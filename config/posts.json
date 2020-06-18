@@ -1,0 +1,107 @@
+{
+  "posts": [
+    {
+      "content": "\r\n##### 前言\r\n>   对于任何系统，都会存在系统性能瓶颈，这里笔者作为一名Java工程师列出了自己在工作中的优化思路，仅供参考。\r\n\r\n  \r\n\r\n## 一、系统性能预测\r\n&emsp;现在服务都是微服务部署开发，如果要模拟服务压测的话要在本地开启相同的服务，前提是机器配置是一样的。而且需要将线上的持久化数据同样copy到本地数据库中，这样才能真正模拟线上的环境。\r\n\r\n&emsp;首先拿单台机器进行压测，压测的对象可以是某个核心的接口（这个接口可以是日志服务中统计的访问量比较高的具体的接口API），比如拿金融产品的标下单接口或者产品标的详情接口，像这种接口在某个时间会有一个高并发访问的瞬间流量。\r\n\r\n&emsp;具体的指标主要是要分析系统的QPS和TPS，我们预测一个单体的应用能够承受多少的并发量，看这两个指标是否能够达到我们预期的值。后面进行压测时候，观察流量巅峰时刻观察系统的运行情况。这个就涉及到下面性能分析了.\r\n<br>\r\n\r\n## 二、系统性能分析\r\n#### 1、硬件方面：\r\n##### CPU：\r\n &emsp;在压测的时候观察CPU的占用情况，是否长期处于100%状态，正常来说80%以下是正常的。如果非常低，那么说明系统不是在做IO密集型运算动作，性能瓶颈是在其他方面，不是在CPU上面，具体的操作方法可以用top命令查看。\r\n &emsp;以笔者经验来看，一般CPU飙高的原因无非两种，第一种就是代码中存在死循环，并且循环中有\r\n##### 内存：\r\n  在Java中，内存是一个很重要的指标，这个关乎到系统是否可以稳定运行。我们可以借助三方工具可以查看系统的JVM内存的运行情况，笔者提供几个通用的预测内存的运行情况的思路：\r\n    - 每秒占用多少内存？\r\n    - 多长时间触发一次Minor GC？\r\n    - 多长时间触发一次Major GC？\r\n    - Minor  GC耗时多久？Major  GC耗时多久？\r\n    - 会不会频繁因为Survivor放不下导致对象进入老年代？\r\n    \r\n在日常开发中，开发人员需要关注的就是，判断系统JVM是否有频繁FULL GC和频繁YOUNG GC，如果有，那么会严重影响系统性能。笔者就这两个方面去分析一下\r\n &emsp;&emsp; 1、**频繁FULL GC** ：首先我们应该要了解到频繁FULL GC危害，一般的中大型系统，系统的JVM会设置很大，比如会给堆内存分配4~8G的空间，因为遍历对象图的过程中堆越大，遍历时间就会长，而且如果垃圾越多，垃圾回收也会拉长整个GC的时间，这就导致每一次FULL GC会有长时间的STW，影响系统稳定性。然后我们要清楚导致触发Full GC的场景，这里列出了可能会导致的几个场景：\r\n&emsp;&emsp;1）大对象\r\n&emsp;&emsp;2）方法区meta space空间占满\r\n&emsp;&emsp;3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC\r\n&emsp;&emsp;4）内存泄漏导致空间不足进而GC\r\n这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子![](https://zhangyaoo.github.io/post-images/1592463486063.png)\r\n这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。\r\n &emsp;&emsp;  2、 **频繁 YOUNG GC**  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题\r\n  \r\n\r\n##### IO：IO分网络IO和磁盘IO\r\n&emsp;对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。\r\n\r\n&emsp;对于网络IO，因为网络负载或者网络堵塞是不控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。\r\n\r\n&emsp;分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。\r\n\r\n\r\n####  2、MySQL层面\r\n，是否有长期的事务锁占用，是否有单个资源的并发竞争。\r\n比如投资某一个产品场景，在扣减了产品的剩余可投金额后，直接提交事务释放锁，然后利用分布式事务来做其他的耗时操作。如果其他耗时操作中有对同一资源进行竞争的话，那么产品锁持有时间过长，导致性能低。\r\n总体来说。可以从几个方面去优化，查询效率是否高效、索引设置是否合理、SQL语句是否合理、是否用主从分摊查询压力。还比如是否用了归档，分库分表，ES引入等等\r\n\r\n####  3、业务层方面，\r\n拿资金匹配来说，尽量一个借款匹配一个资金，这样资金池里面的资金锁行范围会减少（因为有多线程抢占资金资源），资金匹配的速度会加快，并且这样优化这样银行转账的次数会少点，防止多个投资人账户进行银行转账，会拉长整个借款的耗时，避免其中一个账户出错导致全部回滚这样的情况。\r\n\r\n## 三、系统性能优化\r\n1. 利用MQ同步转异步，多线程消费\r\n2. 读场景比较多的接口可以利用缓存redis，可以做集群、哨兵、高可用保证redis性能\r\n3. 从产品的角度，将发布标的时间放到凌晨\r\n4. 对于强一致的同步下单场景，可以将对MySQL的操作改为redis，然后利用MQ做异步\r\n    - 加监控，\r\n    - 优化JVM，比如垃圾回收器\r\n    - 合理设置服务之间的调用超时时间\r\n    - 非核心资金逻辑可以做异步\r\n5. 对于架构方面，可以做MySQL主从、分库分表或者归档、Redis集群、多机房负载均衡，细化分布式部署、引入ES等多个方面考虑",
+      "data": {
+        "title": "关于系统性能瓶颈预测和系统性能优化一些思路",
+        "date": "2020-06-17 21:05:11",
+        "tags": [],
+        "published": true,
+        "hideInList": false,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua"
+    },
+    {
+      "content": "\r\n链表实现思路：\r\n * 1、数据是直接利用 HashMap 来存放的。\r\n * 2、内部使用了一个双向链表来存放数据，所以有一个头结点 header，以及尾结点 tailer。\r\n * 3、每次写入头结点，删除尾结点时都是依赖于 header tailer\r\n注：可以参考linkedHashMap底层结构\r\n\r\n![](https://1124826889.github.io/zhangyao.github.io//post-images/1592220507945.png)\r\n```\r\nimport com.google.common.collect.Maps;\r\nimport java.util.Map;\r\n\r\n/**\r\n * 线程不安全，同步机制自行控制。\r\n */\r\npublic class LRUCacheV2 {\r\n    /**\r\n     * 缓存map\r\n     */\r\n    private final Map<String, Node> cacheMap;\r\n\r\n    /**\r\n     * 头指针\r\n     */\r\n    private Node head;\r\n\r\n    /**\r\n     * 尾指针\r\n     */\r\n    private Node tail;\r\n\r\n    /**\r\n     * 容量\r\n     */\r\n    private final int cacheSize;\r\n\r\n    /**\r\n     * 当前容量\r\n     */\r\n    private int currentCacheSize;\r\n\r\n    LRUCacheV2(int capacity){\r\n        cacheMap = Maps.newHashMapWithExpectedSize(capacity);\r\n        cacheSize = capacity;\r\n        currentCacheSize = 0;\r\n    }\r\n\r\n    public Object get(String key){\r\n        Node node = cacheMap.get(key);\r\n        if(node != null){\r\n            // 移动到头指针\r\n            move2head(node);\r\n            return node.getData();\r\n        }\r\n        return null;\r\n    }\r\n\r\n    public void remove(String key){\r\n        Node node = cacheMap.get(key);\r\n        if(node != null){\r\n            Node pre = node.getPre();\r\n            Node next = node.getNext();\r\n            if(pre != null){\r\n                pre.setNext(next);\r\n            }\r\n            if(next != null){\r\n                next.setPre(pre);\r\n            }\r\n\r\n            // 如果删除刚好是头节点或者尾节点，也要移动指针\r\n            if(node.getKey().equals(head.getKey())){\r\n                head = pre;\r\n            }\r\n            if(node.getKey().equals(tail.getKey())){\r\n                tail = next;\r\n            }\r\n\r\n            cacheMap.remove(key);\r\n        }\r\n    }\r\n\r\n    public void put(String key, Object value){\r\n        Node node = cacheMap.get(key);\r\n        if(node != null){\r\n            // 存在节点的话，就覆盖，并且放到头\r\n            node.setData(value);\r\n            move2head(node);\r\n            cacheMap.put(key, node);\r\n        }else {\r\n            // 不存在节点，构造并且放到头\r\n            if(currentCacheSize == cacheSize){\r\n                // 删除尾node\r\n                String delKey = tail.getKey();\r\n                cacheMap.remove(delKey);\r\n\r\n                // 尾指针移动\r\n                Node next = tail.getNext();\r\n                if(next != null){\r\n                    next.setPre(null);\r\n                }\r\n                tail.setNext(null);\r\n                tail = next;\r\n\r\n            }else{\r\n                currentCacheSize++;\r\n            }\r\n            node = new Node();\r\n            node.setData(value);\r\n            node.setKey(key);\r\n            // 头指针移动\r\n            move2head(node);\r\n        }\r\n        cacheMap.put(key, node);\r\n    }\r\n\r\n    /**\r\n     * 节点移到头\r\n     */\r\n    private void move2head(Node node){\r\n        if(head == null){\r\n            // 初始化head 和 tail\r\n            head = node;\r\n            head.setNext(null);\r\n            head.setPre(null);\r\n            tail = node;\r\n        }else {\r\n            // 如果是相同的Key，啥都不用动，node就是最新的头\r\n            if(node.getKey().equals(head.getKey())){\r\n                return;\r\n            }\r\n\r\n            // 截取node\r\n            Node pre = node.getPre();\r\n            Node next = node.getNext();\r\n            if(pre != null){\r\n                pre.setNext(next);\r\n            }\r\n            if(next != null){\r\n                next.setPre(pre);\r\n            }\r\n\r\n            // 如果要截取的节点是尾节点，那么尾节点指针也要向前移动\r\n            if(node.getKey().equals(tail.getKey())){\r\n                tail = next;\r\n            }\r\n\r\n            // 放在头前面\r\n            head.setNext(node);\r\n            node.setPre(head);\r\n            // node下个指针指向null\r\n            node.setNext(null);\r\n            head = node;\r\n        }\r\n    }\r\n\r\n    @Override\r\n    public String toString() {\r\n        StringBuilder sb = new StringBuilder() ;\r\n        Node node = head;\r\n        while (node != null){\r\n            sb.append(node.getKey()).append(\":\")\r\n                    .append(node.getData())\r\n                    .append(\"-->\") ;\r\n            node = node.getPre();\r\n        }\r\n        return sb.toString();\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        LRUCacheV2 lruCacheV2 = new LRUCacheV2(4);\r\n        lruCacheV2.put(\"1\",\"1\");\r\n        lruCacheV2.put(\"2\",\"2\");\r\n        lruCacheV2.put(\"3\",\"3\");\r\n        lruCacheV2.put(\"4\",\"4\");\r\n        lruCacheV2.put(\"5\",\"5\");\r\n        //lruCacheV2.get(\"2\");\r\n        //lruCacheV2.put(\"2\",\"22\");\r\n        lruCacheV2.remove(\"5\");\r\n        System.out.println(lruCacheV2.toString());\r\n    }\r\n}\r\n```\r\n参考：\r\n1、https://www.iteye.com/blog/gogole-692103\r\n2、https://crossoverjie.top/2018/04/07/algorithm/LRU-cache/\r\n",
+      "data": {
+        "title": "O(1)时间复杂度下，双向链表实现LRU",
+        "date": "2020-06-15 19:17:45",
+        "tags": [
+          "Java基础"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1592231255802&di=4e1d20b36c0f79e7837c4a3128fb75bb&imgtype=0&src=http%3A%2F%2Fk.zol-img.com.cn%2Fsoftbbs%2F6737%2Fa6736285_s.jpg",
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru"
+    },
+    {
+      "content": "> 欢迎来到我的小站呀，很高兴遇见你！🤝\n\n## 🏠 关于本站\n\n## 👨‍💻 博主是谁\n\n## ⛹ 兴趣爱好\n\n## 📬 联系我呀\n",
+      "data": {
+        "title": "关于",
+        "date": "2019-01-25 19:09:48",
+        "tags": null,
+        "published": true,
+        "hideInList": true,
+        "feature": null,
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "about"
+    },
+    {
+      "content": "\n<!-- more -->\n👏  欢迎使用 **Gridea** ！  \n✍️  **Gridea** 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ... \n\n<!-- more -->\n\n[Github](https://github.com/getgridea/gridea)  \n[Gridea 主页](https://gridea.dev/)  \n[示例网站](http://fehey.com/)\n\n## 特性👇\n📝  你可以使用最酷的 **Markdown** 语法，进行快速创作  \n\n🌉  你可以给文章配上精美的封面图和在文章任意位置插入图片  \n\n🏷️  你可以对文章进行标签分组  \n\n📋  你可以自定义菜单，甚至可以创建外部链接菜单  \n\n💻  你可以在 **Windows**，**MacOS** 或 **Linux** 设备上使用此客户端  \n\n🌎  你可以使用 **𝖦𝗂𝗍𝗁𝗎𝖻 𝖯𝖺𝗀𝖾𝗌** 或 **Coding Pages** 向世界展示，未来将支持更多平台  \n\n💬  你可以进行简单的配置，接入 [Gitalk](https://github.com/gitalk/gitalk) 或 [DisqusJS](https://github.com/SukkaW/DisqusJS) 评论系统  \n\n🇬🇧  你可以使用**中文简体**或**英语**  \n\n🌁  你可以任意使用应用内默认主题或任意第三方主题，强大的主题自定义能力  \n\n🖥  你可以自定义源文件夹，利用 OneDrive、百度网盘、iCloud、Dropbox 等进行多设备同步  \n\n🌱 当然 **Gridea** 还很年轻，有很多不足，但请相信，它会不停向前 🏃\n\n未来，它一定会成为你离不开的伙伴\n\n尽情发挥你的才华吧！\n\n😘 Enjoy~\n",
+      "data": {
+        "title": "Hello Gridea",
+        "date": "2018-12-12 00:00:00",
+        "tags": [
+          "Gridea"
+        ],
+        "published": true,
+        "hideInList": true,
+        "feature": "/post-images/hello-gridea.png",
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "hello-gridea"
+    }
+  ],
+  "tags": [
+    {
+      "index": -1,
+      "name": "Java基础",
+      "slug": "bsWdIaAdo",
+      "used": true
+    },
+    {
+      "name": "Gridea",
+      "slug": "dAJoTpHjg",
+      "used": true
+    }
+  ],
+  "menus": [
+    {
+      "link": "/",
+      "name": "首页",
+      "openType": "Internal"
+    },
+    {
+      "link": "/archives",
+      "name": "归档",
+      "openType": "Internal"
+    },
+    {
+      "link": "/tags",
+      "name": "标签",
+      "openType": "Internal"
+    },
+    {
+      "link": "/post/about",
+      "name": "关于",
+      "openType": "Internal"
+    }
+  ]
+}
