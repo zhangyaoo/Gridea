@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="keywords" content="zhangyao个人博客">
+<meta name="description" content="生死看淡，不服就干">
+<meta name="theme-color" content="#000">
+<title>will</title>
+<link rel="shortcut icon" href="/favicon.ico?v=1592485207037">
+<link rel="stylesheet" href="/media/css/pisces.css">
+<link rel="stylesheet" href="/media/fonts/font-awesome.css">
+<link
+  href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Rosario:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext"
+  rel="stylesheet" type="text/css">
+
+<link href="/media/hljs/styles/androidstudio.css"
+  rel="stylesheet">
+
+<link rel="stylesheet" href="/styles/main.css">
+
+<script src="/media/hljs/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.0/velocity.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.0/velocity.ui.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"
+  integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"
+  integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"
+  integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+  onload="renderMathInElement(document.body);"></script>
+
+
+
+
+
+</head>
+
+<body>
+  <div class="head-top-line"></div>
+  <div class="header-box">
+    
+<div class="pisces">
+  <header class="header  ">
+    <div class="blog-header box-shadow-wrapper bg-color " id="header">
+      <div class="nav-toggle" id="nav_toggle">
+        <div class="toggle-box">
+          <div class="line line-top"></div>
+          <div class="line line-center"></div>
+          <div class="line line-bottom"></div>
+        </div>
+      </div>
+      <div class="site-meta">       
+        <div class="site-title">
+          
+            <a href="/" class="brand">
+              <span>will</span>
+            </a>  
+          
+        </div>
+        
+          <p class="subtitle">生死看淡，不服就干</p>
+        
+      </div>
+      <nav class="site-nav" id="site_nav">
+        <ul id="nav_ul">
+          
+            
+            
+              
+            
+            <li class="nav-item ">
+              
+              
+                <a href="/" target="_self">
+                  <i class="fa fa-home"></i> 首页
+                </a>
+              
+            </li>
+          
+            
+            
+              
+            
+            <li class="nav-item ">
+              
+              
+                <a href="/archives/" target="_self">
+                  <i class="fa fa-archive"></i> 归档
+                </a>
+              
+            </li>
+          
+            
+            
+              
+            
+            <li class="nav-item ">
+              
+              
+                <a href="/tags/" target="_self">
+                  <i class="fa fa-tags"></i> 标签
+                </a>
+              
+            </li>
+          
+            
+            
+              
+            
+            <li class="nav-item ">
+              
+              
+                <a href="/post/about/" target="_self">
+                  <i class="fa fa-user"></i> 关于
+                </a>
+              
+            </li>
+          
+          
+            
+              <li class="nav-item ">
+                <a href="/friends/" target="_self">
+                  
+                    <i class="fa fa-address-book"></i> 友情链接
+                  
+                </a>
+              </li>
+            
+          
+          
+            <li id="fa_search" class="nav-item">
+              <a href="javascript:void(0);">
+                <i class="fa fa-search"></i> <span class="language" data-lan="search">搜索</span>
+              </a>
+            </li>
+          
+        </ul>
+      </nav>
+    </div>
+  </header>
+</div>
+
+<script type="text/javascript"> 
+ 
+  let showNav = true;
+
+  let navToggle = document.querySelector('#nav_toggle'),
+  siteNav = document.querySelector('#site_nav');
+  
+  function navClick() {
+    let sideBar = document.querySelector('.sidebar');
+    let navUl = document.querySelector('#nav_ul');
+    navToggle.classList.toggle('nav-toggle-active');
+    siteNav.classList.toggle('nav-menu-active');
+    if (siteNav.classList.contains('nav-menu-active')) {
+      siteNav.style = "height: " + (navUl.children.length * 42) +"px !important";
+    } else {
+      siteNav.style = "";
+    }
+  }
+
+  navToggle.addEventListener('click',navClick);  
+</script>
+  </div>
+  <div class="main-continer">
+    
+    <div
+      class="section-layout  pisces">
+      <div class="section-layout-wrapper">
+        <div id="sidebarMeta" class="sidebar">
+    
+<div class="sidebar-wrapper box-shadow-wrapper bg-color">
+  <div class="sidebar-item">
+    <img class="site-author-image right-motion" src="/images/avatar.png"/>
+    <p class="site-author-name">will</p>
+    
+  </div>
+  <div class="sidebar-item side-item-stat right-motion">
+    <div class="sidebar-item-box">
+      <a href="/archives/">
+        
+        <span class="site-item-stat-count">2</span>
+        <span class="site-item-stat-name language" data-lan="article">文章</span>
+      </a>
+    </div>
+    <div class="sidebar-item-box">
+      <a href="">
+        <span class="site-item-stat-count">1</span>
+        <span class="site-item-stat-name language" data-lan="category">分类</span>
+      </a>
+    </div>
+    <div class="sidebar-item-box">
+      <a href="/tags/">
+        <span class="site-item-stat-count">1</span>
+        <span class="site-item-stat-name language" data-lan="tag">标签</span>
+      </a>
+    </div>
+  </div>
+  
+    
+  
+  
+
+
+
+</div>
+</div>
+<script>
+  let sidebarMeta = document.querySelector('#sidebarMeta');
+  let scheme = 'pisces';
+  let sidebarWrapper = document.querySelector('.sidebar-wrapper');
+  if (sidebarMeta && (scheme === 'pisces' || scheme === 'gemini')) {
+    document.addEventListener('scroll', function(e) {
+      if (document.scrollingElement.scrollTop > parseInt(sidebarMeta.style.marginTop) + 10) {
+        sidebarWrapper.classList.add('home-sidebar-fixed')
+      } else {
+        sidebarWrapper.classList.remove('home-sidebar-fixed')
+      }
+    });
+  }
+  </script>
+        <div class="section-box tag-line box-shadow-wrapper">
+          <section class="section tags-section posts-expand bg-color">
+            <div class="padding-wrapper">
+  <div class="tag-timeline-box">
+    <div class="tag-timeline-wrapper">
+      <div class="tag-timeline-title">
+        <h2>
+          Gridea
+          <small class="language" data-lan="tag">标签</small>
+        </h2>
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <a href="http://localhost:4000/post/hello-gridea/">
+        <div class="motion-warpper">
+          <div class="tag-post-node">
+            <h1>
+              12-12
+              <small>Hello Gridea</small>
+            </h1>
+          </div>
+        </div>
+      </a>
+      
+      
+      
+    </div>
+  </div>
+</div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <div class="footer-box">
+  <footer class="footer">
+    <div class="copyright">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | © 2019-2020 Theme By <a
+        href="https://github.com/hsxyhao/gridea-theme-next" target="_blank">HsxyHao</a>
+    </div>
+    <div class="poweredby">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+  </footer>
+  
+  
+  <div class="pisces back-to-top" id="back_to_top">
+    <i class="fa fa-arrow-up"></i>
+    
+    <span class="scrollpercent">
+      <span id="back_to_top_text">0</span>%
+    </span>
+    
+  </div>
+  
+  
+  
+</div>
+<script>
+
+  let sideBarOpen = 'sidebar-open';
+  let body = document.body;
+  let back2Top = document.querySelector('#back_to_top'),
+    back2TopText = document.querySelector('#back_to_top_text'),
+    drawerBox = document.querySelector('#drawer_box'),
+    rightSideBar = document.querySelector('.sidebar'),
+    viewport = document.querySelector('body');
+
+  function scrollAnimation(currentY, targetY) {
+
+    let needScrollTop = targetY - currentY
+    let _currentY = currentY
+    setTimeout(() => {
+      const dist = Math.ceil(needScrollTop / 10)
+      _currentY += dist
+      window.scrollTo(_currentY, currentY)
+      if (needScrollTop > 10 || needScrollTop < -10) {
+        scrollAnimation(_currentY, targetY)
+      } else {
+        window.scrollTo(_currentY, targetY)
+      }
+    }, 1)
+  }
+
+  back2Top.addEventListener("click", function (e) {
+    scrollAnimation(document.scrollingElement.scrollTop, 0);
+    e.stopPropagation();
+    return false;
+  });
+
+  window.addEventListener('scroll', function (e) {
+    let percent = document.scrollingElement.scrollTop / (document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight) * 100;
+    if (percent > 1 && !back2Top.classList.contains('back-top-active')) {
+      back2Top.classList.add('back-top-active');
+    }
+    if (percent == 0) {
+      back2Top.classList.remove('back-top-active');
+    }
+    if (back2TopText) {
+      back2TopText.textContent = Math.floor(percent);
+    }
+  });
+
+
+  let hasCacu = false;
+  window.onresize = function () {
+    calcuHeight();
+  }
+
+  function calcuHeight() {
+    // 动态调整站点概览高度
+    if (!hasCacu && back2Top.classList.contains('pisces') || back2Top.classList.contains('gemini')) {
+      let sideBar = document.querySelector('.sidebar');
+      let navUl = document.querySelector('#site_nav');
+      sideBar.style = 'margin-top:' + (navUl.offsetHeight + navUl.offsetTop + 15) + 'px;';
+      hasCacu = true;
+    }
+  }
+  calcuHeight();
+
+  let open = false, MOTION_TIME = 300, RIGHT_MOVE_DIS = '320px';
+
+  if (drawerBox) {
+    let rightMotions = document.querySelectorAll('.right-motion');
+    let right = drawerBox.classList.contains('right');
+
+    let transitionDir = right ? "transition.slideRightIn" : "transition.slideLeftIn";
+
+    let openProp, closeProp;
+    if (right) {
+      openProp = {
+        paddingRight: RIGHT_MOVE_DIS
+      };
+      closeProp = {
+        paddingRight: '0px'
+      };
+    } else {
+      openProp = {
+        paddingLeft: RIGHT_MOVE_DIS
+      };
+      closeProp = {
+        paddingLeft: '0px'
+      };
+    }
+
+    drawerBox.onclick = function () {
+      open = !open;
+      window.Velocity(rightSideBar, 'stop');
+      window.Velocity(viewport, 'stop');
+      window.Velocity(rightMotions, 'stop');
+      if (open) {
+        window.Velocity(rightSideBar, {
+          width: RIGHT_MOVE_DIS
+        }, {
+          duration: MOTION_TIME,
+          begin: function () {
+            window.Velocity(rightMotions, transitionDir, {});
+          }
+        })
+        window.Velocity(viewport, openProp, {
+          duration: MOTION_TIME
+        });
+      } else {
+        window.Velocity(rightSideBar, {
+          width: '0px'
+        }, {
+          duration: MOTION_TIME,
+          begin: function () {
+            window.Velocity(rightMotions, {
+              opacity: 0
+            });
+          }
+        })
+        window.Velocity(viewport, closeProp, {
+          duration: MOTION_TIME
+        });
+      }
+      for (let i = 0; i < drawerBox.children.length; i++) {
+        drawerBox.children[i].classList.toggle('muse-line');
+      }
+      drawerBox.classList.toggle(sideBarOpen);
+    }
+  }
+
+  // 链接跳转
+  let newWindow = 'false'
+  if (newWindow === 'true') {
+    let links = document.querySelectorAll('.post-body a')
+    links.forEach(item => {
+      if (!item.classList.contains('btn')) {
+        item.setAttribute("target", "_blank");
+      }
+    })
+  }
+
+  let faSearch = document.querySelector('#fa_search');
+  faSearch.addEventListener('click', function () {
+    document.querySelector('#search_mask').style = ''
+  })
+
+  // 代码高亮
+  hljs.initHighlightingOnLoad();
+  
+  // 离开当前页title变化
+  var leaveTitle = '';
+  if (leaveTitle) {
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState == 'hidden') {
+        normal_title = document.title;
+        document.title = leaveTitle;
+      } else {
+        document.title = normal_title;
+      }
+    });
+  }
+
+</script>
+  </div>
+</body>
+
+  <div class="search-mask" id="search_mask" style="display: none;">
+  <div class="search-box">
+    <div class="search-title">
+      <i class="fa fa-search"></i>
+      <div class="input-box">
+        <input id="search" type="text" class="language" data-lan="search" placeholder="搜索">
+      </div>
+      <i id="close" class="fa fa-times-circle"></i>
+    </div>
+    <div class="stat-box">
+      <span id="stat_count">0</span><span class="language" data-lan="stat">条相关条目，使用了</span><span id="stat_times">0</span><span class="language" data-lan="stat-time">毫秒</span>
+      <hr>
+    </div>
+    <div class="result" id="result">
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/"" data-c="
+          &lt;h5 id=&#34;前言&#34;&gt;前言&lt;/h5&gt;
+&lt;blockquote&gt;
+&lt;p&gt;对于任何系统，都会存在系统性能瓶颈，这里笔者作为一名Java工程师列出了自己在工作中的优化思路，仅供参考。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;一-系统性能预测&#34;&gt;一、系统性能预测&lt;/h2&gt;
+&lt;p&gt; 现在服务都是微服务部署开发，如果要模拟服务压测的话要在本地开启相同的服务，前提是机器配置是一样的。而且需要将线上的持久化数据同样copy到本地数据库中，这样才能真正模拟线上的环境。&lt;/p&gt;
+&lt;p&gt; 首先拿单台机器进行压测，压测的对象可以是某个核心的接口（这个接口可以是日志服务中统计的访问量比较高的具体的接口API），比如拿金融产品的标下单接口或者产品标的详情接口，像这种接口在某个时间会有一个高并发访问的瞬间流量。&lt;/p&gt;
+&lt;p&gt; 具体的指标主要是要分析系统的QPS和TPS，我们预测一个单体的应用能够承受多少的并发量，看这两个指标是否能够达到我们预期的值。后面进行压测时候，观察流量巅峰时刻观察系统的运行情况。这个就涉及到下面性能分析了.&lt;br&gt;
+&lt;br&gt;&lt;/p&gt;
+&lt;h2 id=&#34;二-系统性能分析&#34;&gt;二、系统性能分析&lt;/h2&gt;
+&lt;h4 id=&#34;1-硬件方面&#34;&gt;1、硬件方面：&lt;/h4&gt;
+&lt;h5 id=&#34;cpu&#34;&gt;CPU：&lt;/h5&gt;
+&lt;p&gt; 在压测的时候观察CPU的占用情况，是否长期处于100%状态，正常来说80%以下是正常的。如果非常低，那么说明系统不是在做IO密集型运算动作，性能瓶颈是在其他方面，不是在CPU上面，具体的操作方法可以用top命令查看。&lt;br&gt;
+ 以笔者经验来看，一般CPU飙高的原因无非两种，第一种就是代码中存在死循环，并且循环中有&lt;/p&gt;
+&lt;h5 id=&#34;内存&#34;&gt;内存：&lt;/h5&gt;
+&lt;p&gt;在Java中，内存是一个很重要的指标，这个关乎到系统是否可以稳定运行。我们可以借助三方工具可以查看系统的JVM内存的运行情况，笔者提供几个通用的预测内存的运行情况的思路：&lt;br&gt;
+- 每秒占用多少内存？&lt;br&gt;
+- 多长时间触发一次Minor GC？&lt;br&gt;
+- 多长时间触发一次Major GC？&lt;br&gt;
+- Minor  GC耗时多久？Major  GC耗时多久？&lt;br&gt;
+- 会不会频繁因为Survivor放不下导致对象进入老年代？&lt;/p&gt;
+&lt;p&gt;在日常开发中，开发人员需要关注的就是，判断系统JVM是否有频繁FULL GC和频繁YOUNG GC，如果有，那么会严重影响系统性能。笔者就这两个方面去分析一下&lt;br&gt;
+   1、&lt;strong&gt;频繁FULL GC&lt;/strong&gt; ：首先我们应该要了解到频繁FULL GC危害，一般的中大型系统，系统的JVM会设置很大，比如会给堆内存分配4~8G的空间，因为遍历对象图的过程中堆越大，遍历时间就会长，而且如果垃圾越多，垃圾回收也会拉长整个GC的时间，这就导致每一次FULL GC会有长时间的STW，影响系统稳定性。然后我们要清楚导致触发Full GC的场景，这里列出了可能会导致的几个场景：&lt;br&gt;
+  1）大对象&lt;br&gt;
+  2）方法区meta space空间占满&lt;br&gt;
+  3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC&lt;br&gt;
+  4）内存泄漏导致空间不足进而GC&lt;br&gt;
+这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子&lt;img src=&#34;http://localhost:4000/post-images/1592463486063.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。&lt;br&gt;
+    2、 &lt;strong&gt;频繁 YOUNG GC&lt;/strong&gt;  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题&lt;/p&gt;
+&lt;h5 id=&#34;ioio分网络io和磁盘io&#34;&gt;IO：IO分网络IO和磁盘IO&lt;/h5&gt;
+&lt;p&gt; 对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。&lt;/p&gt;
+&lt;p&gt; 对于网络IO，因为网络负载或者网络堵塞是不控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。&lt;/p&gt;
+&lt;p&gt; 分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。&lt;/p&gt;
+&lt;h4 id=&#34;2-mysql层面&#34;&gt;2、MySQL层面&lt;/h4&gt;
+&lt;p&gt;，是否有长期的事务锁占用，是否有单个资源的并发竞争。&lt;br&gt;
+比如投资某一个产品场景，在扣减了产品的剩余可投金额后，直接提交事务释放锁，然后利用分布式事务来做其他的耗时操作。如果其他耗时操作中有对同一资源进行竞争的话，那么产品锁持有时间过长，导致性能低。&lt;br&gt;
+总体来说。可以从几个方面去优化，查询效率是否高效、索引设置是否合理、SQL语句是否合理、是否用主从分摊查询压力。还比如是否用了归档，分库分表，ES引入等等&lt;/p&gt;
+&lt;h4 id=&#34;3-业务层方面&#34;&gt;3、业务层方面，&lt;/h4&gt;
+&lt;p&gt;拿资金匹配来说，尽量一个借款匹配一个资金，这样资金池里面的资金锁行范围会减少（因为有多线程抢占资金资源），资金匹配的速度会加快，并且这样优化这样银行转账的次数会少点，防止多个投资人账户进行银行转账，会拉长整个借款的耗时，避免其中一个账户出错导致全部回滚这样的情况。&lt;/p&gt;
+&lt;h2 id=&#34;三-系统性能优化&#34;&gt;三、系统性能优化&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;利用MQ同步转异步，多线程消费&lt;/li&gt;
+&lt;li&gt;读场景比较多的接口可以利用缓存redis，可以做集群、哨兵、高可用保证redis性能&lt;/li&gt;
+&lt;li&gt;从产品的角度，将发布标的时间放到凌晨&lt;/li&gt;
+&lt;li&gt;对于强一致的同步下单场景，可以将对MySQL的操作改为redis，然后利用MQ做异步
+&lt;ul&gt;
+&lt;li&gt;加监控，&lt;/li&gt;
+&lt;li&gt;优化JVM，比如垃圾回收器&lt;/li&gt;
+&lt;li&gt;合理设置服务之间的调用超时时间&lt;/li&gt;
+&lt;li&gt;非核心资金逻辑可以做异步&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;对于架构方面，可以做MySQL主从、分库分表或者归档、Redis集群、多机房负载均衡，细化分布式部署、引入ES等多个方面考虑&lt;/li&gt;
+&lt;/ol&gt;
+">关于系统性能瓶颈预测和系统性能优化一些思路</a>
+      </div>
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/"" data-c="
+          &lt;p&gt;链表实现思路：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;1、数据是直接利用 HashMap 来存放的。&lt;/li&gt;
+&lt;li&gt;2、内部使用了一个双向链表来存放数据，所以有一个头结点 header，以及尾结点 tailer。&lt;/li&gt;
+&lt;li&gt;3、每次写入头结点，删除尾结点时都是依赖于 header tailer&lt;br&gt;
+注：可以参考linkedHashMap底层结构&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure data-type=&#34;image&#34; tabindex=&#34;1&#34;&gt;&lt;img src=&#34;http://localhost:4000/post-images/1592220507945.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/figure&gt;
+&lt;pre&gt;&lt;code&gt;import com.google.common.collect.Maps;
+import java.util.Map;
+
+/**
+ * 线程不安全，同步机制自行控制。
+ */
+public class LRUCacheV2 {
+    /**
+     * 缓存map
+     */
+    private final Map&amp;lt;String, Node&amp;gt; cacheMap;
+
+    /**
+     * 头指针
+     */
+    private Node head;
+
+    /**
+     * 尾指针
+     */
+    private Node tail;
+
+    /**
+     * 容量
+     */
+    private final int cacheSize;
+
+    /**
+     * 当前容量
+     */
+    private int currentCacheSize;
+
+    LRUCacheV2(int capacity){
+        cacheMap = Maps.newHashMapWithExpectedSize(capacity);
+        cacheSize = capacity;
+        currentCacheSize = 0;
+    }
+
+    public Object get(String key){
+        Node node = cacheMap.get(key);
+        if(node != null){
+            // 移动到头指针
+            move2head(node);
+            return node.getData();
+        }
+        return null;
+    }
+
+    public void remove(String key){
+        Node node = cacheMap.get(key);
+        if(node != null){
+            Node pre = node.getPre();
+            Node next = node.getNext();
+            if(pre != null){
+                pre.setNext(next);
+            }
+            if(next != null){
+                next.setPre(pre);
+            }
+
+            // 如果删除刚好是头节点或者尾节点，也要移动指针
+            if(node.getKey().equals(head.getKey())){
+                head = pre;
+            }
+            if(node.getKey().equals(tail.getKey())){
+                tail = next;
+            }
+
+            cacheMap.remove(key);
+        }
+    }
+
+    public void put(String key, Object value){
+        Node node = cacheMap.get(key);
+        if(node != null){
+            // 存在节点的话，就覆盖，并且放到头
+            node.setData(value);
+            move2head(node);
+            cacheMap.put(key, node);
+        }else {
+            // 不存在节点，构造并且放到头
+            if(currentCacheSize == cacheSize){
+                // 删除尾node
+                String delKey = tail.getKey();
+                cacheMap.remove(delKey);
+
+                // 尾指针移动
+                Node next = tail.getNext();
+                if(next != null){
+                    next.setPre(null);
+                }
+                tail.setNext(null);
+                tail = next;
+
+            }else{
+                currentCacheSize++;
+            }
+            node = new Node();
+            node.setData(value);
+            node.setKey(key);
+            // 头指针移动
+            move2head(node);
+        }
+        cacheMap.put(key, node);
+    }
+
+    /**
+     * 节点移到头
+     */
+    private void move2head(Node node){
+        if(head == null){
+            // 初始化head 和 tail
+            head = node;
+            head.setNext(null);
+            head.setPre(null);
+            tail = node;
+        }else {
+            // 如果是相同的Key，啥都不用动，node就是最新的头
+            if(node.getKey().equals(head.getKey())){
+                return;
+            }
+
+            // 截取node
+            Node pre = node.getPre();
+            Node next = node.getNext();
+            if(pre != null){
+                pre.setNext(next);
+            }
+            if(next != null){
+                next.setPre(pre);
+            }
+
+            // 如果要截取的节点是尾节点，那么尾节点指针也要向前移动
+            if(node.getKey().equals(tail.getKey())){
+                tail = next;
+            }
+
+            // 放在头前面
+            head.setNext(node);
+            node.setPre(head);
+            // node下个指针指向null
+            node.setNext(null);
+            head = node;
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder() ;
+        Node node = head;
+        while (node != null){
+            sb.append(node.getKey()).append(&amp;quot;:&amp;quot;)
+                    .append(node.getData())
+                    .append(&amp;quot;--&amp;gt;&amp;quot;) ;
+            node = node.getPre();
+        }
+        return sb.toString();
+    }
+
+    public static void main(String[] args) {
+        LRUCacheV2 lruCacheV2 = new LRUCacheV2(4);
+        lruCacheV2.put(&amp;quot;1&amp;quot;,&amp;quot;1&amp;quot;);
+        lruCacheV2.put(&amp;quot;2&amp;quot;,&amp;quot;2&amp;quot;);
+        lruCacheV2.put(&amp;quot;3&amp;quot;,&amp;quot;3&amp;quot;);
+        lruCacheV2.put(&amp;quot;4&amp;quot;,&amp;quot;4&amp;quot;);
+        lruCacheV2.put(&amp;quot;5&amp;quot;,&amp;quot;5&amp;quot;);
+        //lruCacheV2.get(&amp;quot;2&amp;quot;);
+        //lruCacheV2.put(&amp;quot;2&amp;quot;,&amp;quot;22&amp;quot;);
+        lruCacheV2.remove(&amp;quot;5&amp;quot;);
+        System.out.println(lruCacheV2.toString());
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;参考：&lt;br&gt;
+1、https://www.iteye.com/blog/gogole-692103&lt;br&gt;
+2、https://crossoverjie.top/2018/04/07/algorithm/LRU-cache/&lt;/p&gt;
+">O(1)时间复杂度下，双向链表实现LRU</a>
+      </div>
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/about/"" data-c="
+          &lt;blockquote&gt;
+&lt;p&gt;欢迎来到我的小站呀，很高兴遇见你！🤝&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;关于本站&#34;&gt;🏠 关于本站&lt;/h2&gt;
+&lt;h2 id=&#34;博主是谁&#34;&gt;👨‍💻 博主是谁&lt;/h2&gt;
+&lt;h2 id=&#34;兴趣爱好&#34;&gt;⛹ 兴趣爱好&lt;/h2&gt;
+&lt;h2 id=&#34;联系我呀&#34;&gt;📬 联系我呀&lt;/h2&gt;
+">关于</a>
+      </div>
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/hello-gridea/"" data-c="
+          &lt;!-- more --&gt;
+&lt;p&gt;👏  欢迎使用 &lt;strong&gt;Gridea&lt;/strong&gt; ！&lt;br&gt;
+✍️  &lt;strong&gt;Gridea&lt;/strong&gt; 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...&lt;/p&gt;
+&lt;!-- more --&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/getgridea/gridea&#34;&gt;Github&lt;/a&gt;&lt;br&gt;
+&lt;a href=&#34;https://gridea.dev/&#34;&gt;Gridea 主页&lt;/a&gt;&lt;br&gt;
+&lt;a href=&#34;http://fehey.com/&#34;&gt;示例网站&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;特性&#34;&gt;特性👇&lt;/h2&gt;
+&lt;p&gt;📝  你可以使用最酷的 &lt;strong&gt;Markdown&lt;/strong&gt; 语法，进行快速创作&lt;/p&gt;
+&lt;p&gt;🌉  你可以给文章配上精美的封面图和在文章任意位置插入图片&lt;/p&gt;
+&lt;p&gt;🏷️  你可以对文章进行标签分组&lt;/p&gt;
+&lt;p&gt;📋  你可以自定义菜单，甚至可以创建外部链接菜单&lt;/p&gt;
+&lt;p&gt;💻  你可以在 &lt;strong&gt;Windows&lt;/strong&gt;，&lt;strong&gt;MacOS&lt;/strong&gt; 或 &lt;strong&gt;Linux&lt;/strong&gt; 设备上使用此客户端&lt;/p&gt;
+&lt;p&gt;🌎  你可以使用 &lt;strong&gt;𝖦𝗂𝗍𝗁𝗎𝖻 𝖯𝖺𝗀𝖾𝗌&lt;/strong&gt; 或 &lt;strong&gt;Coding Pages&lt;/strong&gt; 向世界展示，未来将支持更多平台&lt;/p&gt;
+&lt;p&gt;💬  你可以进行简单的配置，接入 &lt;a href=&#34;https://github.com/gitalk/gitalk&#34;&gt;Gitalk&lt;/a&gt; 或 &lt;a href=&#34;https://github.com/SukkaW/DisqusJS&#34;&gt;DisqusJS&lt;/a&gt; 评论系统&lt;/p&gt;
+&lt;p&gt;🇬🇧  你可以使用&lt;strong&gt;中文简体&lt;/strong&gt;或&lt;strong&gt;英语&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;🌁  你可以任意使用应用内默认主题或任意第三方主题，强大的主题自定义能力&lt;/p&gt;
+&lt;p&gt;🖥  你可以自定义源文件夹，利用 OneDrive、百度网盘、iCloud、Dropbox 等进行多设备同步&lt;/p&gt;
+&lt;p&gt;🌱 当然 &lt;strong&gt;Gridea&lt;/strong&gt; 还很年轻，有很多不足，但请相信，它会不停向前 🏃&lt;/p&gt;
+&lt;p&gt;未来，它一定会成为你离不开的伙伴&lt;/p&gt;
+&lt;p&gt;尽情发挥你的才华吧！&lt;/p&gt;
+&lt;p&gt;😘 Enjoy~&lt;/p&gt;
+">Hello Gridea</a>
+      </div>
+      
+    </div>
+    <div class="page">
+      <div id="page_ul"></div>
+    </div>
+  </div>
+</div>
+<script>
+  !function () {
+    let searchMask = document.querySelector('#search_mask');
+    let result = document.querySelector('#result');
+    let items = document.querySelectorAll('.item');
+    let searchBox = document.querySelector('#search');
+    let statCount = document.querySelector('#stat_count');
+    let statTimes = document.querySelector('#stat_times');
+    let pageUl = document.querySelector('#page_ul');
+    let close = document.querySelector('#close');
+    
+    close.addEventListener('click', function() {
+      searchMask.style = 'display: none;'
+    })
+
+    let finds = [];
+    let contents = [];
+    let pageSize = 10;
+    items.forEach(item => {
+      let a = item.querySelector('a');
+      contents.push({
+        title: a.innerText,
+        details: a.dataset.c,
+        link: a.href
+      })
+      item.remove();
+    })
+
+    function insertStr(soure, start, count) {
+      let newStr = soure.substr(start, count);
+      return soure.slice(0, start) + '<em>' + newStr + '</em>' + soure.slice(start + count);
+    }
+
+    pageUl.addEventListener('click', function(event) {
+      let target = event.target;
+      if (target.__proto__ === HTMLSpanElement.prototype) {
+        appendResults(parseInt(target.dataset.i));
+      }
+    })
+
+    function appendResults(index) {
+      let htmlResult = '';
+      let start = index || 0;
+      let end = Math.min(start + pageSize, finds.length);
+      for (let i = start; i < end; i++) {
+        const current = finds[i];
+        let html = current.title;
+        let sum = 0;
+        let positions = current.positions;
+        positions.forEach(position => {
+          html = insertStr(html, position.start + sum, position.count);
+          sum += 9;
+        })
+        htmlResult += `<div class="item"><a class="result-title" href="${current.link}">${html}</a></div>`;
+      }
+      result.innerHTML = htmlResult;
+      pageUl.innerHTML = '';
+      let count = finds.length / pageSize;
+      let lis = '';
+      if (start !== 0) {
+        lis += `<span class="fa fa-angle-left" data-i='${start - 1}'></span>`;
+      }
+      for (let i = 0; i < count; i++) {
+        lis += `<span class='${i === start?'current':''}' data-i='${i}'>${i+1}</span>`;     
+      }
+      if (start+1 < count) {
+        lis += `<span class="fa fa-angle-right" data-i='${start+1}'></span>`;  
+      }
+      pageUl.innerHTML = lis;
+    }
+
+    function search(delay) {
+      let timer = null
+      return function () {
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+          let start = Date.now();
+          let segments = searchBox.value.split(' ').filter(c => c != '');
+          if (segments.length <= 0) {
+            return;
+          }
+          finds = [];
+          let htmlResult = '';
+          contents.forEach(content => {
+            let title = content.title;
+            let positions = [];
+            let find = false;
+            segments.forEach((segment) => {
+              if (content.title.includes(segment)) {
+                find = true;
+                positions.push({
+                  start: content.title.indexOf(segment),
+                  count: segment.length
+                })
+              } else if (content.details.includes(segment)) {
+                find = true;
+              }
+            });
+            if (find) {
+              finds.push({
+                title: content.title,
+                link: content.link,
+                positions
+              });
+            }
+          })
+          appendResults(0);
+          statCount.textContent = finds.length;
+          statTimes.textContent = Date.now() - start;
+        }, delay)
+      }
+    }
+    searchBox.addEventListener('input', search(200));
+  }()
+</script>
+
+<input hidden id="copy" />
+<script>
+  let language = '';
+  if (language !== '') {
+    let map = new Map();
+    if (language === 'en') {
+      map.set('search', 'Search');
+      map.set('category', 'Categories');
+      map.set('article', 'Articles');
+      map.set('tag', 'Tags');
+      map.set('top', 'Top');
+      map.set('publish', 'published');
+      map.set('minute', ' minutes');
+      map.set('read-more', 'Read More');
+      map.set('view', 'View');
+      map.set('words', ' words');
+      map.set('category-in', 'category in');
+      map.set('preview', 'Meta');
+      map.set('index', 'Toc');
+      map.set('no-archives', "You haven't created yet");
+      map.set('archives', " articles in total");
+      map.set('cloud-tags', " tags in total");
+      map.set('copyright', "Copyright: ");
+      map.set('author', "Author: ");
+      map.set('link', "Link: ");
+      map.set('leave-message', "Leave a message");
+      map.set('format', "Links Format");
+      map.set('site-name', "Name: ");
+      map.set('site-link', "Link: ");
+      map.set('site-desc', "Desc: ");
+      map.set('stat', " related results, taking ");
+      map.set('stat-time', " ms");
+      map.set('site-img', "Image: ");
+    }
+
+    if (map.size > 0) {
+      let lanElems = document.querySelectorAll('.language');
+      lanElems.forEach(elem => {
+        let lan = elem.dataset.lan, text = map.get(lan);
+        if (elem.__proto__ === HTMLInputElement.prototype) {
+          elem.placeholder = text
+        } else {
+          if (elem.dataset.count) {
+            text = elem.dataset.count + text;
+          }
+          elem.textContent = text;
+        }
+      })
+    }
+  }
+  //拿来主义(真香)^_^，Clipboard 实现摘自掘金 https://juejin.im/post/5aefeb6e6fb9a07aa43c20af
+  window.Clipboard = (function (window, document, navigator) {
+    var textArea,
+      copy;
+
+    // 判断是不是ios端
+    function isOS() {
+      return navigator.userAgent.match(/ipad|iphone/i);
+    }
+    //创建文本元素
+    function createTextArea(text) {
+      textArea = document.createElement('textArea');
+      textArea.value = text;
+      textArea.style.width = 0;
+      textArea.style.height = 0;
+      textArea.clientHeight = 0;
+      textArea.clientWidth = 0;
+      document.body.appendChild(textArea);
+    }
+    //选择内容
+    function selectText() {
+      var range,
+        selection;
+
+      if (isOS()) {
+        range = document.createRange();
+        range.selectNodeContents(textArea);
+        selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        textArea.setSelectionRange(0, 999999);
+      } else {
+        textArea.select();
+      }
+    }
+
+    //复制到剪贴板
+    function copyToClipboard() {
+      try {
+        document.execCommand("Copy")
+      } catch (err) {
+        alert("复制错误！请手动复制！")
+      }
+      document.body.removeChild(textArea);
+    }
+
+    copy = function (text) {
+      createTextArea(text);
+      selectText();
+      copyToClipboard();
+    };
+
+    return {
+      copy: copy
+    };
+  })(window, document, navigator);
+
+  function copyCode(e) {
+    if (e.srcElement.tagName === 'SPAN' && e.srcElement.classList.contains('copy-code')) {
+      let code = e.currentTarget.querySelector('code');
+      var text = code.innerText;
+      if (e.srcElement.textContent === '复制成功') {
+        console.log('复制操作频率过高');
+        return;
+      }
+      e.srcElement.textContent = '复制成功';
+      (function (elem) {
+        setTimeout(() => {
+          if (elem.textContent === '复制成功') {
+            elem.textContent = '复制代码'
+          }
+        }, 1000);
+      })(e.srcElement)
+      Clipboard.copy(text);
+    }
+  }
+
+  let pres = document.querySelectorAll('pre');
+  pres.forEach(pre => {
+    let code = pre.querySelector('code');
+    let copyElem = document.createElement('span');
+    copyElem.classList.add('copy-code');
+    copyElem.textContent = '复制代码';
+    pre.appendChild(copyElem);
+    pre.onclick = copyCode
+  })
+
+</script>
+<script src="/media/js/motion.js"></script>
+
+<script src="https://cdn.jsdelivr.net/gh/cferdinandi/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script>
+  var scroll = new SmoothScroll('a[href*="#"]', {
+    speed: 200
+  });
+</script>
+
+
+<script src="/media/js/mouse/love.js"></script>
+
+
+
+</html>
