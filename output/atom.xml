@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://zhangyaoo.github.io</id>
+    <id>http://localhost:4000</id>
     <title>will</title>
-    <updated>2020-06-19T11:21:04.463Z</updated>
+    <updated>2020-06-22T11:33:09.763Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://zhangyaoo.github.io"/>
-    <link rel="self" href="https://zhangyaoo.github.io/atom.xml"/>
+    <link rel="alternate" href="http://localhost:4000"/>
+    <link rel="self" href="http://localhost:4000/atom.xml"/>
     <subtitle>生死看淡，不服就干</subtitle>
-    <logo>https://zhangyaoo.github.io/images/avatar.png</logo>
-    <icon>https://zhangyaoo.github.io/favicon.ico</icon>
+    <logo>http://localhost:4000/images/avatar.png</logo>
+    <icon>http://localhost:4000/favicon.ico</icon>
     <rights>All rights reserved 2020, will</rights>
     <entry>
+        <title type="html"><![CDATA[关于Zookeeper奇数节点以及脑裂问题]]></title>
+        <id>http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/</id>
+        <link href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
+        </link>
+        <updated>2020-06-22T02:32:00.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="zookeeper脑裂">zookeeper脑裂</h3>
+<h3 id="如何解决脑裂">如何解决脑裂</h3>
+<h3 id="引出奇数节点">引出奇数节点</h3>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[解决并发下本地事务和消息投递一致性]]></title>
+        <id>http://localhost:4000/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/</id>
+        <link href="http://localhost:4000/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/">
+        </link>
+        <updated>2020-06-22T02:27:01.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="并发优化">并发优化</h3>
+<h3 id="并发优化优点以及带来的问题">并发优化优点以及带来的问题</h3>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[O(N)时间复杂度下，二进制反转]]></title>
-        <id>https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/</id>
-        <link href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/">
+        <id>http://localhost:4000/post/er-jin-zhi-fan-zhuan/</id>
+        <link href="http://localhost:4000/post/er-jin-zhi-fan-zhuan/">
         </link>
         <updated>2020-06-19T08:11:36.000Z</updated>
         <content type="html"><![CDATA[<h4 id="题目描述">题目描述</h4>
@@ -53,9 +74,9 @@ public class BitReverse {
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[关于系统性能优化一些总结]]></title>
-        <id>https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/</id>
-        <link href="https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
+        <title type="html"><![CDATA[关于系统性能优化的总结]]></title>
+        <id>http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/</id>
+        <link href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
         </link>
         <updated>2020-06-17T13:05:11.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -93,7 +114,7 @@ public class BitReverse {
   2）方法区meta space空间占满<br>
   3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC<br>
   4）内存泄漏导致空间不足进而GC<br>
-这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子<img src="https://zhangyaoo.github.io/post-images/1592463486063.png" alt="" loading="lazy"><br>
+这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子<img src="http://localhost:4000/post-images/1592463486063.png" alt="" loading="lazy"><br>
 这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。<br>
     2、 <strong>频繁 YOUNG GC</strong>  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题</p>
 <p><strong>这里笔者以自己开发经验，提供一些“简单的”JVM优化拙见</strong>：</p>
@@ -146,8 +167,8 @@ public class BitReverse {
     </entry>
     <entry>
         <title type="html"><![CDATA[O(1)时间复杂度下，双向链表实现LRU]]></title>
-        <id>https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/</id>
-        <link href="https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/">
+        <id>http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/</id>
+        <link href="http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/">
         </link>
         <updated>2020-06-15T11:17:45.000Z</updated>
         <content type="html"><![CDATA[<p>链表实现思路：</p>
@@ -157,7 +178,7 @@ public class BitReverse {
 <li>3、每次写入头结点，删除尾结点时都是依赖于 header tailer<br>
 注：可以参考linkedHashMap底层结构</li>
 </ul>
-<figure data-type="image" tabindex="1"><img src="https://zhangyaoo.github.io/post-images/1592220507945.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1592220507945.png" alt="" loading="lazy"></figure>
 <pre><code>import com.google.common.collect.Maps;
 import java.util.Map;
 

@@ -5,11 +5,11 @@
   <meta charset="UTF-8" />
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="keywords" content="zhangyao个人博客">
+<meta name="keywords" content="zhangyao blog">
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
 <title>关于 | will</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1592565657535">
+<link rel="shortcut icon" href="/favicon.ico?v=1592819121965">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -202,24 +202,31 @@
     <div class="sidebar-item-box">
       <a href="/archives/">
         
-        <span class="site-item-stat-count">3</span>
+        <span class="site-item-stat-count">5</span>
         <span class="site-item-stat-name language" data-lan="article">文章</span>
       </a>
     </div>
     <div class="sidebar-item-box">
       <a href="">
-        <span class="site-item-stat-count">3</span>
+        <span class="site-item-stat-count">5</span>
         <span class="site-item-stat-name language" data-lan="category">分类</span>
       </a>
     </div>
     <div class="sidebar-item-box">
       <a href="/tags/">
-        <span class="site-item-stat-count">3</span>
+        <span class="site-item-stat-count">5</span>
         <span class="site-item-stat-name language" data-lan="tag">标签</span>
       </a>
     </div>
   </div>
   
+    
+      <div class="sidebar-item">
+        <span class="site-item-rss">
+            <i class="fa fa-rss"></i>
+            <a href="http://localhost:4000/atom.xml" target="_blank">RSS</a>
+        </span>
+      </div>
     
   
   
@@ -506,7 +513,7 @@
           <div class="section bg-color post post-page">
             <header class="post-header">
   <h1 class="post-title">
-    <a class="post-title-link" href="https://zhangyaoo.github.io/post/about/">
+    <a class="post-title-link" href="http://localhost:4000/post/about/">
       关于
     </a>
   </h1>
@@ -701,7 +708,7 @@
   }
 
   // 链接跳转
-  let newWindow = 'false'
+  let newWindow = 'true'
   if (newWindow === 'true') {
     let links = document.querySelectorAll('.post-body a')
     links.forEach(item => {
@@ -999,7 +1006,22 @@
     <div class="result" id="result">
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/"" data-c="
+          &lt;h3 id=&#34;zookeeper脑裂&#34;&gt;zookeeper脑裂&lt;/h3&gt;
+&lt;h3 id=&#34;如何解决脑裂&#34;&gt;如何解决脑裂&lt;/h3&gt;
+&lt;h3 id=&#34;引出奇数节点&#34;&gt;引出奇数节点&lt;/h3&gt;
+">关于Zookeeper奇数节点以及脑裂问题</a>
+      </div>
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/"" data-c="
+          &lt;h3 id=&#34;并发优化&#34;&gt;并发优化&lt;/h3&gt;
+&lt;h3 id=&#34;并发优化优点以及带来的问题&#34;&gt;并发优化优点以及带来的问题&lt;/h3&gt;
+">解决并发下本地事务和消息投递一致性</a>
+      </div>
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/er-jin-zhi-fan-zhuan/"" data-c="
           &lt;h4 id=&#34;题目描述&#34;&gt;题目描述&lt;/h4&gt;
 &lt;p&gt;给定一个32位整数 . 输出二进制表示反转后的值.&lt;br&gt;
 例如 input 43261596（二进制 00000010100101000001111010011100）&lt;br&gt;
@@ -1038,7 +1060,7 @@ public class BitReverse {
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/"" data-c="
           &lt;h3 id=&#34;前言&#34;&gt;前言&lt;/h3&gt;
 &lt;blockquote&gt;
 &lt;p&gt;对于任何系统，都会存在系统性能瓶颈，这里笔者作为一名Java工程师列出了自己在工作中的优化思路，仅供参考。&lt;/p&gt;
@@ -1074,7 +1096,7 @@ public class BitReverse {
   2）方法区meta space空间占满&lt;br&gt;
   3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC&lt;br&gt;
   4）内存泄漏导致空间不足进而GC&lt;br&gt;
-这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592463486063.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子&lt;img src=&#34;http://localhost:4000/post-images/1592463486063.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
 这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。&lt;br&gt;
     2、 &lt;strong&gt;频繁 YOUNG GC&lt;/strong&gt;  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;这里笔者以自己开发经验，提供一些“简单的”JVM优化拙见&lt;/strong&gt;：&lt;/p&gt;
@@ -1123,11 +1145,11 @@ public class BitReverse {
 &lt;/li&gt;
 &lt;li&gt;对于架构方面，可以做MySQL主从、分库分表或者归档、Redis集群、多机房负载均衡，细化分布式部署、引入ES等多个方面考虑&lt;/li&gt;
 &lt;/ol&gt;
-">关于系统性能优化一些总结</a>
+">关于系统性能优化的总结</a>
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/"" data-c="
           &lt;p&gt;链表实现思路：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;1、数据是直接利用 HashMap 来存放的。&lt;/li&gt;
@@ -1135,7 +1157,7 @@ public class BitReverse {
 &lt;li&gt;3、每次写入头结点，删除尾结点时都是依赖于 header tailer&lt;br&gt;
 注：可以参考linkedHashMap底层结构&lt;/li&gt;
 &lt;/ul&gt;
-&lt;figure data-type=&#34;image&#34; tabindex=&#34;1&#34;&gt;&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592220507945.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/figure&gt;
+&lt;figure data-type=&#34;image&#34; tabindex=&#34;1&#34;&gt;&lt;img src=&#34;http://localhost:4000/post-images/1592220507945.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/figure&gt;
 &lt;pre&gt;&lt;code&gt;import com.google.common.collect.Maps;
 import java.util.Map;
 
@@ -1316,7 +1338,7 @@ public class LRUCacheV2 {
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/about/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/about/"" data-c="
           &lt;blockquote&gt;
 &lt;p&gt;欢迎来到我的小站呀，很高兴遇见你！🤝&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -1325,33 +1347,6 @@ public class LRUCacheV2 {
 &lt;h2 id=&#34;兴趣爱好&#34;&gt;⛹ 兴趣爱好&lt;/h2&gt;
 &lt;h2 id=&#34;联系我呀&#34;&gt;📬 联系我呀&lt;/h2&gt;
 ">关于</a>
-      </div>
-      
-      <div class="item">
-        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/hello-gridea/"" data-c="
-          &lt;!-- more --&gt;
-&lt;p&gt;👏  欢迎使用 &lt;strong&gt;Gridea&lt;/strong&gt; ！&lt;br&gt;
-✍️  &lt;strong&gt;Gridea&lt;/strong&gt; 一个静态博客写作客户端。你可以用它来记录你的生活、心情、知识、笔记、创意... ...&lt;/p&gt;
-&lt;!-- more --&gt;
-&lt;p&gt;&lt;a href=&#34;https://github.com/getgridea/gridea&#34;&gt;Github&lt;/a&gt;&lt;br&gt;
-&lt;a href=&#34;https://gridea.dev/&#34;&gt;Gridea 主页&lt;/a&gt;&lt;br&gt;
-&lt;a href=&#34;http://fehey.com/&#34;&gt;示例网站&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id=&#34;特性&#34;&gt;特性👇&lt;/h2&gt;
-&lt;p&gt;📝  你可以使用最酷的 &lt;strong&gt;Markdown&lt;/strong&gt; 语法，进行快速创作&lt;/p&gt;
-&lt;p&gt;🌉  你可以给文章配上精美的封面图和在文章任意位置插入图片&lt;/p&gt;
-&lt;p&gt;🏷️  你可以对文章进行标签分组&lt;/p&gt;
-&lt;p&gt;📋  你可以自定义菜单，甚至可以创建外部链接菜单&lt;/p&gt;
-&lt;p&gt;💻  你可以在 &lt;strong&gt;Windows&lt;/strong&gt;，&lt;strong&gt;MacOS&lt;/strong&gt; 或 &lt;strong&gt;Linux&lt;/strong&gt; 设备上使用此客户端&lt;/p&gt;
-&lt;p&gt;🌎  你可以使用 &lt;strong&gt;𝖦𝗂𝗍𝗁𝗎𝖻 𝖯𝖺𝗀𝖾𝗌&lt;/strong&gt; 或 &lt;strong&gt;Coding Pages&lt;/strong&gt; 向世界展示，未来将支持更多平台&lt;/p&gt;
-&lt;p&gt;💬  你可以进行简单的配置，接入 &lt;a href=&#34;https://github.com/gitalk/gitalk&#34;&gt;Gitalk&lt;/a&gt; 或 &lt;a href=&#34;https://github.com/SukkaW/DisqusJS&#34;&gt;DisqusJS&lt;/a&gt; 评论系统&lt;/p&gt;
-&lt;p&gt;🇬🇧  你可以使用&lt;strong&gt;中文简体&lt;/strong&gt;或&lt;strong&gt;英语&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;🌁  你可以任意使用应用内默认主题或任意第三方主题，强大的主题自定义能力&lt;/p&gt;
-&lt;p&gt;🖥  你可以自定义源文件夹，利用 OneDrive、百度网盘、iCloud、Dropbox 等进行多设备同步&lt;/p&gt;
-&lt;p&gt;🌱 当然 &lt;strong&gt;Gridea&lt;/strong&gt; 还很年轻，有很多不足，但请相信，它会不停向前 🏃&lt;/p&gt;
-&lt;p&gt;未来，它一定会成为你离不开的伙伴&lt;/p&gt;
-&lt;p&gt;尽情发挥你的才华吧！&lt;/p&gt;
-&lt;p&gt;😘 Enjoy~&lt;/p&gt;
-">Hello Gridea</a>
       </div>
       
     </div>

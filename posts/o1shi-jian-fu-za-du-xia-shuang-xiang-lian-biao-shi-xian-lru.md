@@ -4,7 +4,7 @@ date: 2020-06-15 19:17:45
 tags: [Java基础]
 published: true
 hideInList: false
-feature: https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1592231255802&di=4e1d20b36c0f79e7837c4a3128fb75bb&imgtype=0&src=http%3A%2F%2Fk.zol-img.com.cn%2Fsoftbbs%2F6737%2Fa6736285_s.jpg
+feature: /post-images/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru.jfif
 isTop: false
 ---
 
@@ -14,7 +14,7 @@ isTop: false
  * 3、每次写入头结点，删除尾结点时都是依赖于 header tailer
 注：可以参考linkedHashMap底层结构
 
-![](https://1124826889.github.io/zhangyao.github.io//post-images/1592220507945.png)
+![](https://zhangyaoo.github.io/post-images/1592220507945.png)
 ```
 import com.google.common.collect.Maps;
 import java.util.Map;
