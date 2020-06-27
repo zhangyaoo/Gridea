@@ -8,7 +8,7 @@
 <meta name="keywords" content="zhangyao blog">
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
-<title>will</title>
+<title>2018年总结 | will</title>
 <link rel="shortcut icon" href="/favicon.ico?v=1593269618477">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
@@ -38,6 +38,8 @@
 
 
 
+  <meta name="description" content="2018年总结" />
+  <meta name="keywords" content="总结" />
 </head>
 
 <body>
@@ -170,10 +172,26 @@
   <div class="main-continer">
     
     <div
-      class="section-layout  pisces">
+      class="section-layout pisces ">
       <div class="section-layout-wrapper">
-        <div id="sidebarMeta" class="sidebar">
-    
+        
+
+<div class="sidebar">
+  
+    <div class="sidebar-box box-shadow-wrapper bg-color right-motion" id="sidebar">
+      
+        <div class="post-list-sidebar">
+          <div class="sidebar-title">
+            <span id="tocSideBar" class="sidebar-title-item sidebar-title-active language" data-lan="index">文章目录</span>
+            <span id="metaSideBar" class="sidebar-title-item language" data-lan="preview">站点概览</span>
+          </div>
+        </div>
+      
+      <div class="sidebar-body pisces" id="sidebar_body">
+        
+          
+            <div class="post-side-meta" id="post_side_meta">
+              
 <div class="sidebar-wrapper box-shadow-wrapper bg-color">
   <div class="sidebar-item">
     <img class="site-author-image right-motion" src="/images/avatar.png"/>
@@ -216,78 +234,442 @@
 
 
 </div>
+            </div>
+            <div class="post-toc sidebar-body-active" id="post_toc" style="opacity: 1;">
+              <div class="toc-box right-motion">
+  <div class="toc-wrapper auto-number auto"
+    id="toc_wrapper">
+    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%86%99%E7%BB%99%E8%87%AA%E5%B7%B1%E7%9A%842018%E5%B9%B4%E6%80%BB%E7%BB%93">写给自己的2018年总结</a></li>
+<li><a href="#%E9%A2%98%E8%AE%B0">题记</a></li>
+<li><a href="#1-%E5%85%B3%E4%BA%8E%E6%8A%80%E6%9C%AF">1、关于技术</a></li>
+<li><a href="#2-%E5%85%B3%E4%BA%8E%E8%AE%A4%E7%9F%A5">2、关于认知</a></li>
+<li><a href="#3-%E5%85%B3%E4%BA%8E%E4%B8%BA%E4%BA%BA%E5%A4%84%E4%BA%8B">3、关于为人处事</a></li>
+<li><a href="#4-%E5%85%B3%E4%BA%8E%E5%8F%8B%E6%83%85%E7%88%B1%E6%83%85%E4%BA%B2%E6%83%85">4、关于友情爱情亲情</a></li>
+<li><a href="#5-2019%E5%B9%B4%E5%B1%95%E6%9C%9B">5、2019年展望</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93%E4%B8%80%E4%B8%8B">总结一下</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
 </div>
+
 <script>
-  let sidebarMeta = document.querySelector('#sidebarMeta');
-  let scheme = 'pisces';
-  let sidebarWrapper = document.querySelector('.sidebar-wrapper');
-  if (sidebarMeta && (scheme === 'pisces' || scheme === 'gemini')) {
-    document.addEventListener('scroll', function(e) {
-      if (document.scrollingElement.scrollTop > parseInt(sidebarMeta.style.marginTop) + 10) {
-        sidebarWrapper.classList.add('home-sidebar-fixed')
-      } else {
-        sidebarWrapper.classList.remove('home-sidebar-fixed')
+
+  let lastTop = 0, lList = [], hList = [], postBody, lastIndex = -1;
+  let active = 'active-show', activeClass = 'active-current';
+  let tocWrapper = document.querySelector('#toc_wrapper');
+  let tocContent = tocWrapper.children[0];
+  let autoNumber = tocWrapper && tocWrapper.classList.contains('auto-number');
+
+  function addTocNumber(elem, deep) {
+    if (!elem) {
+      return;
+    }
+    let prop = elem.__proto__;
+
+    if (prop === HTMLUListElement.prototype) {
+      for (let i = 0; i < elem.children.length; i++) {
+        addTocNumber(elem.children[i], deep + (i + 1) + '.');
       }
+    } else if (prop === HTMLLIElement.prototype) {
+      // 保存li元素
+      if (elem.children[0] && elem.children[0].__proto__ === HTMLAnchorElement.prototype) {
+        lList.push(elem);
+      }
+      for (let i = 0; i < elem.children.length; i++) {
+        let cur = elem.children[i];
+        if (cur.__proto__ === HTMLAnchorElement.prototype) {
+          if (autoNumber) {
+            cur.text = deep + ' ' + cur.text;
+          }
+        } else if (cur.__proto__ === HTMLUListElement.prototype) {
+          addTocNumber(cur, deep);
+        }
+      }
+    }
+  }
+
+  function removeParentActiveClass() {
+    let parents = tocContent.querySelectorAll('.' + active)
+    parents.forEach(function (elem) {
+      elem.classList.remove(active);
     });
   }
-  </script>
-        <div class="section-box tag-line box-shadow-wrapper">
-          <section class="section tags-section posts-expand bg-color">
-            <div class="padding-wrapper">
-  <div class="tag-timeline-box">
-    <div class="tag-timeline-wrapper">
-      <div class="tag-timeline-title">
-        <h2>
-          数据结构和算法
-          <small class="language" data-lan="tag">标签</small>
-        </h2>
+
+  function addActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.add(activeClass);
+    }
+  }
+
+  function removeActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.remove(activeClass);
+    }
+  }
+
+  function addActiveLiElemment(elem, parent) {
+    if (!elem || elem === parent) {
+      return;
+    } else {
+      if (elem.__proto__ === HTMLLIElement.prototype) {
+        elem.classList.add(active);
+      }
+      addActiveLiElemment(elem.parentElement, parent);
+    }
+  }
+
+  function showToc() {
+    if (tocWrapper) {
+      postBody = document.querySelector('#post_body');
+      for (let i = 0; i < postBody.children.length; i++) {
+        if (postBody.children[i].__proto__ === HTMLHeadingElement.prototype) {
+          hList.push(postBody.children[i]);
+        }
+      }
+      if (tocWrapper.classList.contains('compress')) {
+        tocContent.classList.add('closed');
+      } else if (tocWrapper.classList.contains('no_compress')) {
+        tocContent.classList.add('expanded');
+      } else {
+        if (hList.length > 10) {
+          active = 'active-hidden'
+          tocContent.classList.add('closed');
+        } else {
+          tocContent.classList.add('expanded');
+        }
+      }
+    }
+  }
+
+  (function () {
+    // 处理不是从#一级标题开始目录
+    if (tocContent.children.length === 1 && tocContent.children[0].__proto__ === HTMLLIElement.prototype) {
+      let con = tocContent.children[0].children[0];
+      tocContent.innerHTML = con.innerHTML;
+    }
+    let markdownItTOC = document.querySelector('.markdownIt-TOC');
+    let innerHeight = window.innerHeight;
+    markdownItTOC.style = `max-height: ${innerHeight - 80 > 0 ? innerHeight - 80 : innerHeight}px`
+    addTocNumber(tocContent, '');
+  })();
+
+  document.addEventListener('scroll', function (e) {
+    if (lList.length <= 0) {
+      return;
+    }
+    let scrollTop = document.scrollingElement.scrollTop + 10;
+    let dir;
+
+    if (lastTop - scrollTop > 0) {
+      dir = 'up';
+    } else {
+      dir = 'down';
+    }
+
+    lastTop = scrollTop;
+    if (scrollTop <= 0) {
+      if (lastIndex >= 0 && lastIndex < hList.length) {
+        lList[lastIndex].classList.remove(activeClass);
+      }
+      return;
+    }
+
+    let current = 0, hasFind = false;
+    for (let i = 0; i < hList.length; i++) {
+      if (hList[i].offsetTop > scrollTop) {
+        current = i;
+        hasFind = true;
+        break;
+      }
+    }
+    if (!hasFind && scrollTop > lList[lList.length - 1].offsetTop) {
+      current = hList.length - 1;
+    } else {
+      current--;
+    }
+    if (dir === 'down') {
+      if (current > lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex)
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    } else {
+      if (current < lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex);
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    }
+  });
+
+
+  window.addEventListener('load', function () {
+    showToc();
+    document.querySelector('#sidebar').style = 'display: block;';
+    tocWrapper.classList.add('toc-active');
+    setTimeout(function () {
+      if ("createEvent" in document) {
+        let evt = document.createEvent("HTMLEvents");
+        evt.initEvent("scroll", false, true);
+        document.dispatchEvent(evt);
+      }
+      else {
+        document.fireEvent("scroll");
+      }
+    }, 500)
+  })
+
+</script>
+            </div>
+          
+        
       </div>
+    </div>
+  
+</div>
+<script>
+  const SIDEBAR_TITLE_ACTIVE = 'sidebar-title-active';
+  const SIDEBAR_BODY_ACTIVE = 'sidebar-body-active';
+  const SLIDE_UP_IN = 'slide-up-in';
+
+  let sidebar = document.querySelector('#sidebar'),
+  tocSideBar = document.querySelector('#tocSideBar'),
+  metaSideBar = document.querySelector('#metaSideBar'),
+  postToc = document.querySelector('#post_toc'),
+  postSiteMeta = document.querySelector('#post_side_meta'),
+  sidebarTitle = document.querySelector('.sidebar-title'),
+  sidebarBody = document.querySelector('#sidebar_body');
+
+  tocSideBar && tocSideBar.addEventListener('click', (e) => {
+    toggleSidebar(e);
+  });
+
+  metaSideBar && metaSideBar.addEventListener('click', (e) => {
+    toggleSidebar(e);
+  });
+
+  function toggleSidebar(e) {
+    let currentTitle = document.querySelector("."+SIDEBAR_TITLE_ACTIVE);
+    if (currentTitle == e.srcElement) {
+      return ;
+    }
+    let current, showElement, hideElement;
+    if (e.srcElement == metaSideBar) {
+      showElement = postSiteMeta;
+      hideElement = postToc;
+    } else if (e.srcElement == tocSideBar){
+      showElement = postToc;
+      hideElement = postSiteMeta;
+    }
+    currentTitle.classList.remove(SIDEBAR_TITLE_ACTIVE);
+    e.srcElement.classList.add(SIDEBAR_TITLE_ACTIVE);
+
+    window.Velocity(hideElement, 'stop');
+    window.Velocity(hideElement, 'transition.slideUpOut', {
+      display: 'none',
+      duration: 200,
+      complete: function () {
+        window.Velocity(showElement, 'transition.slideDownIn', {
+          duration: 200
+        });
+      }
+    })
+    hideElement.classList.remove(SIDEBAR_BODY_ACTIVE);
+    showElement.classList.add(SIDEBAR_BODY_ACTIVE);
+  }
+
+  postToc && postToc.addEventListener('transitionend', function() {
+    this.classList.remove(SLIDE_UP_IN);
+  });
+
+  if (sidebarBody) {
+    if (sidebarBody.classList.contains('pisces') || sidebarBody.classList.contains('gemini')) {
+      let hasFix = false;
+      let scrollEl = document.querySelector('.main-continer');
+      let limitTop = document.querySelector('#nav_ul').children.length * 42 + 162;
+      window.addEventListener('scroll', function(e) {
+        if (document.scrollingElement.scrollTop >= limitTop) {
+          if (!hasFix) {
+            sidebar.classList.add('sidebar-fixed');
+            hasFix = true;
+          }
+        } else {
+          if (hasFix) {
+            sidebar.classList.remove('sidebar-fixed');
+            hasFix = false;
+          }
+        }
+      });
+    }
+  }
+  
+</script>
+        <div class="section-box box-shadow-wrapper">
+          <div class="section bg-color post post-page">
+            <header class="post-header">
+  <h1 class="post-title">
+    <a class="post-title-link" href="http://localhost:4000/post/2018-nian-zong-jie/">
+      2018年总结
+    </a>
+  </h1>
+  <div class="post-meta">
+    
+    <span class="meta-item pc-show">
+      <i class="fa fa-calendar-o"></i>
+      <span class="language" data-lan="publish">发布于</span>
+      <span>2019-01-01</span>
+      <span class="post-meta-divider pc-show">|</span>
+    </span>
+    
+    <span class="meta-item">
+      <i class="fa fa-folder-o"></i>
+      <span class="pc-show language" data-lan="category-in">分类于</span>
       
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      <a href="http://localhost:4000/post/er-jin-zhi-fan-zhuan/">
-        <div class="motion-warpper">
-          <div class="tag-post-node">
-            <h1>
-              06-19
-              <small>O(N)时间复杂度下，二进制反转</small>
-            </h1>
-          </div>
-        </div>
+      <a href="http://localhost:4000/tag/hD1pMQ2Ri/">
+        <span>总结</span>
       </a>
       
       
+    </span>
+    <span class="post-meta-divider">|</span>
+    
+    <span class="meta-item">
+      <i class="fa fa-clock-o"></i>
+      <span>10<span class="language" data-lan="minute">分钟</span></span>
+    </span>
+    <span class="meta-item">
+      <span class="post-meta-divider">|</span>
+      <i class="fa fa-file-word-o"></i>
+      <span>2730<span class="pc-show language" data-lan="words">字数</span></span>
+    </span>
+    
+  </div>
+</header>
+            <div class="post-body next-md-body" id="post_body">
+              <h2 id="写给自己的2018年总结">写给自己的2018年总结</h2>
+<h2 id="题记">题记</h2>
+<p><img src="https://img-blog.csdnimg.cn/20181231115831927.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70" alt="" loading="lazy"><br>
+不觉中，2018年就快过了，在这之前从来没有写过一些总结性的文章，从小学初中日志作业，到高中的日复一夜的学习再到大学的浑浑噩噩的僵硬式的学习，一直都在进行流水账式的学习输入，从没有写过关于一年的计划甚至是一个月的小目标。</p>
+<p>至于为什么要做这个总结，我想是因为，年复一年的度过，有时候自己都不知道在这一年干过什么事情、收获了什么和失去了什么，包括对友情、亲情和事业等等。是因为我记性太差，还是说在这个娱乐信息爆炸的时代，我注意力都集中在快餐式的的认知上，很难有精力或者集中注意力去汲取自己想要的高质量的信息上，不得而知。所以今年我觉得有必要去总结自己的这一年。</p>
+<p>总结目录：</p>
+<ol>
+<li>关于技术</li>
+<li>关于认知</li>
+<li>关于为人处事</li>
+<li>关于友情爱情亲情</li>
+<li>2019展望</li>
+</ol>
+<h2 id="1-关于技术">1、关于技术</h2>
+<p><img src="https://img-blog.csdnimg.cn/20181231120336118.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+1、技术积累<br>
+师范专业毕业的我从大三开始接触计算机，大三那年学的网络工程，还考了个CCNA，目前发现没有什么用，对于现在的我来说。然后被住在上铺的兄弟67代入坑里学习code搬砖，从那开始便一发不可收拾，埋头苦学，连教师资格证都不考，跑出去公司里面当小弟实习。至此就开始技术积累之路了。</p>
+<p>当小弟那一段时间，就像刚萌发的种子一样疯狂吸收营养，学些了python爬虫、python web开发、Java公众号开发，SSM Java全家桶开发。这些都是在学校学不到的东西，当时感觉自己很牛逼，直到毕业找工作。</p>
+<p>毕业那一刻起，因为技术发展瓶颈，我又背上行囊横跨大半个中国从山东去南方一线城市漂。拿这自以为高大上的简历去投递，然后面试，惨遭面试官的啪啪打脸，连一个hashmap的底层原理都不知道，最有印象的是Java 循环删除list怎么删除，回答完后别面试官一脸嫌弃-。-</p>
+<p><strong>只会拿着现成的框架和应用去用，而不知道底层的实现方式和原理，那么工作性质就和网管差不多</strong>。<br>
+不会举一反三，如果又有新的框架出来又必须要学习一遍，如果说掌握了底层工作原理，那么用起来会舒服很多。</p>
+<p>2、技术分享<br>
+<img src="https://img-blog.csdnimg.cn/20181231124820725.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<strong>分享的乐趣，从一开始就停不下来。</strong><br>
+公司会周期性的选一些当下热门的技术让我们去研究，然后去把自己研究的内容分享出来。我认为这是非常棒的一种学习方式。为什么这么说。因为这个是非常具体挑战性的，你理解了是一个层次，如果说要给别人将明白又是另外一个层次，这是两个不同层次的概念。如果说你的语言表达性不行，那么这个就是更加难上加难了。</p>
+<p>分享的乐趣不仅是这个，当你给别人讲完后，你还可以通过别人提供的问题和建议方案，和你自己的理解进行碰撞，然后产生新的认知元素，到下一次分享就可以融入上次分享的认知进来。</p>
+<p>到现在为止，我还在想，怎么在给别人讲解分享的时候能够更能让别人听懂，而且愿意去听。我最怕还是在分享的时候别人在玩手机。因为有了这个现象就表明你的分享做的不够好。</p>
+<p>3、书籍<br>
+<strong>在这个手机万能的时代，能够静下心来看完一本书并理解是非常不容易的</strong>。<br>
+或许你们都说哪有时间看书，都忙工作任务了，甚至有时候我自己都不敢说一个月看完一本书，不管是文学还是专业技术性书籍。</p>
+<p>今年，我看了以下几本书，有的只看了一本书中的一部分，大部分都是涉及专业技术的：Netty权威指南、深入理解Java多线程、JavaEE互联网轻量级技术整合开发、Java高并发程序设计。还有其他的一些非技术书就不一一列举了。一年才看这几本书真是有点丢人-。-</p>
+<p>自认为网络技术博客和纸质书还是有各有各自的存在的意义的。就拿纸质书来说，它能够通过一系列的目录，能够从基本来源、基本原理、使用场景、底层原理技术、工作应用场景来一一进行有顺序的给人以真正理解和掌握。不需要自己从网上搜分散的知识点。</p>
+<p><strong>不是看完书后就完了，还需要自己通过实践去证明你自己的理解是否正确</strong>，这也是个不可欠缺的过程。</p>
+<p>为什么还需要读书呢，我认为网上一句话还是不错的，是《物演通论》作者王东岳说的：“因为通过电视或者其他方式搜集的信息，即那种通过直观方式接受的知识，是最浅显、最粗疏且没有经过精密逻辑证明的东西”。</p>
+<p>4、思考<br>
+<img src="https://img-blog.csdnimg.cn/20181231141547586.png" alt="在这里插入图片描述" loading="lazy"><br>
+关于程序员技术深度和广度的选择，也是从网上看的一句话，Oracle技术大牛杨晓峰指出：“<strong>技术人免不了要构建广泛的知识体系，但终究还是要克制住诱惑，将某个领域做到精深</strong>。水桶的水量取决于最短板，但是大多数情况下，我们在工作中的回报，更多的源自于自身的长处，甚至某种程度上还决定了我们是拥有自己选择的自由，还是疲于奔命，必经我们每个人的体力、经历有现实的上限的”。<br>
+自认为还是很有道理的，先建立自己广度网，然后专门找一项自己喜欢的方向，然后放开手脚去研究。至少要有一个非常深的领域知识，所谓知识体系的搭建是基于多个扎实的知识点汇集而成，点不扎实不深入。</p>
+<h2 id="2-关于认知">2、关于认知</h2>
+<p><img src="https://img-blog.csdnimg.cn/20181231154812245.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+1、<strong>人与人最大的不同：认知不同</strong><br>
+我认为的成长就是认知成长，是对一间事物的理解和处理方法。由于每个人的出生家境不同，生活环境不同，也就影响了每个人的认知，所以人才会有各自的想法，做事准则和处世方式。</p>
+<p>2、<strong>不断学习，使自己更值钱。</strong><br>
+都说2018年是互联网寒冬，但是对我们技术人来说，难以构成影响，因为只要你有足够的技术底子，在哪都可以养活自己。用我们家乡话来说，”学好技术，走到天下都不怕“，这里我私自把物理化改成技术，哈哈。<br>
+经常都能在网上看到一句话，”<strong>人生最重要的投资是自己。使自己更值钱才是立身之本。</strong>“</p>
+<p>3、<strong>高质量的输入重要，输出比输入更重要</strong><br>
+就拿看书写文章来说，当我们要写类似高考那种作文题目时候，如果这时读武侠小说，那么肯定是对于写作文是无益的，这就是低质量的输入，如果看一些文学方面的书的话，那么对于写作是非常有好处的。<br>
+但是一味的输入，提升的意义不高，个人观点。比如我从小学到大，到现在都没写过文章的话，以前在高中学习的写文章的能力都没有了。所以如果不去输出，那么学习到的东西将在以后某个时刻都会忘记。</p>
+<h2 id="3-关于为人处事">3、关于为人处事</h2>
+<p><img src="https://img-blog.csdnimg.cn/20181231150512794.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+我这举两个例子：<br>
+例1：上学那会，我爸送我去火车站，到了马路上准备叫出租车。这时对面马路上来了一辆空车，司机师傅看到我们招手，就准备到不远处掉头，然后这时候另外一辆出租车就刚好停在我们面前，我准备上眼前这辆车的时候，我爸就把我拉住叫我等之前那一辆车掉头坐那辆车，而且那辆车已经拐弯马上到我们这边来了。之后结果就是，我和我爸坐上了之前一辆车，而且和停在我们面前的后一辆车师傅说“不好意思我们已经叫了马路对面那一辆车了“。</p>
+<p>这件事到现在我还有记忆深刻，这里我想说的是，<strong>我们在方便自己的同时，也要换位思考考虑别人的感受</strong>。<br>
+或许对于你来说是一件小事情，直接图方便坐上离自己最近的车。那也无可厚非，换作以前的我也是，没有换位思考过。但是现在我觉得换位思考也是一个成年人应具备的素质。</p>
+<p>例2：上一次公司技术联调，我这边需要远程和另一个分公司同事联调，我这边完事后需要通知他那边，他那边才能继续完成工作，由于自己的原因，这边做完，没有及时通知到他们，导致他们那边延期。</p>
+<p>这件事我想说的是，<strong>我们在做事的时候，无论是工作还是生活，都不能去因为自己耽搁别人</strong>，因为别人的时间也是时间，和我们自己是一样的。</p>
+<h2 id="4-关于友情爱情亲情">4、关于友情爱情亲情</h2>
+<p><img src="https://img-blog.csdnimg.cn/20181231151002819.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+关于友情：想对远方的朋友说 <strong>当你辉煌时候，我祝贺你，当你落魄的时候，我随时帮助你</strong>。</p>
+<p>关于爱情：到现在我还在想自己真正想去拥有的是什么。</p>
+<p>关于亲情：只有别人关心你飞的高不高，没有人会关心你飞的累不累，除了家人。</p>
+<h2 id="5-2019年展望">5、2019年展望</h2>
+<p>立个flag，毕竟是未来的事<br>
+1、一周一次跑步+篮球<br>
+2、两个月至少看完一本书<br>
+3、保护好视力<br>
+4、熟悉金融核心业务<br>
+5、体重不超140</p>
+<h2 id="总结一下">总结一下</h2>
+<p><img src="https://img-blog.csdnimg.cn/20181231162952878.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+人的成长是不断认识到以前的自己是一个傻X的过程，希望明年的我认为今年的我是一个傻X。</p>
+<p><em>2018-12-31 于张遥出租屋写</em></p>
+
+            </div>
+            
+            
+              <div class="post-footer">
+  <ul class="post-copyright">
+    <li class="post-copyright-author">
+      <strong class="language" data-lan="author">本文作者：</strong>
+      will
+    </li>
+    <li class="post-copyright-link">
+      <strong class="language" data-lan="link">本文链接：</strong>
+      <a href="http://localhost:4000/post/2018-nian-zong-jie/" title="2018年总结">http://localhost:4000/post/2018-nian-zong-jie/</a>
+    </li>
+    <li class="post-copyright-license">
+      <strong class="language" data-lan="copyright">版权声明： </strong>
+      本博客所有文章除特别声明外，均采用<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i> BY-NC-SA</a> 许可协议。转载请注明出处！
+    </li>
+  </ul>
+  <div class="tags">
+    
+      <a href="http://localhost:4000/tag/hD1pMQ2Ri/"># 总结</a>
+    
+  </div>
+  <div class="nav">
+    <div class="nav-prev">
       
+        <i class="fa fa-chevron-left"></i>
+        <a class="nav-pc-next" title="关于" href="http://localhost:4000/post/about/">关于</a class="nav-pc-next">
+        <a class="nav-mobile-prev" title="关于" href="http://localhost:4000/post/about/">上一篇</a>
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+    </div>
+    <div class="nav-next">
       
     </div>
   </div>
 </div>
-          </section>
+            
+            
+  
+
+          </div>
         </div>
       </div>
     </div>
@@ -475,6 +857,253 @@
   }
 
 </script>
+    <div class="light-box" id="light_box"></div>
+<script>
+  let imgs = document.querySelectorAll('.post-body img');
+  let lightBox = document.querySelector('#light_box');
+  lightBox.addEventListener('mousedown', (e) => {
+    e.preventDefault()
+  })
+  lightBox.addEventListener('mousewheel', (e) => {
+    e.preventDefault()
+  })
+  let width = window.innerWidth * 0.8;
+  lightBox.onclick = () => {
+    let img = lightBox.querySelector('img');
+    lightBox.style = '';
+    img && img.remove();
+  }
+  imgs.forEach(item => {
+    item.onclick = function (e) {
+      let lightImg = document.createElement('img');
+      lightImg.src = this.src;
+      lightBox.style = `height: 100%; opacity: 1; background-color: rgba(0, 0, 0, 0.5);cursor: zoom-out;`;
+      lightImg.style = `width: ${width}px; border: 1px solid #fff; border-radius: 2px;`;
+      lightImg.onclick = function () {
+        lightBox.style = '';
+        this.remove();
+      }
+      lightBox.append(lightImg);
+    }
+  })
+</script>
+    <div class="reward-mask" style="display: none;">
+  <div class="reward-relative">
+    <span class="close" aria-hidden="true">x</span>
+    <div class="reward-body">
+      <h2>感谢您的支持，我会继续努力的!</h2>
+      <div class="reward-img-box">
+        <div style="position: relative; width: 140px; height: 140px;">
+          
+          
+          
+        </div>
+      </div>
+      <p class="reward-word">扫码打赏，你说多少就多少</p>
+      <p class="reward-tip">打开微信扫一扫，即可进行扫码打赏哦</p>
+    </div>
+    <div class="bottom">
+      
+      
+    </div>
+  </div>
+</div>
+<style>
+  .reward-mask {
+    position: fixed;
+    z-index: 99999;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #00000054;
+  }
+
+  .reward-relative {
+    position: relative;
+    width: 480px;
+    text-align: center;
+    margin: 0 auto;
+    border-radius: 5px;
+    background-color: #fff;
+    top: 50%;
+    margin-top: -205px;
+  }
+
+  .reward-relative .close {
+    position: absolute;
+    right: 10px;
+    font-weight: normal;
+    font-size: 16px;
+    color: #929292;
+  }
+
+  .reward-body {
+    padding: 40px 20px 20px;
+  }
+
+  .bottom {
+    display: flex;
+  }
+
+  .reward-btn {
+    text-align: center;
+  }
+
+  .reward-btn-text {
+    display: inline-block;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 50%;
+    background-color: #ff9734;
+    color: #FFF;
+    margin-top: 20px;
+  }
+
+  .pay-text {
+    margin-top: 10px;
+    padding: 10px;
+    flex: 1;
+    transition: all .2s linear;
+  }
+
+  .pay-text:hover {
+    background-color: #a5a5a536;
+  }
+
+  .reward-body h2 {
+    padding-top: 10px;
+    text-align: center;
+    color: #a3a3a3;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 0 0 20px;
+  }
+
+  .reward-body h2:after,
+  .reward-body h2:before {
+    font-family: Arial, Helvetica, sans-serif;
+    background: 0 0;
+    width: 0;
+    height: 0;
+    font-style: normal;
+    color: #eee;
+    font-size: 80px;
+    position: absolute;
+    top: 20px;
+  }
+
+  .reward-body h2:before {
+    content: '\201c';
+    left: 50px;
+  }
+
+  .reward-body h2:after {
+    content: '\201d';
+    right: 80px;
+  }
+
+  .reward-img-box {
+    display: inline-block;
+    padding: 10px;
+    border: 6px solid #ea5f00;
+    margin: 0 auto;
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .reward-img {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 767px) {
+    .reward-relative {
+      height: 100%;
+      top: 0px;
+      margin-top: 0;
+      width: auto;
+    }
+
+    .reward-relative .bottom {
+      flex-direction: column;
+    }
+
+    .reward-relative .pay-text {
+      width: 80%;
+      margin: 5px auto;
+      border: 1px solid silver;
+      padding: 6px;
+      border-radius: 4px;
+    }
+
+    .reward-body h2:after {
+      right: 40px;
+    }
+
+    .reward-body h2:after,
+    .reward-body h2:before {
+      font-size: 60px;
+    }
+
+    .reward-body h2:before {
+      left: 20px;
+    }
+  }
+</style>
+<script>
+  !function () {
+    var mask = document.querySelector('.reward-mask');
+    let close = document.querySelector('.reward-relative .close');
+    let rewardBtn = document.querySelector('.reward-btn');
+
+    let zfb = document.querySelector('#zfb'),
+      wx = document.querySelector('#wx'),
+      zfbBtn = document.querySelector('#zfbBtn'),
+      wxBtn = document.querySelector('#wxBtn');
+
+    if (zfbBtn && wxBtn) {
+      zfbBtn.addEventListener('click', () => {
+        window.Velocity(zfb, 'transition.slideLeftIn', {
+          duration: 400
+        });
+        window.Velocity(wx, 'transition.slideRightOut', {
+          display: 'none',
+          duration: 400
+        });
+      });
+
+      wxBtn.addEventListener('click', () => {
+        window.Velocity(wx, 'transition.slideRightIn', {
+          duration: 400
+        });
+        window.Velocity(zfb, 'transition.slideLeftOut', {
+          display: 'none',
+          duration: 400
+        });
+      });
+    }
+
+    rewardBtn.addEventListener('click', (e) => {
+      window.Velocity(mask, 'transition.slideDownIn', {
+        duration: 400
+      })
+    });
+
+    close.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.Velocity(mask, 'transition.slideUpOut', {
+        duration: 400
+      })
+    })
+  }()
+</script>
+
   </div>
 </body>
 
@@ -1369,7 +1998,6 @@ public class LRUCacheV2 {
 
 
 <script src="/media/js/mouse/love.js"></script>
-
 
 
 </html>
