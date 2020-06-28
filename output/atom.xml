@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>http://localhost:4000</id>
     <title>will</title>
-    <updated>2020-06-27T14:56:28.661Z</updated>
+    <updated>2020-06-28T09:11:57.881Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="http://localhost:4000"/>
     <link rel="self" href="http://localhost:4000/atom.xml"/>
@@ -16,7 +16,7 @@
         <link href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
         </link>
         <updated>2020-06-22T02:32:00.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="zookeeper脑裂">zookeeper脑裂</h3>
+        <content type="html"><![CDATA[<h3 id="zookeeper脑裂">Zookeeper脑裂</h3>
 <h3 id="如何解决脑裂">如何解决脑裂</h3>
 <h3 id="引出奇数节点">引出奇数节点</h3>
 ]]></content>
@@ -29,6 +29,10 @@
         <updated>2020-06-22T02:27:01.000Z</updated>
         <content type="html"><![CDATA[<h3 id="并发优化">并发优化</h3>
 <h3 id="并发优化优点以及带来的问题">并发优化优点以及带来的问题</h3>
+<h3 id="分布式事务解决一致性问题">分布式事务解决一致性问题</h3>
+<h3 id="最终一致性">最终一致性</h3>
+<h3 id="消费端重复消费">消费端重复消费</h3>
+<h3 id="消费端消费失败">消费端消费失败</h3>
 ]]></content>
     </entry>
     <entry>
@@ -135,8 +139,12 @@ public class BitReverse {
 </ol>
 <p>以上，合理分配JVM内存资源以及做好系统内存的监控机制是我们系统稳定性运行的保障。</p>
 <h5 id="网络负载和io">网络负载和IO</h5>
-<p> 对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。</p>
-<p> 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。</p>
+<p>来一张IO发生场景图片：<br>
+<img src="http://localhost:4000/post-images/1593333928024.png" alt="" loading="lazy"><br>
+ 对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。<br>
+ 笔者在开发中就遇到因为IO问题带来的线程资源耗尽的线上问题：我们系统业务在借贷业务成功后，要生成借款协议，协议是一个PDF文件，当时主业务逻辑完成后同步调用生成PDF的逻辑，因为当时大流量并发，导致整个借贷业务性能瓶颈就在磁盘IO上，CPU处于空闲状态，借用网上的一个图，TOP命令可以看出IO花费的时间在76.6%，后面优化后就多线程异步处理。<br>
+<img src="http://localhost:4000/post-images/1593334249512.webp" alt="" loading="lazy"></p>
+<p> 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：<img src="http://localhost:4000/post-images/1593334346151.png" alt="" loading="lazy"></p>
 <p> 分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。</p>
 <h3 id="2-中间件层">2、中间件层</h3>
 <p>  这里中间件，泛指数据存储层，以笔者经验来看，大多数系统性能问题和瓶颈都是与数据存储相关，这里笔者就拿这方面展开讨论总结。</p>
@@ -213,7 +221,11 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 <p>3、背景：C端用户在APP上，某一个标开启募集资金后进行投标，这里的标类似支付宝的理财产品，开始募集的时候会有高并发流量涌入，当APP端用户同时投标，会有大量请求，这就形成了抢购的动作，因为一个产品标的可投金额是有限的，只有少数人能投标成功<br>
 优化之前：笔者在上文中提到的，尽管说频繁将更新行锁的数据放到事务的最后， 会有性能提升，但是随着并发数增长，MySQL也会成为性能瓶颈。<br>
 优化之后：利用redis的纯内存操作高性能的优点，将产品的可投金额放入缓存redis（这里redis里面的金额比数据库中少保证不超卖），利用redis的decrby命令或者lua脚本，保证产品标剩余可投金额能够进行原子减少，每一次减少成功后，将用户这一次投标的数据丢入MQ中异步处理，消费端做的就是将插入预状态的借款数据、冻结用户金额和减少产品的可投金额放入同一个事务中处理。<br>
-上面做的优化能够保证C端用户的良好体验，但是引入各种中间件的话会出现各种问题需要去解决，比如redis挂了怎么？这时候就要考虑持久化和集群哨兵保持redis高可用。再比如MQ挂了怎么办、网络丢失导致消息丢失、重复消费幂等等等问题。需要开发人员去应对每一个可能出现问题的场景。</p>
+上面做的优化能够保证C端用户的良好体验，但是引入各种中间件的话会出现各种问题需要去解决，比如重复投标怎么办，Redis挂了怎么？MQ挂了怎么办？消息丢失怎么办？等一系列问题。<br>
+重复投标，可以利用用户标识的唯一token做，短信生成token，设置token失效时间（短信失效时间60s），投标时候校验token是否过期和使用过。<br>
+Redis挂，这时候就要考虑持久化和集群哨兵保持redis高可用。<br>
+MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久化，生产端和消费端的重试机制和ack机制。<br>
+以上需要开发人员去应对每一个可能出现问题的场景。</p>
 <h2 id="三-后续流量增长系统性能优化思路">三、后续流量增长系统性能优化思路</h2>
 <p>当流量激增的时候，首先要考虑到系统的稳定性和高可用，后续针对特定的场景，分析性能瓶颈，然后再去做并发的优化。这里笔者就<strong>简单的</strong>列举一下业界的做法，下面每一条读者都可以自行扩展大篇幅深入去了解。</p>
 <h4 id="高可用">高可用</h4>
@@ -246,7 +258,7 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 2、死磕ElasticSearch社区——ElasticSearch优化<br>
 3、MySQL性能压测——https://my.oschina.net/u/867417/blog/758690<br>
 4、高可用系统方案——https://blog.csdn.net/hustspy1990/article/details/78008324<br>
-5、彻底理解高并发——https://mp.weixin.qq.com/s?__biz=MzU2MTM4NDAwMw==&amp;mid=2247484105&amp;idx=1&amp;sn=de4c763482aa65383dab59b221800cb5&amp;chksm=fc78dde5cb0f54f39e1f278249d236ff2400330be573405435dba458404a5f771715319d694c&amp;mpshare=1&amp;scene=23&amp;srcid=&amp;sharer_sharetime=1593228785481&amp;sharer_shareid=48702c70183b62662ee3edd289996b47#rd<br>
+5、彻底理解高并发—— https://mp.weixin.qq.com/s?__biz=MzU2MTM4NDAwMw==&amp;mid=2247484105&amp;idx=1&amp;sn=de4c763482aa65383dab59b221800cb5&amp;chksm=fc78dde5cb0f54f39e1f278249d236ff2400330be573405435dba458404a5f771715319d694c&amp;mpshare=1&amp;scene=23&amp;srcid=&amp;sharer_sharetime=1593228785481&amp;sharer_shareid=48702c70183b62662ee3edd289996b47#rd<br>
 6、Redis性能测试——https://redis.io/topics/benchmarks</p>
 ]]></content>
     </entry>

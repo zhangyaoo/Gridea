@@ -9,7 +9,7 @@ isTop: false
 ---
 
 
-### zookeeper脑裂
+### Zookeeper脑裂
 
 ### 如何解决脑裂
 

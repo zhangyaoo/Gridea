@@ -9,7 +9,7 @@
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
 <title>O(N)时间复杂度下，二进制反转 | will</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1593269618477">
+<link rel="shortcut icon" href="/favicon.ico?v=1593335515926">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -1091,7 +1091,7 @@ public class BitReverse {
       
       <div class="item">
         <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/"" data-c="
-          &lt;h3 id=&#34;zookeeper脑裂&#34;&gt;zookeeper脑裂&lt;/h3&gt;
+          &lt;h3 id=&#34;zookeeper脑裂&#34;&gt;Zookeeper脑裂&lt;/h3&gt;
 &lt;h3 id=&#34;如何解决脑裂&#34;&gt;如何解决脑裂&lt;/h3&gt;
 &lt;h3 id=&#34;引出奇数节点&#34;&gt;引出奇数节点&lt;/h3&gt;
 ">关于Zookeeper奇数节点以及脑裂问题</a>
@@ -1101,6 +1101,10 @@ public class BitReverse {
         <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/"" data-c="
           &lt;h3 id=&#34;并发优化&#34;&gt;并发优化&lt;/h3&gt;
 &lt;h3 id=&#34;并发优化优点以及带来的问题&#34;&gt;并发优化优点以及带来的问题&lt;/h3&gt;
+&lt;h3 id=&#34;分布式事务解决一致性问题&#34;&gt;分布式事务解决一致性问题&lt;/h3&gt;
+&lt;h3 id=&#34;最终一致性&#34;&gt;最终一致性&lt;/h3&gt;
+&lt;h3 id=&#34;消费端重复消费&#34;&gt;消费端重复消费&lt;/h3&gt;
+&lt;h3 id=&#34;消费端消费失败&#34;&gt;消费端消费失败&lt;/h3&gt;
 ">解决并发下本地事务和消息投递一致性</a>
       </div>
       
@@ -1201,8 +1205,12 @@ public class BitReverse {
 &lt;/ol&gt;
 &lt;p&gt;以上，合理分配JVM内存资源以及做好系统内存的监控机制是我们系统稳定性运行的保障。&lt;/p&gt;
 &lt;h5 id=&#34;网络负载和io&#34;&gt;网络负载和IO&lt;/h5&gt;
-&lt;p&gt; 对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。&lt;/p&gt;
-&lt;p&gt; 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。&lt;/p&gt;
+&lt;p&gt;来一张IO发生场景图片：&lt;br&gt;
+&lt;img src=&#34;http://localhost:4000/post-images/1593333928024.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+ 对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。&lt;br&gt;
+ 笔者在开发中就遇到因为IO问题带来的线程资源耗尽的线上问题：我们系统业务在借贷业务成功后，要生成借款协议，协议是一个PDF文件，当时主业务逻辑完成后同步调用生成PDF的逻辑，因为当时大流量并发，导致整个借贷业务性能瓶颈就在磁盘IO上，CPU处于空闲状态，借用网上的一个图，TOP命令可以看出IO花费的时间在76.6%，后面优化后就多线程异步处理。&lt;br&gt;
+&lt;img src=&#34;http://localhost:4000/post-images/1593334249512.webp&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
+&lt;p&gt; 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：&lt;img src=&#34;http://localhost:4000/post-images/1593334346151.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
 &lt;p&gt; 分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。&lt;/p&gt;
 &lt;h3 id=&#34;2-中间件层&#34;&gt;2、中间件层&lt;/h3&gt;
 &lt;p&gt;  这里中间件，泛指数据存储层，以笔者经验来看，大多数系统性能问题和瓶颈都是与数据存储相关，这里笔者就拿这方面展开讨论总结。&lt;/p&gt;
@@ -1279,7 +1287,11 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 &lt;p&gt;3、背景：C端用户在APP上，某一个标开启募集资金后进行投标，这里的标类似支付宝的理财产品，开始募集的时候会有高并发流量涌入，当APP端用户同时投标，会有大量请求，这就形成了抢购的动作，因为一个产品标的可投金额是有限的，只有少数人能投标成功&lt;br&gt;
 优化之前：笔者在上文中提到的，尽管说频繁将更新行锁的数据放到事务的最后， 会有性能提升，但是随着并发数增长，MySQL也会成为性能瓶颈。&lt;br&gt;
 优化之后：利用redis的纯内存操作高性能的优点，将产品的可投金额放入缓存redis（这里redis里面的金额比数据库中少保证不超卖），利用redis的decrby命令或者lua脚本，保证产品标剩余可投金额能够进行原子减少，每一次减少成功后，将用户这一次投标的数据丢入MQ中异步处理，消费端做的就是将插入预状态的借款数据、冻结用户金额和减少产品的可投金额放入同一个事务中处理。&lt;br&gt;
-上面做的优化能够保证C端用户的良好体验，但是引入各种中间件的话会出现各种问题需要去解决，比如redis挂了怎么？这时候就要考虑持久化和集群哨兵保持redis高可用。再比如MQ挂了怎么办、网络丢失导致消息丢失、重复消费幂等等等问题。需要开发人员去应对每一个可能出现问题的场景。&lt;/p&gt;
+上面做的优化能够保证C端用户的良好体验，但是引入各种中间件的话会出现各种问题需要去解决，比如重复投标怎么办，Redis挂了怎么？MQ挂了怎么办？消息丢失怎么办？等一系列问题。&lt;br&gt;
+重复投标，可以利用用户标识的唯一token做，短信生成token，设置token失效时间（短信失效时间60s），投标时候校验token是否过期和使用过。&lt;br&gt;
+Redis挂，这时候就要考虑持久化和集群哨兵保持redis高可用。&lt;br&gt;
+MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久化，生产端和消费端的重试机制和ack机制。&lt;br&gt;
+以上需要开发人员去应对每一个可能出现问题的场景。&lt;/p&gt;
 &lt;h2 id=&#34;三-后续流量增长系统性能优化思路&#34;&gt;三、后续流量增长系统性能优化思路&lt;/h2&gt;
 &lt;p&gt;当流量激增的时候，首先要考虑到系统的稳定性和高可用，后续针对特定的场景，分析性能瓶颈，然后再去做并发的优化。这里笔者就&lt;strong&gt;简单的&lt;/strong&gt;列举一下业界的做法，下面每一条读者都可以自行扩展大篇幅深入去了解。&lt;/p&gt;
 &lt;h4 id=&#34;高可用&#34;&gt;高可用&lt;/h4&gt;
@@ -1312,7 +1324,7 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 2、死磕ElasticSearch社区——ElasticSearch优化&lt;br&gt;
 3、MySQL性能压测——https://my.oschina.net/u/867417/blog/758690&lt;br&gt;
 4、高可用系统方案——https://blog.csdn.net/hustspy1990/article/details/78008324&lt;br&gt;
-5、彻底理解高并发——https://mp.weixin.qq.com/s?__biz=MzU2MTM4NDAwMw==&amp;amp;mid=2247484105&amp;amp;idx=1&amp;amp;sn=de4c763482aa65383dab59b221800cb5&amp;amp;chksm=fc78dde5cb0f54f39e1f278249d236ff2400330be573405435dba458404a5f771715319d694c&amp;amp;mpshare=1&amp;amp;scene=23&amp;amp;srcid=&amp;amp;sharer_sharetime=1593228785481&amp;amp;sharer_shareid=48702c70183b62662ee3edd289996b47#rd&lt;br&gt;
+5、彻底理解高并发—— https://mp.weixin.qq.com/s?__biz=MzU2MTM4NDAwMw==&amp;amp;mid=2247484105&amp;amp;idx=1&amp;amp;sn=de4c763482aa65383dab59b221800cb5&amp;amp;chksm=fc78dde5cb0f54f39e1f278249d236ff2400330be573405435dba458404a5f771715319d694c&amp;amp;mpshare=1&amp;amp;scene=23&amp;amp;srcid=&amp;amp;sharer_sharetime=1593228785481&amp;amp;sharer_shareid=48702c70183b62662ee3edd289996b47#rd&lt;br&gt;
 6、Redis性能测试——https://redis.io/topics/benchmarks&lt;/p&gt;
 ">系统性能优化的思考和总结</a>
       </div>
