@@ -9,7 +9,7 @@
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
 <title>will</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1593335515926">
+<link rel="shortcut icon" href="/favicon.ico?v=1593428808912">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -184,7 +184,7 @@
     <div class="sidebar-item-box">
       <a href="/archives/">
         
-        <span class="site-item-stat-count">8</span>
+        <span class="site-item-stat-count">7</span>
         <span class="site-item-stat-name language" data-lan="article">文章</span>
       </a>
     </div>
@@ -206,7 +206,7 @@
       <div class="sidebar-item">
         <span class="site-item-rss">
             <i class="fa fa-rss"></i>
-            <a href="http://localhost:4000/atom.xml" target="_blank">RSS</a>
+            <a href="https://zhangyaoo.github.io/atom.xml" target="_blank">RSS</a>
         </span>
       </div>
     
@@ -257,7 +257,11 @@
       
       
       
-      <a href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
+      
+      
+      
+      
+      <a href="https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
         <div class="motion-warpper">
           <div class="tag-post-node">
             <h1>
@@ -494,15 +498,114 @@
     <div class="result" id="result">
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/"" data-c="
-          &lt;h3 id=&#34;zookeeper脑裂&#34;&gt;Zookeeper脑裂&lt;/h3&gt;
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/"" data-c="
+          &lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在对MySQL开发中，联合索引是很常见的一种MySQL优化方式，本文解释了联合索引的存储以及查找过程，可以了解一下底层的原理以及加深对MySQL联合索引的理解。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;innodb-b树&#34;&gt;Innodb B+树&lt;/h2&gt;
+&lt;p&gt;先看一下Innodb B+树的主键索引和辅助索引。这里直接拿张洋大神的图：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;聚簇索引:&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593425796639.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/li&gt;
+&lt;li&gt;辅助非聚簇索引:&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593425801180.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+&lt;strong&gt;结构&lt;/strong&gt;：当一个表T（id,name,age,sex,high）建一个普通索引  KEY(name)，name的索引结果就和上面辅助非聚簇索引结构一样。&lt;br&gt;
+&lt;strong&gt;查询&lt;/strong&gt;：当有一个select id,name,age from T where name = &amp;quot;&amp;quot; 辅助索引会根据name在B+树上进行二叉树查找，找出叶子节点数据后发现没有age这个数据，就会进行&lt;strong&gt;回表&lt;/strong&gt;操作到主键聚簇索引去查找，拿到聚簇索引叶子节点的age数据。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;联合索引存储以及寻址&#34;&gt;联合索引存储以及寻址&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;索引结构&lt;/strong&gt;：我们知道上述回表过程也会消耗性能，相当于多查一次，所以系统可以根据业务情况加上一个组合索引，当然并不是一直加组合索引就可以了，因为要考虑到索引存储空间的问题。例如给上述加上一个组合索引  KEY（name,age,sex）【 KEY（col1,col2,col3）】。那么这个组合索引的B+树非叶子节点数据结构和上述辅助非聚簇索引图一样，但是叶子节点是这样的：&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593425790647.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+叶子节点存储col1,col2,col3这三列数据以及加上ID这一列数据。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;寻址过程：&lt;/strong&gt;&lt;br&gt;
+例如语句：select id,name,age from T where name = &amp;quot;张三&amp;quot; and age=25，先根据name字段从辅助聚簇索引定位到哪一个叶子节点数据中，然后根据age节点在上述表格的前6行中，寻找age= 25的数据，然后找出所有符合的数据以及其对应的ID，然后根据ID来进行回表操作查询。这里返回了三条数据，就回了三次表。&lt;br&gt;
+上述回表过程中，笔者引入一个&lt;strong&gt;索引下推&lt;/strong&gt;的一个功能，索引下推是MySQL在5.6版本后引入的一个查询优化。就拿上述的例子，在没有优化之前，据name字段查询“张三”后，会拿到6条结果，回表6次，然后从主键索引拿到6条数据后，根据age字段筛选数据；优化之后，先再辅助索引上面根据name字段和age字段筛选符合数据，也就是ID，然后再回表，这里回表了三次。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;组合索引注意事项&lt;/strong&gt;&lt;br&gt;
+当然，联合索引的最重要的是注意联合索引的使用问题，要遵循最左匹配原则，才可以优化到整个SQL了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+&lt;p&gt;以上，总结了MySQL的索引的基本原理，以及联合索引的存储和寻址过程，并且引入索引下推概念，还有使用联合索引的注意事项。&lt;/p&gt;
+&lt;h2 id=&#34;参考&#34;&gt;参考&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;MySQL索引背后的数据结构及算法原理——http://blog.codinglabs.org/articles/theory-of-mysql-index.html。&lt;/li&gt;
+&lt;/ul&gt;
+">MySQL联合索引在B+树的存储和查找</a>
+      </div>
+      
+      <div class="item">
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/"" data-c="
+          &lt;h3 id=&#34;前言&#34;&gt;前言&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Zookeeper作为微服务分布式协调中间件，了解它的原理以及日常开发中的注意事项和可能会出现的问题是有必要的。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;前置知识zab协议&#34;&gt;前置知识：ZAB协议&lt;/h3&gt;
+&lt;p&gt;ZAB：Zookeeper Atomic Broadcast（ZAB）崩坏恢复和原子广播协议&lt;br&gt;
+1）崩坏恢复：在master节点宕机情况下，其他集群节点会重新选举master节点，快速领导者选举机制：选举规则会参照最大的分代年龄epoch&amp;gt;最大的事务zxid&amp;gt;server id来进行选举，选举过程就是将自己节点投票信息发给其他集群节点，投票信息附带zxid和serverid，&lt;strong&gt;判断是否超过一半的投票选同一个节点&lt;/strong&gt;，那么这个节点就会选举为master。&lt;br&gt;
+2）选举完后，就会进行数据同步，将master节点数据同步到slave中，此时对外服务不可用。&lt;br&gt;
+3）原子广播：ZAB协议保证消息的一致性和有序性&lt;br&gt;
+ 一致性：leader发送propasal事务请求（包含zxid），master判断过半机制ack，就认为事务可以提交了，master会提交事务，然后广播提交事务消息，从节点开始提交本事务。一半ack机制，可以看zookeeper是CP，但是不是强一致性；从节点接收propasal后，会将事务写入磁盘。&lt;br&gt;
+ 有序性：zxid事务id保证全局有序性，每一个slave服务器维持一个FIFO队列，维持局部有序性。&lt;/p&gt;
+&lt;h3 id=&#34;zookeeper脑裂&#34;&gt;Zookeeper脑裂&lt;/h3&gt;
+&lt;p&gt; Zookeeper脑裂都是出现在集群环境中的。指的是一个集群环境中出现了多个master节点，导致严重数据同步和写入问题，数据不一致等等，如果这种情况出现在线上分布式环境下，会导致服务不可用。&lt;/p&gt;
+&lt;h3 id=&#34;出现原因&#34;&gt;出现原因&lt;/h3&gt;
+&lt;p&gt; 可能就是网络环境有问题导致节点之间断开，或者节点假死等等，导致一部分slave节点会重新进入崩坏恢复模式，重新选举新的master节点，然后对外提供事务服务。由于心跳超时（网络原因导致的）认为旧的master死了，但其实旧的master还存活着。&lt;/p&gt;
 &lt;h3 id=&#34;如何解决脑裂&#34;&gt;如何解决脑裂&lt;/h3&gt;
+&lt;p&gt;过半机制，如果集群中某个节点的投票数量大于集群有效节点的一半，就会选出master。这里拿出关键代码：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;// 验证是否符合过半机制，如果符合就会选举新的master节点
+public boolean containsQuorum(Set&amp;lt;Long&amp;gt; set){
+    // half是在构造方法里赋值的
+    // n表示集群中zkServer的个数（准确的说是参与者的个数，参与者不包括观察者节点）
+    half = n/2;
+    // set.size()表示某台zkServer获得的票数
+    return (set.size() &amp;gt; half);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;笔者介绍几种情况，来说明一下几种脑裂的场景&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;比如集群中有6个节点，一个master和5个slave，分两个机房，每个机房分别三台，发生了机房不可通信的情况，如下图：&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593419532309.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+然后机房B就会产生新的master，如图&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593419550068.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+这个时候Zookeeper为了防止这样的情况发生，利用了&lt;strong&gt;过半机制&lt;/strong&gt;的这个特性。&lt;br&gt;
+上图中，机房B节点为3 小于集群数量的一半，所以，最终上面图中机房B是不会选举出新的master节点的。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;我们再来看一种情况：比如集群中有5个节点，一个master和4个slave，分两个机房，如下图：&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593419973725.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+如果发生了机房不能通信的情况，那么机房B因为节点是2个，没有超过一半，就不会产生出新的master节点了。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;再来看最后一种情况，比如集群中有5个节点，一个master和4个slave，分两个机房，不同的是master节点在机房B，如下图：&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593420189914.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+如果发生了机房不能通信的情况，那么机房A节点是3个，超过了一半，就会进入崩坏恢复模式产生新的master节点，那么此时集群中就会出现两个master节点了。如下图所示&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593420219104.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+那么遇到这种情况Zookeeper是如何处理的？答：旧的leader所有的写请求同步到其他followers节点是会被拒绝的。因为每当新leader产生时，会生成一个epoch，这个epoch是递增的，followers如果确认了新的leader存在，知道其epoch，就会拒绝epoch小于现任leader epoch的所有请求。这个时候旧的master进入恢复模式进行数据同步。&lt;br&gt;
+所以按照上面的情况，机房A的所有followers节点正常通信，机房B的所有节点重新进入恢复模式进行数据同步。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;总结：通过Quorums机制来防止脑裂，当leader挂掉之后，可以重新选举出新的leader节点使整个集群达成一致；当出现假死现象时，通过epoch大小来拒绝旧的leader发起的请求，当出现这种情况，旧的leader 进入恢复模式进行数据同步。&lt;/p&gt;
 &lt;h3 id=&#34;引出奇数节点&#34;&gt;引出奇数节点&lt;/h3&gt;
+&lt;p&gt; 知晓以上场景后，我们知道，2台机器也能选举出master，只不过只要有1个死了zookeeper就不能用了，因为1没有过半。所以2个zookeeper的死亡容忍度为0。同理，要是有3个zookeeper，一个死了，还剩下2个正常的，过半了，所以3个zookeeper的容忍度为1。如果按照这样的机制推理，那么得出2-&amp;gt;0;3-&amp;gt;1;4-&amp;gt;1;5-&amp;gt;2;6-&amp;gt;2  左边是数量，右边是容忍度，所以2n和2n-1的容忍度是一样的，所以可以得出，集群是&lt;strong&gt;奇数个能够节省资源&lt;/strong&gt;。&lt;/p&gt;
+&lt;!--下面的奇数节点的作用需要确认 TODO--&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+&lt;p&gt;以上，笔者总结了ZAB协议，到Zookeeper防止脑裂的场景以及如何处理，以及结合例子，Zookeeper集群在奇数节点下的作用。&lt;/p&gt;
+&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;ZooKeeper集群的脑裂问题——https://www.cnblogs.com/shoufeng/p/10591526.html&lt;/li&gt;
+&lt;/ul&gt;
 ">关于Zookeeper奇数节点以及脑裂问题</a>
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/"" data-c="
           &lt;h3 id=&#34;并发优化&#34;&gt;并发优化&lt;/h3&gt;
 &lt;h3 id=&#34;并发优化优点以及带来的问题&#34;&gt;并发优化优点以及带来的问题&lt;/h3&gt;
 &lt;h3 id=&#34;分布式事务解决一致性问题&#34;&gt;分布式事务解决一致性问题&lt;/h3&gt;
@@ -513,7 +616,7 @@
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/er-jin-zhi-fan-zhuan/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/"" data-c="
           &lt;h4 id=&#34;题目描述&#34;&gt;题目描述&lt;/h4&gt;
 &lt;p&gt;给定一个32位整数 . 输出二进制表示反转后的值.&lt;br&gt;
 例如 input 43261596（二进制 00000010100101000001111010011100）&lt;br&gt;
@@ -552,7 +655,7 @@ public class BitReverse {
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/"" data-c="
           &lt;h3 id=&#34;前言&#34;&gt;前言&lt;/h3&gt;
 &lt;blockquote&gt;
 &lt;p&gt;对于任何系统，都会存在系统性能瓶颈，这里笔者作为一名Java工程师列出了自己在工作中的优化思路，仅供参考。&lt;/p&gt;
@@ -588,7 +691,7 @@ public class BitReverse {
   2）方法区meta space空间占满&lt;br&gt;
   3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC&lt;br&gt;
   4）内存泄漏导致空间不足进而GC&lt;br&gt;
-这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子&lt;img src=&#34;http://localhost:4000/post-images/1592463486063.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592463486063.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
 这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。&lt;br&gt;
     2、 &lt;strong&gt;频繁 YOUNG GC&lt;/strong&gt;  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;这里笔者以自己开发经验，提供一些“简单的”JVM优化拙见&lt;/strong&gt;：&lt;/p&gt;
@@ -610,17 +713,17 @@ public class BitReverse {
 &lt;p&gt;以上，合理分配JVM内存资源以及做好系统内存的监控机制是我们系统稳定性运行的保障。&lt;/p&gt;
 &lt;h5 id=&#34;网络负载和io&#34;&gt;网络负载和IO&lt;/h5&gt;
 &lt;p&gt;来一张IO发生场景图片：&lt;br&gt;
-&lt;img src=&#34;http://localhost:4000/post-images/1593333928024.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593333928024.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
  对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。&lt;br&gt;
  笔者在开发中就遇到因为IO问题带来的线程资源耗尽的线上问题：我们系统业务在借贷业务成功后，要生成借款协议，协议是一个PDF文件，当时主业务逻辑完成后同步调用生成PDF的逻辑，因为当时大流量并发，导致整个借贷业务性能瓶颈就在磁盘IO上，CPU处于空闲状态，借用网上的一个图，TOP命令可以看出IO花费的时间在76.6%，后面优化后就多线程异步处理。&lt;br&gt;
-&lt;img src=&#34;http://localhost:4000/post-images/1593334249512.webp&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
-&lt;p&gt; 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：&lt;img src=&#34;http://localhost:4000/post-images/1593334346151.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593334249512.webp&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
+&lt;p&gt; 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593334346151.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
 &lt;p&gt; 分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。&lt;/p&gt;
 &lt;h3 id=&#34;2-中间件层&#34;&gt;2、中间件层&lt;/h3&gt;
 &lt;p&gt;  这里中间件，泛指数据存储层，以笔者经验来看，大多数系统性能问题和瓶颈都是与数据存储相关，这里笔者就拿这方面展开讨论总结。&lt;/p&gt;
 &lt;h5 id=&#34;mysql&#34;&gt;MySQL&lt;/h5&gt;
 &lt;p&gt;一般来说MySQL在很多线程更新同一行的场景下，TPS性能曲线如图所示，参考丁奇的《秒杀场景下MySQL的低效》&lt;br&gt;
-&lt;img src=&#34;http://localhost:4000/post-images/1592893242022.png&#34; alt=&#34;秒杀场景下MySQL的低效&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592893242022.png&#34; alt=&#34;秒杀场景下MySQL的低效&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
 图中我们可以看到，线程数在6的时候TPS达到巅峰2W，随着线程数的增长，TPS会随之降低。在高并发场景下，可以根据这个结论来进行优化，比如，当有瞬间大流量冲击数据库时候，我们可以进行数据缓冲，比如用队列削峰，开启6个线程消费，然后访问数据库。&lt;br&gt;
 当然这个看业务场景，如果是对同一个资源进行竞争的话，这个证削峰是可行的。但是，如果场景是每一个线程对不同资源进行访问修改时候，不涉及资源竞争的话，那么就不要进行削峰处理，直接访问数据库即可，当然这个也要考虑到MySQL的性能问题。&lt;br&gt;
 举个例子，就拿光插入数据的性能测试来说（没有建唯一索引），4核4G的7200转的机械硬盘机器配置，最高能够承受7500的并发插入数。[参考MySQL性能压测]&lt;/p&gt;
@@ -657,9 +760,9 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 &lt;/ul&gt;
 &lt;h5 id=&#34;redis&#34;&gt;Redis&lt;/h5&gt;
 &lt;p&gt;Redis作为开发人员接触最频繁的中间件，首先，笔者先拿出官网给出的Redis性能测试结果：从下图可以得出结论：redis单机测试结果是TPS是7W,QPS只能比这个数据更高。&lt;br&gt;
-&lt;img src=&#34;http://localhost:4000/post-images/1592983835284.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592983835284.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
 当使用了管道pipline后性能大约提升了6倍，如下图所示&lt;br&gt;
-&lt;img src=&#34;http://localhost:4000/post-images/1592986207480.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592986207480.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
 &lt;p&gt;根据官网的文档，影响Redis性能有以下因素，笔者认为开发人员做一些基准测试压测以及日常开发中使用Redis的时候，注意这些优化点，就能高效使用Redis：&lt;br&gt;
 1、网络延迟和网络带宽，作为运维人员，最好将服务器和Redis服务部署到同一个局域网内，降低网络延迟。作为开发人员，尽量不要使用大key和大value，因为随着这种数据越来越多，在网络传输的时候会占用大部分网络宽带，举个例子，如果一个redis对象大小超过1KB，当你的QPS达到100万，会把你的千兆路由器的带宽打满，因此网络带宽可能就会成为性能瓶颈。&lt;br&gt;
 2、使用pipline，当使用以太网访问Redis时，保据大小保持在以太网数据包大小（约1500字节）以下时，使用流水线进行聚合的命令特别有效。&lt;br&gt;
@@ -667,7 +770,7 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 4、使用scan代替keys，keys会造成严重的性能问题&lt;br&gt;
 5、设置内存的大小阈值并且设置好内存缓存淘汰的策略，线上设置LRU策略来淘汰缓存这样做是为了避免物理内存使用完后，造成卡顿的情况。并且线上要避免大量key同时失效的场景，因为redis删除失效的key是循环删除的，并且频繁的删除会促使内存管理器回收内存页，这样也会导致卡顿的现象。&lt;br&gt;
 6、connection客户端连接数量，Redis作为一个事件驱动模型，因为base epoll能够实现O(1)时间复杂度的响应操作，因此能够提供很好性能。Redis已经以超过60000个连接为基准，并且在这些条件下仍能够维持50000 q / s的吞吐量，而且具有30000个连接的实例只能处理100个连接可达到的吞吐量的一半，可参考下图（来源官网）：&lt;br&gt;
-&lt;img src=&#34;http://localhost:4000/post-images/1592991673063.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592991673063.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
 &lt;h5 id=&#34;elasticsearch&#34;&gt;ElasticSearch&lt;/h5&gt;
 &lt;p&gt;ElasticSearch可以解决大数据量下的搜索慢问题，这里笔者就拿 死磕ElasticSearch社区作者的优化建议，给出几点在日常开发ElasticSearch的优化方案：&lt;br&gt;
 1、尽量将所有数据的一半都缓存在内存当中file cache system 当中&lt;br&gt;
@@ -734,22 +837,26 @@ MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/"" data-c="
-          &lt;h4 id=&#34;linkedhashmap底层的数据结构&#34;&gt;linkedHashMap底层的数据结构&lt;/h4&gt;
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/"" data-c="
+          &lt;h3 id=&#34;前言&#34;&gt;前言&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;笔者先从linkedHashMap源码中借鉴插入顺序访问的代码，然后然后自己实现了一个LRU&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;linkedhashmap底层的数据结构&#34;&gt;linkedHashMap底层的数据结构&lt;/h3&gt;
 &lt;p&gt;linkedHashMap底层结构（顺序访问）：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;1、linkedHashMap维护了每个node的双向链表，初始化时候维护了空的entry header头，新加入的节点放到entry的头部header的next&lt;/li&gt;
 &lt;li&gt;2、put还是get都会进行重排序，get entry1 还是put entry1都会先把Entry1从双向链表中删除，然后再把Entry1加入到双向链表的表尾。&lt;/li&gt;
 &lt;li&gt;3、遍历访问的时候，会访问header的下一个next节点，这就形成了顺序访问&lt;/li&gt;
 &lt;/ul&gt;
-&lt;figure data-type=&#34;image&#34; tabindex=&#34;1&#34;&gt;&lt;img src=&#34;http://localhost:4000/post-images/1592968145044.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/figure&gt;
-&lt;h4 id=&#34;链表实现&#34;&gt;链表实现&lt;/h4&gt;
+&lt;figure data-type=&#34;image&#34; tabindex=&#34;1&#34;&gt;&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592968145044.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/figure&gt;
+&lt;h3 id=&#34;链表实现&#34;&gt;链表实现&lt;/h3&gt;
 &lt;p&gt;实现思路：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;1、数据是直接利用 HashMap 来存放的。&lt;/li&gt;
 &lt;li&gt;2、内部使用了一个双向链表来存放数据，所以有一个头结点 header，以及尾结点 tailer。&lt;/li&gt;
 &lt;li&gt;3、每次写入头结点，删除尾结点时都是依赖于 header tailer&lt;br&gt;
-&lt;img src=&#34;http://localhost:4000/post-images/1592220507945.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/li&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1592220507945.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre&gt;&lt;code&gt;import com.google.common.collect.Maps;
 import java.util.Map;
@@ -931,7 +1038,7 @@ public class LRUCacheV2 {
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/2019-nian-zong-jie/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/2019-nian-zong-jie/"" data-c="
           &lt;p&gt;小提示：阅读此篇文章大约需要三分钟时间，以下都是个人一些生活工作上碎碎念念，唠叨碎语，请斟酌阅读~&lt;/p&gt;
 &lt;p&gt;目录&lt;br&gt;
 开头&lt;br&gt;
@@ -1012,13 +1119,13 @@ public class LRUCacheV2 {
 学习大数据相关知识&lt;br&gt;
 保护眼睛&lt;/p&gt;
 &lt;p&gt;以上，完&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:4000/post-images/1593268924481.jpg&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+&lt;p&gt;&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1593268924481.jpg&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
 最后贴上自各最喜欢的照片，2015年于西藏拍&lt;/p&gt;
 ">2019年总结</a>
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/about/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/about/"" data-c="
           &lt;blockquote&gt;
 &lt;p&gt;欢迎来到我的小站呀，很高兴遇见你！🤝&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -1034,7 +1141,7 @@ public class LRUCacheV2 {
       </div>
       
       <div class="item">
-        <a class="result-title" style="opacity: 0;" href="http://localhost:4000/post/2018-nian-zong-jie/"" data-c="
+        <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/2018-nian-zong-jie/"" data-c="
           &lt;h2 id=&#34;写给自己的2018年总结&#34;&gt;写给自己的2018年总结&lt;/h2&gt;
 &lt;h2 id=&#34;题记&#34;&gt;题记&lt;/h2&gt;
 &lt;p&gt;&lt;img src=&#34;https://img-blog.csdnimg.cn/20181231115831927.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p5MTUxMTIzNDI0NDk=,size_16,color_FFFFFF,t_70&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;

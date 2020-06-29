@@ -3,7 +3,7 @@ title: '2018年总结'
 date: 2019-01-01 22:39:13
 tags: [总结]
 published: true
-hideInList: false
+hideInList: true
 feature: 
 isTop: false
 ---

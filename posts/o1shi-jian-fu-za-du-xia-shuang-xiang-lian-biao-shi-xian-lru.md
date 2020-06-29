@@ -7,7 +7,9 @@ hideInList: false
 feature: /post-images/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru.jfif
 isTop: false
 ---
-#### linkedHashMap底层的数据结构
+### 前言
+> 笔者先从linkedHashMap源码中借鉴插入顺序访问的代码，然后然后自己实现了一个LRU
+### linkedHashMap底层的数据结构
 linkedHashMap底层结构（顺序访问）：
 * 1、linkedHashMap维护了每个node的双向链表，初始化时候维护了空的entry header头，新加入的节点放到entry的头部header的next
 * 2、put还是get都会进行重排序，get entry1 还是put entry1都会先把Entry1从双向链表中删除，然后再把Entry1加入到双向链表的表尾。
@@ -16,7 +18,7 @@ linkedHashMap底层结构（顺序访问）：
 ![](https://zhangyaoo.github.io/post-images/1592968145044.png)
 
 
-#### 链表实现
+### 链表实现
 实现思路：
  * 1、数据是直接利用 HashMap 来存放的。
  * 2、内部使用了一个双向链表来存放数据，所以有一个头结点 header，以及尾结点 tailer。
