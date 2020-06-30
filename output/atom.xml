@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://zhangyaoo.github.io</id>
+    <id>http://localhost:4000</id>
     <title>will</title>
-    <updated>2020-06-29T11:06:53.304Z</updated>
+    <updated>2020-06-30T11:34:39.152Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://zhangyaoo.github.io"/>
-    <link rel="self" href="https://zhangyaoo.github.io/atom.xml"/>
+    <link rel="alternate" href="http://localhost:4000"/>
+    <link rel="self" href="http://localhost:4000/atom.xml"/>
     <subtitle>生死看淡，不服就干</subtitle>
-    <logo>https://zhangyaoo.github.io/images/avatar.png</logo>
-    <icon>https://zhangyaoo.github.io/favicon.ico</icon>
+    <logo>http://localhost:4000/images/avatar.png</logo>
+    <icon>http://localhost:4000/favicon.ico</icon>
     <rights>All rights reserved 2020, will</rights>
     <entry>
         <title type="html"><![CDATA[MySQL联合索引在B+树的存储和查找]]></title>
-        <id>https://zhangyaoo.github.io/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/</id>
-        <link href="https://zhangyaoo.github.io/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">
+        <id>http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/</id>
+        <link href="http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">
         </link>
         <updated>2020-06-29T09:32:43.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
@@ -24,9 +24,9 @@
 <p>先看一下Innodb B+树的主键索引和辅助索引。这里直接拿张洋大神的图：</p>
 <ul>
 <li>聚簇索引:<br>
-<img src="https://zhangyaoo.github.io/post-images/1593425796639.png" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1593425796639.png" alt="" loading="lazy"></li>
 <li>辅助非聚簇索引:<br>
-<img src="https://zhangyaoo.github.io/post-images/1593425801180.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593425801180.png" alt="" loading="lazy"><br>
 <strong>结构</strong>：当一个表T（id,name,age,sex,high）建一个普通索引  KEY(name)，name的索引结果就和上面辅助非聚簇索引结构一样。<br>
 <strong>查询</strong>：当有一个select id,name,age from T where name = &quot;&quot; 辅助索引会根据name在B+树上进行二叉树查找，找出叶子节点数据后发现没有age这个数据，就会进行<strong>回表</strong>操作到主键聚簇索引去查找，拿到聚簇索引叶子节点的age数据。</li>
 </ul>
@@ -34,7 +34,7 @@
 <ul>
 <li>
 <p><strong>索引结构</strong>：我们知道上述回表过程也会消耗性能，相当于多查一次，所以系统可以根据业务情况加上一个组合索引，当然并不是一直加组合索引就可以了，因为要考虑到索引存储空间的问题。例如给上述加上一个组合索引  KEY（name,age,sex）【 KEY（col1,col2,col3）】。那么这个组合索引的B+树非叶子节点数据结构和上述辅助非聚簇索引图一样，但是叶子节点是这样的：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593425790647.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593425790647.png" alt="" loading="lazy"><br>
 叶子节点存储col1,col2,col3这三列数据以及加上ID这一列数据。</p>
 </li>
 <li>
@@ -57,8 +57,8 @@
     </entry>
     <entry>
         <title type="html"><![CDATA[关于Zookeeper奇数节点以及脑裂问题]]></title>
-        <id>https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/</id>
-        <link href="https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
+        <id>http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/</id>
+        <link href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
         </link>
         <updated>2020-06-22T02:32:00.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -91,22 +91,22 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <ul>
 <li>
 <p>比如集群中有6个节点，一个master和5个slave，分两个机房，每个机房分别三台，发生了机房不可通信的情况，如下图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593419532309.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593419532309.png" alt="" loading="lazy"><br>
 然后机房B就会产生新的master，如图<br>
-<img src="https://zhangyaoo.github.io/post-images/1593419550068.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593419550068.png" alt="" loading="lazy"><br>
 这个时候Zookeeper为了防止这样的情况发生，利用了<strong>过半机制</strong>的这个特性。<br>
 上图中，机房B节点为3 小于集群数量的一半，所以，最终上面图中机房B是不会选举出新的master节点的。</p>
 </li>
 <li>
 <p>我们再来看一种情况：比如集群中有5个节点，一个master和4个slave，分两个机房，如下图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593419973725.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593419973725.png" alt="" loading="lazy"><br>
 如果发生了机房不能通信的情况，那么机房B因为节点是2个，没有超过一半，就不会产生出新的master节点了。</p>
 </li>
 <li>
 <p>再来看最后一种情况，比如集群中有5个节点，一个master和4个slave，分两个机房，不同的是master节点在机房B，如下图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593420189914.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593420189914.png" alt="" loading="lazy"><br>
 如果发生了机房不能通信的情况，那么机房A节点是3个，超过了一半，就会进入崩坏恢复模式产生新的master节点，那么此时集群中就会出现两个master节点了。如下图所示<br>
-<img src="https://zhangyaoo.github.io/post-images/1593420219104.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593420219104.png" alt="" loading="lazy"><br>
 那么遇到这种情况Zookeeper是如何处理的？答：旧的leader所有的写请求同步到其他followers节点是会被拒绝的。因为每当新leader产生时，会生成一个epoch，这个epoch是递增的，followers如果确认了新的leader存在，知道其epoch，就会拒绝epoch小于现任leader epoch的所有请求。这个时候旧的master进入恢复模式进行数据同步。<br>
 所以按照上面的情况，机房A的所有followers节点正常通信，机房B的所有节点重新进入恢复模式进行数据同步。</p>
 </li>
@@ -124,23 +124,64 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[解决并发下本地事务和消息投递一致性]]></title>
-        <id>https://zhangyaoo.github.io/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/</id>
-        <link href="https://zhangyaoo.github.io/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/">
+        <title type="html"><![CDATA[金融级业务下分布式事务保证数据一致性]]></title>
+        <id>http://localhost:4000/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/</id>
+        <link href="http://localhost:4000/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/">
         </link>
         <updated>2020-06-22T02:27:01.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="并发优化">并发优化</h3>
-<h3 id="并发优化优点以及带来的问题">并发优化优点以及带来的问题</h3>
-<h3 id="分布式事务解决一致性问题">分布式事务解决一致性问题</h3>
-<h3 id="最终一致性">最终一致性</h3>
-<h3 id="消费端重复消费">消费端重复消费</h3>
-<h3 id="消费端消费失败">消费端消费失败</h3>
+        <content type="html"><![CDATA[<h2 id="前言">前言</h2>
+<blockquote>
+<p>随着分布式服务架构的流行与普及，原来在单体应用中执行的多个逻辑操作，现在被拆分成了多个服务之间的远程调用。微服务化后，随着带来的服务之间的分布式事务问题，尤其是在金融业务下，分布式事务是保证数据一致性的重要保证。本文着重会讲分布式事务场景和业界主流的解决方案。</p>
+</blockquote>
+<h2 id="引入">引入</h2>
+<p> 资金转账在金融业务下是一个非常重要而且常见的场景，如果因为技术问题导致资金转账错误，导致数据不一致问题，那么就会造成无法预测的后果。<br>
+ 笔者这里拿银行转账的例子来说（这里的转账有很多场景比如银行卡之间充值提现、银行账户之间的转账等等），比如甲银行账户A向乙银行账户B转账1W：</p>
+<p>同步调用：</p>
+<ol>
+<li>A银行对转出账户执行检查校验，进行账户金额扣减。</li>
+<li>A银行同步调用B银行转账接口。</li>
+<li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
+<li>B银行返回处理结果给A银行。</li>
+</ol>
+<p>同步调用问题：</p>
+<ul>
+<li>如果B银行因为网络原因导致接口不通，那么A调用线程会长时间阻塞。</li>
+<li>如果A扣减后，发送请求后，在网络中丢失了，B银行没有收到请求，导致账户A扣减了，账户B没有加</li>
+<li>如果账户B扣减成功了，由于某种原因比如网络异常没有及时回调给甲银行，那么账户A就认为是异常请求，则会回滚事务，导致数据不一致。</li>
+</ul>
+<p>再来看一下异步调用：</p>
+<ol>
+<li>A银行对转出账户执行检查校验，进行账户金额扣减。</li>
+<li>主线程将请求数据异步写入队列MQ</li>
+<li>真正消费者程序对B银行进行远程调用</li>
+<li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
+<li>B银行返回处理结果给A银行。</li>
+</ol>
+<p>异步调用问题：</p>
+<ul>
+<li>如果账户A扣减本地事务成功了，但是消息发出后，因为网络原因或者其他宕机原因，导致消息未发送成功，没有进行B账户远程调用，导致本地事务和消息不一致性。</li>
+<li>在B账户成功完成账户增加后，在回调A银行接口通知回滚时网络异常或者宕机，会导致A银行转账无法完成回滚，从而导致数据不一致。</li>
+</ul>
+<p>异步调用解决了同步调用的主线程阻塞问题，但还是没有解决数据一致性问题。而且引入MQ中间后，还要考虑到本地事务和MQ消息一致性问题，还有其他的引入后的维护工作，比如消息丢失，消息重发等等问题。</p>
+<h2 id="分布式事务解决方案">分布式事务解决方案</h2>
+<p> 讲到了分布式事务，自然离不开分布式系统的一些基本原则和定理：CAP原则和BASE理论，相信读者应该都知道，这里不做过多阐述。业界根据这些规则和理论，衍生出了各种分布式事务解决方案：XA规范，2PC，3PC，本地消息表方案，基于消息中间件的最终一致性方案，TCC方案，阿里的SEATA，SAGA方案和最大努力通知等等。<br>
+ 以上每个方案都有自己的应用场景，就拿2PC来说，MySQL的事务型日志redolog二段提交（redolog(prepare)--》undolog--》redolog(commit)），Zookeeper的proposal事务提案二段提交（半数以上ack返回成功表示写入数据成功），这些都是2PC的应用。<br>
+ 金融场景下类似资金业务需要保证最终一致性解决分布式事务，不需要保证转账实时性。所以本地消息表、基于MQ中间件的最终一致性等柔性方案是首选的方案。</p>
+<h3 id="本地消息表解决银行转账一致性问题">本地消息表解决银行转账一致性问题</h3>
+<h3 id="银行交易冲正">银行交易冲正</h3>
+<h3 id="事务消息解决本地事务和mq消息一致性问题">事务消息解决本地事务和MQ消息一致性问题</h3>
+<h4 id="消费端重复消费">消费端重复消费</h4>
+<h4 id="消费端消费失败">消费端消费失败</h4>
+<h2 id="参考">参考</h2>
+<ul>
+<li>有赞出金系统——https://tech.youzan.com/build-a-withdraw-sys/</li>
+</ul>
 ]]></content>
     </entry>
     <entry>
         <title type="html"><![CDATA[O(N)时间复杂度下，二进制反转]]></title>
-        <id>https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/</id>
-        <link href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/">
+        <id>http://localhost:4000/post/er-jin-zhi-fan-zhuan/</id>
+        <link href="http://localhost:4000/post/er-jin-zhi-fan-zhuan/">
         </link>
         <updated>2020-06-19T08:11:36.000Z</updated>
         <content type="html"><![CDATA[<h4 id="题目描述">题目描述</h4>
@@ -181,8 +222,8 @@ public class BitReverse {
     </entry>
     <entry>
         <title type="html"><![CDATA[系统性能优化的思考和总结]]></title>
-        <id>https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/</id>
-        <link href="https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
+        <id>http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/</id>
+        <link href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
         </link>
         <updated>2020-06-17T13:05:11.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -220,7 +261,7 @@ public class BitReverse {
   2）方法区meta space空间占满<br>
   3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC<br>
   4）内存泄漏导致空间不足进而GC<br>
-这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子<img src="https://zhangyaoo.github.io/post-images/1592463486063.png" alt="" loading="lazy"><br>
+这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子<img src="http://localhost:4000/post-images/1592463486063.png" alt="" loading="lazy"><br>
 这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。<br>
     2、 <strong>频繁 YOUNG GC</strong>  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题</p>
 <p><strong>这里笔者以自己开发经验，提供一些“简单的”JVM优化拙见</strong>：</p>
@@ -242,17 +283,17 @@ public class BitReverse {
 <p>以上，合理分配JVM内存资源以及做好系统内存的监控机制是我们系统稳定性运行的保障。</p>
 <h5 id="网络负载和io">网络负载和IO</h5>
 <p>来一张IO发生场景图片：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593333928024.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593333928024.png" alt="" loading="lazy"><br>
  对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。<br>
  笔者在开发中就遇到因为IO问题带来的线程资源耗尽的线上问题：我们系统业务在借贷业务成功后，要生成借款协议，协议是一个PDF文件，当时主业务逻辑完成后同步调用生成PDF的逻辑，因为当时大流量并发，导致整个借贷业务性能瓶颈就在磁盘IO上，CPU处于空闲状态，借用网上的一个图，TOP命令可以看出IO花费的时间在76.6%，后面优化后就多线程异步处理。<br>
-<img src="https://zhangyaoo.github.io/post-images/1593334249512.webp" alt="" loading="lazy"></p>
-<p> 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：<img src="https://zhangyaoo.github.io/post-images/1593334346151.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1593334249512.webp" alt="" loading="lazy"></p>
+<p> 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：<img src="http://localhost:4000/post-images/1593334346151.png" alt="" loading="lazy"></p>
 <p> 分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。</p>
 <h3 id="2-中间件层">2、中间件层</h3>
 <p>  这里中间件，泛指数据存储层，以笔者经验来看，大多数系统性能问题和瓶颈都是与数据存储相关，这里笔者就拿这方面展开讨论总结。</p>
 <h5 id="mysql">MySQL</h5>
 <p>一般来说MySQL在很多线程更新同一行的场景下，TPS性能曲线如图所示，参考丁奇的《秒杀场景下MySQL的低效》<br>
-<img src="https://zhangyaoo.github.io/post-images/1592893242022.png" alt="秒杀场景下MySQL的低效" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1592893242022.png" alt="秒杀场景下MySQL的低效" loading="lazy"><br>
 图中我们可以看到，线程数在6的时候TPS达到巅峰2W，随着线程数的增长，TPS会随之降低。在高并发场景下，可以根据这个结论来进行优化，比如，当有瞬间大流量冲击数据库时候，我们可以进行数据缓冲，比如用队列削峰，开启6个线程消费，然后访问数据库。<br>
 当然这个看业务场景，如果是对同一个资源进行竞争的话，这个证削峰是可行的。但是，如果场景是每一个线程对不同资源进行访问修改时候，不涉及资源竞争的话，那么就不要进行削峰处理，直接访问数据库即可，当然这个也要考虑到MySQL的性能问题。<br>
 举个例子，就拿光插入数据的性能测试来说（没有建唯一索引），4核4G的7200转的机械硬盘机器配置，最高能够承受7500的并发插入数。[参考MySQL性能压测]</p>
@@ -289,9 +330,9 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 </ul>
 <h5 id="redis">Redis</h5>
 <p>Redis作为开发人员接触最频繁的中间件，首先，笔者先拿出官网给出的Redis性能测试结果：从下图可以得出结论：redis单机测试结果是TPS是7W,QPS只能比这个数据更高。<br>
-<img src="https://zhangyaoo.github.io/post-images/1592983835284.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1592983835284.png" alt="" loading="lazy"><br>
 当使用了管道pipline后性能大约提升了6倍，如下图所示<br>
-<img src="https://zhangyaoo.github.io/post-images/1592986207480.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1592986207480.png" alt="" loading="lazy"></p>
 <p>根据官网的文档，影响Redis性能有以下因素，笔者认为开发人员做一些基准测试压测以及日常开发中使用Redis的时候，注意这些优化点，就能高效使用Redis：<br>
 1、网络延迟和网络带宽，作为运维人员，最好将服务器和Redis服务部署到同一个局域网内，降低网络延迟。作为开发人员，尽量不要使用大key和大value，因为随着这种数据越来越多，在网络传输的时候会占用大部分网络宽带，举个例子，如果一个redis对象大小超过1KB，当你的QPS达到100万，会把你的千兆路由器的带宽打满，因此网络带宽可能就会成为性能瓶颈。<br>
 2、使用pipline，当使用以太网访问Redis时，保据大小保持在以太网数据包大小（约1500字节）以下时，使用流水线进行聚合的命令特别有效。<br>
@@ -299,7 +340,7 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 4、使用scan代替keys，keys会造成严重的性能问题<br>
 5、设置内存的大小阈值并且设置好内存缓存淘汰的策略，线上设置LRU策略来淘汰缓存这样做是为了避免物理内存使用完后，造成卡顿的情况。并且线上要避免大量key同时失效的场景，因为redis删除失效的key是循环删除的，并且频繁的删除会促使内存管理器回收内存页，这样也会导致卡顿的现象。<br>
 6、connection客户端连接数量，Redis作为一个事件驱动模型，因为base epoll能够实现O(1)时间复杂度的响应操作，因此能够提供很好性能。Redis已经以超过60000个连接为基准，并且在这些条件下仍能够维持50000 q / s的吞吐量，而且具有30000个连接的实例只能处理100个连接可达到的吞吐量的一半，可参考下图（来源官网）：<br>
-<img src="https://zhangyaoo.github.io/post-images/1592991673063.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1592991673063.png" alt="" loading="lazy"></p>
 <h5 id="elasticsearch">ElasticSearch</h5>
 <p>ElasticSearch可以解决大数据量下的搜索慢问题，这里笔者就拿 死磕ElasticSearch社区作者的优化建议，给出几点在日常开发ElasticSearch的优化方案：<br>
 1、尽量将所有数据的一半都缓存在内存当中file cache system 当中<br>
@@ -360,14 +401,14 @@ MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久
 2、死磕ElasticSearch社区——ElasticSearch优化<br>
 3、MySQL性能压测——https://my.oschina.net/u/867417/blog/758690<br>
 4、高可用系统方案——https://blog.csdn.net/hustspy1990/article/details/78008324<br>
-5、彻底理解高并发—— https://mp.weixin.qq.com/s?__biz=MzU2MTM4NDAwMw==&amp;mid=2247484105&amp;idx=1&amp;sn=de4c763482aa65383dab59b221800cb5&amp;chksm=fc78dde5cb0f54f39e1f278249d236ff2400330be573405435dba458404a5f771715319d694c&amp;mpshare=1&amp;scene=23&amp;srcid=&amp;sharer_sharetime=1593228785481&amp;sharer_shareid=48702c70183b62662ee3edd289996b47#rd<br>
-6、Redis性能测试——https://redis.io/topics/benchmarks</p>
+5、Redis性能测试——https://redis.io/topics/benchmarks</p>
+<!--参考 -->
 ]]></content>
     </entry>
     <entry>
         <title type="html"><![CDATA[O(1)时间复杂度下，双向链表实现LRU]]></title>
-        <id>https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/</id>
-        <link href="https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/">
+        <id>http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/</id>
+        <link href="http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/">
         </link>
         <updated>2020-06-15T11:17:45.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -381,14 +422,14 @@ MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久
 <li>2、put还是get都会进行重排序，get entry1 还是put entry1都会先把Entry1从双向链表中删除，然后再把Entry1加入到双向链表的表尾。</li>
 <li>3、遍历访问的时候，会访问header的下一个next节点，这就形成了顺序访问</li>
 </ul>
-<figure data-type="image" tabindex="1"><img src="https://zhangyaoo.github.io/post-images/1592968145044.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1592968145044.png" alt="" loading="lazy"></figure>
 <h3 id="链表实现">链表实现</h3>
 <p>实现思路：</p>
 <ul>
 <li>1、数据是直接利用 HashMap 来存放的。</li>
 <li>2、内部使用了一个双向链表来存放数据，所以有一个头结点 header，以及尾结点 tailer。</li>
 <li>3、每次写入头结点，删除尾结点时都是依赖于 header tailer<br>
-<img src="https://zhangyaoo.github.io/post-images/1592220507945.png" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1592220507945.png" alt="" loading="lazy"></li>
 </ul>
 <pre><code>import com.google.common.collect.Maps;
 import java.util.Map;
@@ -570,8 +611,8 @@ public class LRUCacheV2 {
     </entry>
     <entry>
         <title type="html"><![CDATA[关于]]></title>
-        <id>https://zhangyaoo.github.io/post/about/</id>
-        <link href="https://zhangyaoo.github.io/post/about/">
+        <id>http://localhost:4000/post/about/</id>
+        <link href="http://localhost:4000/post/about/">
         </link>
         <updated>2019-01-25T11:09:48.000Z</updated>
         <content type="html"><![CDATA[<blockquote>
@@ -580,7 +621,7 @@ public class LRUCacheV2 {
 <h2 id="关于本站">🏠 关于本站</h2>
 <p>一些技术博客和一些闲言碎语</p>
 <h2 id="博主是谁">👨‍💻 博主是谁</h2>
-<p>还在打怪升级的小菜鸟</p>
+<p>还在打怪升级的菜鸟</p>
 <h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
 <p>二次元、骑行、篮球、LOL、编码</p>
 <h2 id="联系我呀">📬 联系我呀</h2>

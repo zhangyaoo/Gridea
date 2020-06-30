@@ -201,5 +201,7 @@ MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久
 2、死磕ElasticSearch社区——ElasticSearch优化
 3、MySQL性能压测——https://my.oschina.net/u/867417/blog/758690
 4、高可用系统方案——https://blog.csdn.net/hustspy1990/article/details/78008324
-5、彻底理解高并发—— https://mp.weixin.qq.com/s?__biz=MzU2MTM4NDAwMw==&mid=2247484105&idx=1&sn=de4c763482aa65383dab59b221800cb5&chksm=fc78dde5cb0f54f39e1f278249d236ff2400330be573405435dba458404a5f771715319d694c&mpshare=1&scene=23&srcid=&sharer_sharetime=1593228785481&sharer_shareid=48702c70183b62662ee3edd289996b47#rd
-6、Redis性能测试——https://redis.io/topics/benchmarks
+5、Redis性能测试——https://redis.io/topics/benchmarks
+
+<!--参考 -->
+[comment]: <> (6、彻底理解高并发—https://mp.weixin.qq.com/s?__biz=MzU2MTM4NDAwMw==&mid=2247484105&idx=1&sn=de4c763482aa65383dab59b221800cb5&chksm=fc78dde5cb0f54f39e1f278249d236ff2400330be573405435dba458404a5f771715319d694c&mpshare=1&scene=23&srcid=&sharer_sharetime=1593228785481&sharer_shareid=48702c70183b62662ee3edd289996b47#rd) 
