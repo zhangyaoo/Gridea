@@ -8,7 +8,7 @@
 <meta name="keywords" content="zhangyao blog">
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
-<title>2019年总结 | will</title>
+<title>Saas系统多数据源路由优雅解决方案 | will</title>
 <link rel="shortcut icon" href="/favicon.ico?v=1603191577688">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
@@ -38,8 +38,8 @@
 
 
 
-  <meta name="description" content="2019年总结" />
-  <meta name="keywords" content="总结" />
+  <meta name="description" content="Saas系统多数据源路由优雅解决方案" />
+  <meta name="keywords" content="SaaS" />
 </head>
 
 <body>
@@ -190,7 +190,8 @@
       <div class="sidebar-body pisces" id="sidebar_body">
         
           
-            
+            <div class="post-side-meta" id="post_side_meta">
+              
 <div class="sidebar-wrapper box-shadow-wrapper bg-color">
   <div class="sidebar-item">
     <img class="site-author-image right-motion" src="/images/avatar.png"/>
@@ -233,6 +234,215 @@
 
 
 </div>
+            </div>
+            <div class="post-toc sidebar-body-active" id="post_toc" style="opacity: 1;">
+              <div class="toc-box right-motion">
+  <div class="toc-wrapper auto-number auto"
+    id="toc_wrapper">
+    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E8%83%8C%E6%99%AF">背景</a></li>
+<li><a href="#%E4%B8%80-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%BB%8B%E7%BB%8D">一、解决方案介绍</a>
+<ul>
+<li><a href="#%E7%9B%AE%E5%89%8D%E4%B8%9A%E7%95%8C%E6%95%B0%E6%8D%AE%E9%9A%94%E7%A6%BB%E6%96%B9%E6%A1%88">目前业界数据隔离方案</a></li>
+<li><a href="#%E5%85%B7%E4%BD%93%E6%8A%80%E6%9C%AF%E5%AE%9E%E7%8E%B0">具体技术实现</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%8C-%E6%96%B9%E6%A1%88%E7%9A%84%E9%9A%90%E8%97%8F%E7%BC%BA%E7%82%B9%E4%BB%A5%E5%8F%8A%E8%A7%A3%E5%86%B3">二、方案的隐藏缺点以及解决</a>
+<ul>
+<li><a href="#%E9%9A%90%E8%97%8F%E7%9A%84%E7%BC%BA%E9%99%B7">隐藏的缺陷</a></li>
+<li><a href="#%E8%A7%A3%E5%86%B3">解决</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%89-%E6%9B%B4%E4%BC%98%E9%9B%85%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E4%BC%81%E4%B8%9A%E5%86%85%E9%83%A8%E5%BC%80%E5%8F%91%E7%97%9B%E7%82%B9">三、更优雅方案解决企业内部开发痛点</a>
+<ul>
+<li><a href="#%E7%8E%B0%E7%8A%B6">现状</a></li>
+<li><a href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0">具体实现</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%9B-todo%E5%90%8E%E7%BB%AD%E4%BC%98%E5%8C%96">四、TODO后续优化</a></li>
+<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+</div>
+
+<script>
+
+  let lastTop = 0, lList = [], hList = [], postBody, lastIndex = -1;
+  let active = 'active-show', activeClass = 'active-current';
+  let tocWrapper = document.querySelector('#toc_wrapper');
+  let tocContent = tocWrapper.children[0];
+  let autoNumber = tocWrapper && tocWrapper.classList.contains('auto-number');
+
+  function addTocNumber(elem, deep) {
+    if (!elem) {
+      return;
+    }
+    let prop = elem.__proto__;
+
+    if (prop === HTMLUListElement.prototype) {
+      for (let i = 0; i < elem.children.length; i++) {
+        addTocNumber(elem.children[i], deep + (i + 1) + '.');
+      }
+    } else if (prop === HTMLLIElement.prototype) {
+      // 保存li元素
+      if (elem.children[0] && elem.children[0].__proto__ === HTMLAnchorElement.prototype) {
+        lList.push(elem);
+      }
+      for (let i = 0; i < elem.children.length; i++) {
+        let cur = elem.children[i];
+        if (cur.__proto__ === HTMLAnchorElement.prototype) {
+          if (autoNumber) {
+            cur.text = deep + ' ' + cur.text;
+          }
+        } else if (cur.__proto__ === HTMLUListElement.prototype) {
+          addTocNumber(cur, deep);
+        }
+      }
+    }
+  }
+
+  function removeParentActiveClass() {
+    let parents = tocContent.querySelectorAll('.' + active)
+    parents.forEach(function (elem) {
+      elem.classList.remove(active);
+    });
+  }
+
+  function addActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.add(activeClass);
+    }
+  }
+
+  function removeActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.remove(activeClass);
+    }
+  }
+
+  function addActiveLiElemment(elem, parent) {
+    if (!elem || elem === parent) {
+      return;
+    } else {
+      if (elem.__proto__ === HTMLLIElement.prototype) {
+        elem.classList.add(active);
+      }
+      addActiveLiElemment(elem.parentElement, parent);
+    }
+  }
+
+  function showToc() {
+    if (tocWrapper) {
+      postBody = document.querySelector('#post_body');
+      for (let i = 0; i < postBody.children.length; i++) {
+        if (postBody.children[i].__proto__ === HTMLHeadingElement.prototype) {
+          hList.push(postBody.children[i]);
+        }
+      }
+      if (tocWrapper.classList.contains('compress')) {
+        tocContent.classList.add('closed');
+      } else if (tocWrapper.classList.contains('no_compress')) {
+        tocContent.classList.add('expanded');
+      } else {
+        if (hList.length > 10) {
+          active = 'active-hidden'
+          tocContent.classList.add('closed');
+        } else {
+          tocContent.classList.add('expanded');
+        }
+      }
+    }
+  }
+
+  (function () {
+    // 处理不是从#一级标题开始目录
+    if (tocContent.children.length === 1 && tocContent.children[0].__proto__ === HTMLLIElement.prototype) {
+      let con = tocContent.children[0].children[0];
+      tocContent.innerHTML = con.innerHTML;
+    }
+    let markdownItTOC = document.querySelector('.markdownIt-TOC');
+    let innerHeight = window.innerHeight;
+    markdownItTOC.style = `max-height: ${innerHeight - 80 > 0 ? innerHeight - 80 : innerHeight}px`
+    addTocNumber(tocContent, '');
+  })();
+
+  document.addEventListener('scroll', function (e) {
+    if (lList.length <= 0) {
+      return;
+    }
+    let scrollTop = document.scrollingElement.scrollTop + 10;
+    let dir;
+
+    if (lastTop - scrollTop > 0) {
+      dir = 'up';
+    } else {
+      dir = 'down';
+    }
+
+    lastTop = scrollTop;
+    if (scrollTop <= 0) {
+      if (lastIndex >= 0 && lastIndex < hList.length) {
+        lList[lastIndex].classList.remove(activeClass);
+      }
+      return;
+    }
+
+    let current = 0, hasFind = false;
+    for (let i = 0; i < hList.length; i++) {
+      if (hList[i].offsetTop > scrollTop) {
+        current = i;
+        hasFind = true;
+        break;
+      }
+    }
+    if (!hasFind && scrollTop > lList[lList.length - 1].offsetTop) {
+      current = hList.length - 1;
+    } else {
+      current--;
+    }
+    if (dir === 'down') {
+      if (current > lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex)
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    } else {
+      if (current < lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex);
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    }
+  });
+
+
+  window.addEventListener('load', function () {
+    showToc();
+    document.querySelector('#sidebar').style = 'display: block;';
+    tocWrapper.classList.add('toc-active');
+    setTimeout(function () {
+      if ("createEvent" in document) {
+        let evt = document.createEvent("HTMLEvents");
+        evt.initEvent("scroll", false, true);
+        document.dispatchEvent(evt);
+      }
+      else {
+        document.fireEvent("scroll");
+      }
+    }, 500)
+  })
+
+</script>
+            </div>
           
         
       </div>
@@ -320,8 +530,8 @@
           <div class="section bg-color post post-page">
             <header class="post-header">
   <h1 class="post-title">
-    <a class="post-title-link" href="http://localhost:4000/post/2019-nian-zong-jie/">
-      2019年总结
+    <a class="post-title-link" href="http://localhost:4000/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/">
+      Saas系统多数据源路由优雅解决方案
     </a>
   </h1>
   <div class="post-meta">
@@ -329,7 +539,7 @@
     <span class="meta-item pc-show">
       <i class="fa fa-calendar-o"></i>
       <span class="language" data-lan="publish">发布于</span>
-      <span>2020-01-01</span>
+      <span>2020-10-16</span>
       <span class="post-meta-divider pc-show">|</span>
     </span>
     
@@ -338,8 +548,8 @@
       <span class="pc-show language" data-lan="category-in">分类于</span>
       
       
-      <a href="http://localhost:4000/tag/hD1pMQ2Ri/">
-        <span>总结</span>
+      <a href="http://localhost:4000/tag/I6yTIXFi2/">
+        <span>SaaS</span>
       </a>
       
       
@@ -348,99 +558,157 @@
     
     <span class="meta-item">
       <i class="fa fa-clock-o"></i>
-      <span>6<span class="language" data-lan="minute">分钟</span></span>
+      <span>7<span class="language" data-lan="minute">分钟</span></span>
     </span>
     <span class="meta-item">
       <span class="post-meta-divider">|</span>
       <i class="fa fa-file-word-o"></i>
-      <span>1758<span class="pc-show language" data-lan="words">字数</span></span>
+      <span>1713<span class="pc-show language" data-lan="words">字数</span></span>
     </span>
     
   </div>
 </header>
             <div class="post-body next-md-body" id="post_body">
-              <p>小提示：阅读此篇文章大约需要三分钟时间，以下都是个人一些生活工作上碎碎念念，唠叨碎语，请斟酌阅读~</p>
-<p>目录<br>
-开头<br>
-学习<br>
-工作<br>
-运动<br>
-生活<br>
-游戏<br>
-美食<br>
-亲情<br>
-爱情<br>
-2020flag</p>
-<p>————————我是分割线——————</p>
-<p>开头<br>
-又过了一年，记得上一次写年终总结还是在我狗窝(出租房)里面写的，这一次是在南京南站开始写的。<br>
-深圳的天气就是这么神奇，一年到头穿短袖，曾和我朋友立下一个flag，说在深圳365天300天穿短袖，不然就洗一个月碗，似乎今年温度降的早，早早就穿上了短袖，(flag果然对于我来说就是打脸的)，所以明年来就给自己装逼行为付出代价（╯' - ')╯︵ ┻━┻<br>
-这里一直都是夏天，不能像家乡一样能感受到四季的变化，感觉时间过的特别快，有一次在公司敲代码时候，听到了鸟鸣声，瞬间就想起了家乡田野中的鸟叫虫鸣，脑海里就浮现了那年夏天，吃着冰棍，听着蝉鸣的旧时光。<br>
-这一年有许多值得写的东西，生活中的各个方面都有。用我老爹一句话，一年时间不管是进步多少，只要不是原地踏步走就可以。这次还是像2018年总结一样给自各做一些总结和一些（给自己打脸的）flag</p>
-<p>学习<br>
-说起学习，这里放在最开始写，自认为学习是自己提升自己的最直接最有效的方式。从小学到高中以至于大学的知识，都是皮毛。重要是培养了快速学习能力和自学的习惯，这个可以说是自各学业生涯中获得最有价值的东西了。但是这是不够的，对于生活中认知和工作的方面，自我独立思考也是必不可少的。自各也在特意去注重，培养自各的独立思考的能力。<br>
-在这感谢云智惠IPO所有后台同学，以及@陈秦圆 同学，让自己认识到独立思考和团队合作的重要性。</p>
-<p>这一年有学习到东西有：<br>
-极客时间的数据结构和算法之美<br>
-设计模式之美(只看了一章)<br>
-牛客网的剑指offer(只刷了30道)<br>
-力扣leetcode(只刷了60道)<br>
-《netty实战》<br>
-搭建开源项目fast-im脚手架<br>
-金融业务知识<br>
-沈剑的架构师之路（只看了二十篇）</p>
-<p>来年目标：<br>
-继续完成开源项目<br>
-经营好个人博客<br>
-架构师之路学习<br>
-《redis进阶》<br>
-《剑指offer》<br>
-大数据相关知识</p>
-<p>看了其他书籍：<br>
-《亮剑》<br>
-《寻路中国》</p>
-<p>画外音：一年时间学的这么少，还贴出来（脸皮有点厚😂，手动狗头）</p>
-<p>工作<br>
-在云智惠的一年半时间里，自各学习了许多和工作相关的知识，认识了许多优秀的同学，成长了并且收获了许多，感谢云智惠提供的职场平台。虽然现在已经快要解散了，但是还是表示衷心感谢。江湖再见！</p>
-<p>运动<br>
-唯一一个在2019年立得没有被打脸的flag，就是运动。每周一次篮球或者跑步。<br>
-跑步呢，一般跑个4公里一次。大概跑了二十次，100公里左右，这里只记录了一半，另外一半没有记录（这句是真的）「哭笑:-D」</p>
-<p>篮球呢，现在投篮不准，运球辣眼睛，已然一副老年篮球的样子。但是还是阻挡不了我喜欢这一项运动，就像灌篮高手动漫中一句话“教练，我想打篮球”这样，源自于内心的热爱。</p>
-<p>生活<br>
-这一年我想了很久，得到了什么失去了什么。。我想了很久，突然想起来，<br>
-得到的当然是肚子的肥肉赘肉咯，，失去的你们也知道，肯定是我稀薄的头发。。</p>
-<p>当自各发际线越来越高的时候，就在思考人生，为什么长得这么帅，到要掉头发</p>
-<p>从此菊花茶➕枸杞已是标配，早睡早起已是人生箴言😂，狗命要紧</p>
-<p>游戏<br>
-平常鸭梨大时候偶尔打打游戏放松放松，<br>
-今年凭借自己的天赋(装一下B)和不懈努力，打到白金一。离自己的小目标又近了一步，争取今年上砖石，让我当个砖石守门员也行🤐。</p>
-<p>在这写上最喜欢英雄皇子的台词：“所到之处，无人能挡！”</p>
-<p>美食</p>
-<p>什么最重要，当然是吃。<br>
-想想这一年做的美食，和同学一起做的，此处@肉和杨丽丽，感谢一起相处一年，学到了很多美食是如何做的，我身边的隐藏大厨😂。<br>
-今年学到了有红烧鲫鱼，糖醋排骨，葱花饼，可乐鸡翅，红烧肉，自制凉菜，水煮肉片，自制烤鱼，回锅肉等等等等，就放一张和同学一起做饺子的图片，不多放了，免得晚上中毒太深。。。</p>
-<p>画外音：上面饺子（看起来像）真的不是我包的</p>
-<p>亲情<br>
-特别喜欢《请回答1988》里面家庭亲情，整部片虽然不乏爱情友情等，但是我觉得核心是亲情，最有印象还是宝拉妈妈下雨天护着宝拉那段。&quot;人真正变强大，不是因为守护着自尊心，而是抛开自尊心的时候，因为有需要守护的人&quot;<br>
-这句话还是需要自己去经历体会的。<br>
-以前觉得，出省上学，出省工作，可以离家人远一点，就像是春天的燕子，长大了都想看看外面的世界，去闯荡去经历，去丰富自己的生活增长自己见识。可到了一定的年龄或者认知，会意识到，有家人在的地方，都觉得很知足。特别喜欢《四个春天》纪录片里面燕子归来之时，那种感觉，纪录片中父母看到燕子归来，心里念叨着，咱家小燕子也该回家了。</p>
-<p>爱情<br>
-感谢党感谢国家给我发了一个女朋友，免费滴。&lt;( ˘ ³˘)/💯<br>
-今年最大收货，当然是遇到方小皮同学啦，（默默撒一下新鲜狗粮）希望在以后的日子里，你能够早睡早起，吃好喝好，身体棒棒。</p>
-<p>最后肯定是写一些打脸的东西。。<br>
-2020年flag<br>
-自信<br>
-一周一次跑步或者篮球<br>
-看完剩余书籍<br>
-经营好个人博客<br>
-洗脚城洗一次脚(有什么东西渗入进来了)<br>
-体重不超130<br>
-早睡早起，11点之前睡（虽然是不可能的）<br>
-学习大数据相关知识<br>
-保护眼睛</p>
-<p>以上，完</p>
-<p><img src="http://localhost:4000/post-images/1593268924481.jpg" alt="" loading="lazy"><br>
-最后贴上自各最喜欢的照片，2015年于西藏拍</p>
+              <h2 id="背景">背景</h2>
+<p>在目前的SaaS系统中，业务开发者需要重点关注的一个问题就是数据隔离问题，这个是做SaaS系统必须要考虑的点，多租户数据隔离是每个SaaS系统都要遇到并且要解决的问题，笔者就分享下解决这种问题的思路、具体的解决方案以及优雅的解决思路。</p>
+<h2 id="一-解决方案介绍">一、解决方案介绍</h2>
+<h3 id="目前业界数据隔离方案">目前业界数据隔离方案</h3>
+<p>1、独立数据库，通过动态切换数据源来实现多租户<br>
+2、共享数据库，隔离数据架构<br>
+3、共享数据库，共享数据表，使用字段来区分不同租户，此方案成本最低</p>
+<p>以上方案从上到下，安全性逐渐降低。由于考虑到安全问题，故采用第一种方案解决数据隔离<br>
+优点：</p>
+<ol>
+<li>非常安全</li>
+<li>数据互不影响，性能互不影响</li>
+<li>数据迁移，数据扩展方便</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>需要维护大量的数据库</li>
+<li>需要自行切换数据库，开发量多且实现复杂</li>
+</ol>
+<h3 id="具体技术实现">具体技术实现</h3>
+<p><strong>简单的架构图</strong><br>
+<img src="http://localhost:4000/post-images/1603179800053.png" alt="" loading="lazy"><br>
+如图所示，SaaS项目大概架构图，关键点是应用层传参，以及路由层的实现。</p>
+<p><strong>实现</strong><br>
+1、应用层：项目中应用service层是dubbo服务，而且项目分多层，这里需要考虑到多层服务场景下，如何优雅传参问题，如下图所示<br>
+<img src="http://localhost:4000/post-images/1603181882775.png" alt="" loading="lazy"><br>
+我们考虑到租户ID是唯一标识，和业务参数绑定在一起不优雅，所以两种参数分开处理，业务参数直接参数透传，租户ID唯一标识通过隐式传参来处理（参考dubbo http://dubbo.apache.org/zh-cn/docs/user/demos/attachment.html），并且参数记录到服务本地的threadlocal中，以便后续其他业务需要。具体实现如下：<br>
+<img src="http://localhost:4000/post-images/1603183675071.png" alt="" loading="lazy"></p>
+<p>2、路由层：路由层实现主要是自行实现spring框架中DataSource接口，自定义dynamicDataSource类，然后implement DataSource接口，实现getConnection方法。然后重新定义SqlSessionFactory的bean，将自定义DataSource类属性注入。<br>
+<img src="http://localhost:4000/post-images/1603183148592.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603183156251.png" alt="" loading="lazy"><br>
+然后我们只需要关注getConnection方法根据租户ID，选择相对应的租户连接池就可以了。<br>
+如图中，我们只需要实现这个selectTenantCodeDataSource()这个方法就可以了，这个方法实现很简单，这里就不贴图了。selectTenantCodeDataSource()方法主要就是从threadlocal中拿租户ID，然后去缓存池map中拿出连接池信息。<br>
+<img src="http://localhost:4000/post-images/1603183509071.png" alt="" loading="lazy"><br>
+其中，dataSourceCachePool是在初始化配置时候，将所有的租户连接池直接创建，然后扔到dataSourceCachePool。key是租户的ID，value是连接池信息。</p>
+<p>具体的初始化配置：</p>
+<pre><code class="language-java">/**
+ * 初始化数据源
+ */
+@Configuration
+public class DataSourceInit {
+    
+    @PostConstruct
+    public void InitDataSource()  {
+        log.info(&quot;=====初始化数据源=====&quot;);
+        TenantRoutingDataSource tenantRoutingDataSource = (TenantRoutingDataSource)ApplicationContextProvider.getBean(&quot;tenantRoutingDataSource&quot;);
+        Map&lt;String, DataSourceCache&gt; dataSourceCachePool = new HashMap&lt;&gt;();
+
+        List&lt;TenantInfo&gt; tenantList = tenantInfoService.InitTenantInfo();
+        for (TenantInfo tenantInfo : tenantList) {
+            log.info(tenantInfo.toString());
+            HikariDataSource dataSource = new HikariDataSource();
+            dataSource.setDriverClassName(tenantInfo.getDatasourceDriver());
+            dataSource.setJdbcUrl(tenantInfo.getDatasourceUrl());
+            dataSource.setUsername(tenantInfo.getDatasourceUsername());
+            dataSource.setPassword(tenantInfo.getDatasourcePassword());
+            dataSource.setDataSourceProperties(master.getDataSourceProperties());
+            dataSourceCachePool.put(tenantInfo.getTenantId(), dataSource);
+        }
+        //设置数据源
+        tenantRoutingDataSource.setDataSources(dataSourceCachePool);
+    }
+}
+</code></pre>
+<h2 id="二-方案的隐藏缺点以及解决">二、方案的隐藏缺点以及解决</h2>
+<h3 id="隐藏的缺陷">隐藏的缺陷</h3>
+<p>相信有一定开发经验的读者应该能想到，上述方案最大的缺点就是性能问题，对MySQL有非常大的影响。因为一开始初始化非常多的连接池，就会占用连接资源，比如租户从100个扩展到了1000个以及更多，那么连接池数量就线性增长，如果一个连接池保持15个活跃连接的话，那么连接数就是15*1000，此时如果MySQL的maxconntion的数量非常小，那么MySQL侧就会抛出”too many connctions“错误，在应用层方面就是MySQL不可用了。<br>
+没优化之前的架构：<br>
+<img src="http://localhost:4000/post-images/1603190851131.png" alt="" loading="lazy"></p>
+<h3 id="解决">解决</h3>
+<p>想保持数据库分离，又要考虑到MySQL性能问题，只能向连接池的方向去考虑，其实可以减少数量就可以了，这里实现方案就是一个数据库实例一个连接池，如下图所示：<br>
+<img src="http://localhost:4000/post-images/1603190889253.png" alt="" loading="lazy"><br>
+具体实现就是将上述方案中的dataSourceCachePool的key改为 “IP+端口”，作为key。然后再数据源路由层，多一层映射（租户ID——&gt;数据库实例）就可以了。</p>
+<h2 id="三-更优雅方案解决企业内部开发痛点">三、更优雅方案解决企业内部开发痛点</h2>
+<h3 id="现状">现状</h3>
+<p><strong>现状</strong>：企业内部项目组开发数据源路由，各个人员开发水平不一，各种路由方案实现不同，自己组内的开发的方案只能自己组内使用，并且实现复杂，耗人力物力。<br>
+<strong>目标</strong>：项目组使用直接引入maven包，任何配置都不要配置（自定义的话需要自行在自己项目中配置属性），开箱即用。</p>
+<h3 id="具体实现">具体实现</h3>
+<p><strong>原理</strong>：直接采用springboot starter开发，将上述方案所有的逻辑和技术实现单独放入springboot starter工程中，采用外部配置的方式实现自定义配置。</p>
+<p><strong>开发者实现</strong>：网上有许多springboot starter开发的流程和开发案例，笔者这里就只贴出关键的代码<br>
+1、自动装配类：spring.factories中写入这个类DataSourceAutoConfigure，实现bean的自动装入，类里面主要是实现SqlSessionFactory和PlatformTransactionManager，然后在TenantRoutingDataSource的getconnection方法中自定义实现路由逻辑。</p>
+<pre><code class="language-java">@Configuration
+public class DataSourceAutoConfigure {
+
+    @Resource
+    private TenantRoutingDataSource tenantRoutingDataSource;
+
+    @Bean
+    @ConditionalOnMissingBean(SqlSessionFactory.class)
+    @ConditionalOnBean(TenantRoutingDataSource.class)
+    public SqlSessionFactory sqlSessionFactory() throws Exception{
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(tenantRoutingDataSource);
+        Objects.requireNonNull(sqlSessionFactoryBean.getObject()).getConfiguration().setMapUnderscoreToCamelCase(true);
+        return sqlSessionFactoryBean.getObject();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(PlatformTransactionManager.class)
+    @ConditionalOnBean(TenantRoutingDataSource.class)
+    public PlatformTransactionManager platformTransactionManager() {
+        return new DataSourceTransactionManager(tenantRoutingDataSource);
+    }
+}
+</code></pre>
+<p>2、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置</p>
+<pre><code class="language-java">@Activate(group = {&quot;provider&quot;})
+public class TenantCodeContextFilter implements Filter {
+    @Override
+    public Result invoke(Invoker&lt;?&gt; invoker, Invocation invocation) throws RpcException {
+        String tenantCode = RpcContext.getContext().getAttachment(&quot;tenantCode&quot;);
+        TenantCodeContextHolder.setTenantCode(tenantCode);
+        return invoker.invoke(invocation);
+    }
+}
+</code></pre>
+<p>3、检查用户侧配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常</p>
+<pre><code class="language-java">@Component
+public class CheckConfigListener implements ApplicationListener&lt;ApplicationReadyEvent&gt; {
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+        ConfigurableApplicationContext applicationContext = applicationReadyEvent.getApplicationContext();
+        ConfigurableEnvironment environment = applicationContext.getEnvironment();
+        // 检查用户自定义配置是否正确，自行实现
+        checkDatasourceConfig(environment);
+    }
+}
+</code></pre>
+<p><strong>用户使用</strong>：直接引入相应的maven，方便快捷</p>
+<h2 id="四-todo后续优化">四、TODO后续优化</h2>
+<ol>
+<li>目前多租户数据源通用工程只支持Dubbo的调用，未来可扩展支持多种协议如HTTP、gRPC</li>
+<li>目前只支持Hikari数据源，后续支持多种数据源类型，比如Durid</li>
+<li>如果租户数据非常大，可以考虑空间换时间思想，使用缓存存放租户的数据源配置，提升查询效率。</li>
+</ol>
+<h2 id="参考">参考</h2>
+<ul>
+<li>SaaS系统数据隔离方案——https://blog.arkency.com/comparison-of-approaches-to-multitenancy-in-rails-apps/</li>
+</ul>
 
             </div>
             
@@ -453,7 +721,7 @@
     </li>
     <li class="post-copyright-link">
       <strong class="language" data-lan="link">本文链接：</strong>
-      <a href="http://localhost:4000/post/2019-nian-zong-jie/" title="2019年总结">http://localhost:4000/post/2019-nian-zong-jie/</a>
+      <a href="http://localhost:4000/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/" title="Saas系统多数据源路由优雅解决方案">http://localhost:4000/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/</a>
     </li>
     <li class="post-copyright-license">
       <strong class="language" data-lan="copyright">版权声明： </strong>
@@ -462,14 +730,22 @@
   </ul>
   <div class="tags">
     
-      <a href="http://localhost:4000/tag/hD1pMQ2Ri/"># 总结</a>
+      <a href="http://localhost:4000/tag/I6yTIXFi2/"># SaaS</a>
     
   </div>
   <div class="nav">
     <div class="nav-prev">
       
+        <i class="fa fa-chevron-left"></i>
+        <a class="nav-pc-next" title="采用分布式ID解决分库分表踩的坑" href="http://localhost:4000/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/">采用分布式ID解决分库分表踩的坑</a class="nav-pc-next">
+        <a class="nav-mobile-prev" title="采用分布式ID解决分库分表踩的坑" href="http://localhost:4000/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/">上一篇</a>
+      
     </div>
     <div class="nav-next">
+      
+        <a class="nav-pc-next" title="MySQL联合索引在B+树的存储和查找" href="http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">MySQL联合索引在B+树的存储和查找</a>
+        <a class="nav-mobile-next" title="MySQL联合索引在B+树的存储和查找" href="http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">下一篇</a>
+        <i class="fa fa-chevron-right"></i>
       
     </div>
   </div>

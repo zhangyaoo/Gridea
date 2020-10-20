@@ -1,6 +1,40 @@
 {
   "posts": [
     {
+      "content": "### 背景\r\n\r\n\r\n### ",
+      "data": {
+        "title": "采用分布式ID解决分库分表踩的坑",
+        "date": "2020-10-16 10:55:39",
+        "tags": [],
+        "published": true,
+        "hideInList": false,
+        "feature": "/post-images/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng.jpg",
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng"
+    },
+    {
+      "content": "## 背景\r\n在目前的SaaS系统中，业务开发者需要重点关注的一个问题就是数据隔离问题，这个是做SaaS系统必须要考虑的点，多租户数据隔离是每个SaaS系统都要遇到并且要解决的问题，笔者就分享下解决这种问题的思路、具体的解决方案以及优雅的解决思路。\r\n\r\n## 一、解决方案介绍\r\n### 目前业界数据隔离方案\r\n1、独立数据库，通过动态切换数据源来实现多租户\r\n2、共享数据库，隔离数据架构\r\n3、共享数据库，共享数据表，使用字段来区分不同租户，此方案成本最低\r\n\r\n以上方案从上到下，安全性逐渐降低。由于考虑到安全问题，故采用第一种方案解决数据隔离\r\n优点：\r\n1. 非常安全\r\n2. 数据互不影响，性能互不影响\r\n3. 数据迁移，数据扩展方便\r\n\r\n缺点：\r\n1. 需要维护大量的数据库\r\n2. 需要自行切换数据库，开发量多且实现复杂\r\n\r\n### 具体技术实现\r\n**简单的架构图**\r\n![](https://zhangyaoo.github.io/post-images/1603179800053.png)\r\n如图所示，SaaS项目大概架构图，关键点是应用层传参，以及路由层的实现。\r\n\r\n**实现**\r\n1、应用层：项目中应用service层是dubbo服务，而且项目分多层，这里需要考虑到多层服务场景下，如何优雅传参问题，如下图所示\r\n![](https://zhangyaoo.github.io/post-images/1603181882775.png)\r\n我们考虑到租户ID是唯一标识，和业务参数绑定在一起不优雅，所以两种参数分开处理，业务参数直接参数透传，租户ID唯一标识通过隐式传参来处理（参考dubbo http://dubbo.apache.org/zh-cn/docs/user/demos/attachment.html），并且参数记录到服务本地的threadlocal中，以便后续其他业务需要。具体实现如下：\r\n![](https://zhangyaoo.github.io/post-images/1603183675071.png)\r\n\r\n2、路由层：路由层实现主要是自行实现spring框架中DataSource接口，自定义dynamicDataSource类，然后implement DataSource接口，实现getConnection方法。然后重新定义SqlSessionFactory的bean，将自定义DataSource类属性注入。\r\n![](https://zhangyaoo.github.io/post-images/1603183148592.png)\r\n![](https://zhangyaoo.github.io/post-images/1603183156251.png)\r\n然后我们只需要关注getConnection方法根据租户ID，选择相对应的租户连接池就可以了。\r\n如图中，我们只需要实现这个selectTenantCodeDataSource()这个方法就可以了，这个方法实现很简单，这里就不贴图了。selectTenantCodeDataSource()方法主要就是从threadlocal中拿租户ID，然后去缓存池map中拿出连接池信息。\r\n![](https://zhangyaoo.github.io/post-images/1603183509071.png)\r\n其中，dataSourceCachePool是在初始化配置时候，将所有的租户连接池直接创建，然后扔到dataSourceCachePool。key是租户的ID，value是连接池信息。\r\n\r\n具体的初始化配置：\r\n```java\r\n/**\r\n * 初始化数据源\r\n */\r\n@Configuration\r\npublic class DataSourceInit {\r\n    \r\n    @PostConstruct\r\n    public void InitDataSource()  {\r\n        log.info(\"=====初始化数据源=====\");\r\n        TenantRoutingDataSource tenantRoutingDataSource = (TenantRoutingDataSource)ApplicationContextProvider.getBean(\"tenantRoutingDataSource\");\r\n        Map<String, DataSourceCache> dataSourceCachePool = new HashMap<>();\r\n\r\n        List<TenantInfo> tenantList = tenantInfoService.InitTenantInfo();\r\n        for (TenantInfo tenantInfo : tenantList) {\r\n            log.info(tenantInfo.toString());\r\n            HikariDataSource dataSource = new HikariDataSource();\r\n            dataSource.setDriverClassName(tenantInfo.getDatasourceDriver());\r\n            dataSource.setJdbcUrl(tenantInfo.getDatasourceUrl());\r\n            dataSource.setUsername(tenantInfo.getDatasourceUsername());\r\n            dataSource.setPassword(tenantInfo.getDatasourcePassword());\r\n            dataSource.setDataSourceProperties(master.getDataSourceProperties());\r\n            dataSourceCachePool.put(tenantInfo.getTenantId(), dataSource);\r\n        }\r\n        //设置数据源\r\n        tenantRoutingDataSource.setDataSources(dataSourceCachePool);\r\n    }\r\n}\r\n```\r\n\r\n## 二、方案的隐藏缺点以及解决\r\n### 隐藏的缺陷\r\n相信有一定开发经验的读者应该能想到，上述方案最大的缺点就是性能问题，对MySQL有非常大的影响。因为一开始初始化非常多的连接池，就会占用连接资源，比如租户从100个扩展到了1000个以及更多，那么连接池数量就线性增长，如果一个连接池保持15个活跃连接的话，那么连接数就是15*1000，此时如果MySQL的maxconntion的数量非常小，那么MySQL侧就会抛出”too many connctions“错误，在应用层方面就是MySQL不可用了。\r\n没优化之前的架构：\r\n![](https://zhangyaoo.github.io/post-images/1603190851131.png)\r\n### 解决\r\n想保持数据库分离，又要考虑到MySQL性能问题，只能向连接池的方向去考虑，其实可以减少数量就可以了，这里实现方案就是一个数据库实例一个连接池，如下图所示：\r\n![](https://zhangyaoo.github.io/post-images/1603190889253.png)\r\n具体实现就是将上述方案中的dataSourceCachePool的key改为 “IP+端口”，作为key。然后再数据源路由层，多一层映射（租户ID——>数据库实例）就可以了。\r\n\r\n## 三、更优雅方案解决企业内部开发痛点\r\n### 现状\r\n**现状**：企业内部项目组开发数据源路由，各个人员开发水平不一，各种路由方案实现不同，自己组内的开发的方案只能自己组内使用，并且实现复杂，耗人力物力。\r\n**目标**：项目组使用直接引入maven包，任何配置都不要配置（自定义的话需要自行在自己项目中配置属性），开箱即用。\r\n### 具体实现\r\n**原理**：直接采用springboot starter开发，将上述方案所有的逻辑和技术实现单独放入springboot starter工程中，采用外部配置的方式实现自定义配置。\r\n\r\n**开发者实现**：网上有许多springboot starter开发的流程和开发案例，笔者这里就只贴出关键的代码\r\n1、自动装配类：spring.factories中写入这个类DataSourceAutoConfigure，实现bean的自动装入，类里面主要是实现SqlSessionFactory和PlatformTransactionManager，然后在TenantRoutingDataSource的getconnection方法中自定义实现路由逻辑。\r\n```java\r\n@Configuration\r\npublic class DataSourceAutoConfigure {\r\n\r\n    @Resource\r\n    private TenantRoutingDataSource tenantRoutingDataSource;\r\n\r\n    @Bean\r\n    @ConditionalOnMissingBean(SqlSessionFactory.class)\r\n    @ConditionalOnBean(TenantRoutingDataSource.class)\r\n    public SqlSessionFactory sqlSessionFactory() throws Exception{\r\n        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();\r\n        sqlSessionFactoryBean.setDataSource(tenantRoutingDataSource);\r\n        Objects.requireNonNull(sqlSessionFactoryBean.getObject()).getConfiguration().setMapUnderscoreToCamelCase(true);\r\n        return sqlSessionFactoryBean.getObject();\r\n    }\r\n\r\n    @Bean\r\n    @ConditionalOnMissingBean(PlatformTransactionManager.class)\r\n    @ConditionalOnBean(TenantRoutingDataSource.class)\r\n    public PlatformTransactionManager platformTransactionManager() {\r\n        return new DataSourceTransactionManager(tenantRoutingDataSource);\r\n    }\r\n}\r\n```\r\n2、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置\r\n```java\r\n@Activate(group = {\"provider\"})\r\npublic class TenantCodeContextFilter implements Filter {\r\n    @Override\r\n    public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {\r\n        String tenantCode = RpcContext.getContext().getAttachment(\"tenantCode\");\r\n        TenantCodeContextHolder.setTenantCode(tenantCode);\r\n        return invoker.invoke(invocation);\r\n    }\r\n}\r\n```\r\n3、检查用户侧配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常\r\n```java\r\n@Component\r\npublic class CheckConfigListener implements ApplicationListener<ApplicationReadyEvent> {\r\n\r\n    @Override\r\n    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {\r\n        ConfigurableApplicationContext applicationContext = applicationReadyEvent.getApplicationContext();\r\n        ConfigurableEnvironment environment = applicationContext.getEnvironment();\r\n        // 检查用户自定义配置是否正确，自行实现\r\n        checkDatasourceConfig(environment);\r\n    }\r\n}\r\n```\r\n**用户使用**：直接引入相应的maven，方便快捷\r\n\r\n\r\n## 四、TODO后续优化\r\n1. 目前多租户数据源通用工程只支持Dubbo的调用，未来可扩展支持多种协议如HTTP、gRPC\r\n2. 目前只支持Hikari数据源，后续支持多种数据源类型，比如Durid\r\n3. 如果租户数据非常大，可以考虑空间换时间思想，使用缓存存放租户的数据源配置，提升查询效率。\r\n\r\n\r\n## 参考\r\n- SaaS系统数据隔离方案——https://blog.arkency.com/comparison-of-approaches-to-multitenancy-in-rails-apps/",
+      "data": {
+        "title": "Saas系统多数据源路由优雅解决方案",
+        "date": "2020-10-16 10:26:30",
+        "tags": [
+          "SaaS"
+        ],
+        "published": true,
+        "hideInList": false,
+        "feature": "/post-images/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an.jpg",
+        "isTop": false
+      },
+      "isEmpty": false,
+      "excerpt": "",
+      "abstract": "",
+      "fileName": "saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an"
+    },
+    {
       "content": "## 前言\r\n> 在对MySQL开发中，联合索引是很常见的一种MySQL优化方式，本文解释了联合索引的存储以及查找过程，可以了解一下底层的原理以及加深对MySQL联合索引的理解。\r\n\r\n\r\n## Innodb B+树\r\n先看一下Innodb B+树的主键索引和辅助索引。这里直接拿张洋大神的图：\r\n- 聚簇索引:\r\n![](https://zhangyaoo.github.io/post-images/1593425796639.png)\r\n- 辅助非聚簇索引:\r\n![](https://zhangyaoo.github.io/post-images/1593425801180.png)\r\n**结构**：当一个表T（id,name,age,sex,high）建一个普通索引  KEY(name)，name的索引结果就和上面辅助非聚簇索引结构一样。\r\n**查询**：当有一个select id,name,age from T where name = \"\" 辅助索引会根据name在B+树上进行二叉树查找，找出叶子节点数据后发现没有age这个数据，就会进行**回表**操作到主键聚簇索引去查找，拿到聚簇索引叶子节点的age数据。\r\n\r\n\r\n## 联合索引存储以及寻址\r\n- **索引结构**：我们知道上述回表过程也会消耗性能，相当于多查一次，所以系统可以根据业务情况加上一个组合索引，当然并不是一直加组合索引就可以了，因为要考虑到索引存储空间的问题。例如给上述加上一个组合索引  KEY（name,age,sex）【 KEY（col1,col2,col3）】。那么这个组合索引的B+树非叶子节点数据结构和上述辅助非聚簇索引图一样，但是叶子节点是这样的：\r\n![](https://zhangyaoo.github.io/post-images/1593425790647.png)\r\n叶子节点存储col1,col2,col3这三列数据以及加上ID这一列数据。\r\n\r\n- **寻址过程：**\r\n例如语句：select id,name,age from T where name = \"张三\" and age=25，先根据name字段从辅助聚簇索引定位到哪一个叶子节点数据中，然后根据age节点在上述表格的前6行中，寻找age= 25的数据，然后找出所有符合的数据以及其对应的ID，然后根据ID来进行回表操作查询。这里返回了三条数据，就回了三次表。\r\n上述回表过程中，笔者引入一个**索引下推**的一个功能，索引下推是MySQL在5.6版本后引入的一个查询优化。就拿上述的例子，在没有优化之前，据name字段查询“张三”后，会拿到6条结果，回表6次，然后从主键索引拿到6条数据后，根据age字段筛选数据；优化之后，先再辅助索引上面根据name字段和age字段筛选符合数据，也就是ID，然后再回表，这里回表了三次。\r\n\r\n- **组合索引注意事项**\r\n当然，联合索引的最重要的是注意联合索引的使用问题，要遵循最左匹配原则，才可以优化到整个SQL了。\r\n\r\n\r\n### 总结\r\n以上，总结了MySQL的索引的基本原理，以及联合索引的存储和寻址过程，并且引入索引下推概念，还有使用联合索引的注意事项。\r\n\r\n\r\n\r\n## 参考\r\n- MySQL索引背后的数据结构及算法原理——http://blog.codinglabs.org/articles/theory-of-mysql-index.html。\r\n",
       "data": {
         "title": "MySQL联合索引在B+树的存储和查找",
@@ -162,6 +196,11 @@
     }
   ],
   "tags": [
+    {
+      "name": "SaaS",
+      "slug": "I6yTIXFi2",
+      "used": true
+    },
     {
       "name": "MySQL",
       "slug": "UdV_NEw8b",
