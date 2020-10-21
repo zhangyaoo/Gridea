@@ -82,7 +82,7 @@ public class DataSourceInit {
 没优化之前的架构：
 ![](https://zhangyaoo.github.io/post-images/1603190851131.png)
 ### 解决
-想保持数据库分离，又要考虑到MySQL性能问题，只能向连接池的方向去考虑，其实可以减少数量就可以了，这里实现方案就是一个数据库实例一个连接池，如下图所示：
+想保持数据库分离，又要考虑到MySQL性能问题，只能向连接池优化的方向去考虑，其实可以减少数量就可以了，这里实现方案就是一个数据库实例一个连接池，如下图所示：
 ![](https://zhangyaoo.github.io/post-images/1603190889253.png)
 具体实现就是将上述方案中的dataSourceCachePool的key改为 “IP+端口”，作为key。然后再数据源路由层，多一层映射（租户ID——>数据库实例）就可以了。
 
@@ -120,7 +120,7 @@ public class DataSourceAutoConfigure {
     }
 }
 ```
-2、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置
+2、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置filter这个参数，无需增加任何的配置。
 ```java
 @Activate(group = {"provider"})
 public class TenantCodeContextFilter implements Filter {
@@ -132,7 +132,7 @@ public class TenantCodeContextFilter implements Filter {
     }
 }
 ```
-3、检查用户侧配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常
+3、检查用户侧自定义配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常
 ```java
 @Component
 public class CheckConfigListener implements ApplicationListener<ApplicationReadyEvent> {
