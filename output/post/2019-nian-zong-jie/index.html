@@ -9,7 +9,7 @@
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
 <title>2019年总结 | will</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1603444327869">
+<link rel="shortcut icon" href="/favicon.ico?v=1605162937628">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -207,13 +207,13 @@
     </div>
     <div class="sidebar-item-box">
       <a href="">
-        <span class="site-item-stat-count">7</span>
+        <span class="site-item-stat-count">9</span>
         <span class="site-item-stat-name language" data-lan="category">分类</span>
       </a>
     </div>
     <div class="sidebar-item-box">
       <a href="/tags/">
-        <span class="site-item-stat-count">7</span>
+        <span class="site-item-stat-count">9</span>
         <span class="site-item-stat-name language" data-lan="tag">标签</span>
       </a>
     </div>
@@ -933,9 +933,238 @@
       
       <div class="item">
         <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/"" data-c="
-          &lt;h3 id=&#34;背景&#34;&gt;背景&lt;/h3&gt;
-&lt;h3 id=&#34;&#34;&gt;&lt;/h3&gt;
-">采用分布式ID解决分库分表踩的坑</a>
+          &lt;h3 id=&#34;一-背景&#34;&gt;一、背景&lt;/h3&gt;
+&lt;p&gt;随着业务模式的扩大，多个平台下用户数量不断扩大。并且因为业务需要，需要合并两个业务系统的用户中心，因为需要对接三方系统，所以要求用户的ID标识不能体现出系统的用户量。&lt;br&gt;
+技术团队考虑到这种场景以及后续用户的扩大，需要一个方案去解决在&lt;strong&gt;分布式环境&lt;/strong&gt;下ID递增的问题，系统自己的ID递增算法也需要做改变。&lt;/p&gt;
+&lt;h3 id=&#34;二-业界比较流行的分布式id解决方案&#34;&gt;二、业界比较流行的分布式ID解决方案&lt;/h3&gt;
+&lt;p&gt;技术团队首先考察业界比较流行的做法，总结不同方案优缺点，然后根据自己的业务来选择更合适的方案。&lt;/p&gt;
+&lt;h4 id=&#34;21-数据库分批id分发&#34;&gt;2.1 数据库分批ID分发&lt;/h4&gt;
+&lt;p&gt;数据库分批ID原理主要是利用分批思想以及乐观锁来解决，目前淘宝中间件TDDL其中的主键分配就是用了这个方案。该方案具体是这样做的：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;数据库表维护一条数据，记录当前分配ID号以及偏移数量等数据&lt;/li&gt;
+&lt;li&gt;编写服务，利用乐观锁去CAS更新数据，更新成功就说明拿到了一批ID号，失败的话进行重试，设置一定的重试次数&lt;/li&gt;
+&lt;li&gt;放入本地缓存或者redis做扣减，如果用完就重复步骤2&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;具体的的表可以是类似这样的：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;字段&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;id&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;自增ID，没有业务意义&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;current_num&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;当前已经分配的ID最大值&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;limit&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;一次分配多少个ID&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;version&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;版本号，CAS更新用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;create_time&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;记录创建时间&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;update_time&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;记录更新时间&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;比如，limit=1000，一次分配1000个ID，没分配之前current_num = 0，第一次current_num = 1000，第二次依次类推。&lt;/p&gt;
+&lt;p&gt;当然，上述的方案也有缺点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;一条数据，如果有大量流程去更新，要竞争获取行锁，会有性能问题，（可以参考行锁的利弊，丁奇——秒杀场景下MySQL的低效）&lt;/li&gt;
+&lt;li&gt;强依赖DB，如果当前数据库宕机，导致分布式ID分发服务就会出现问题&lt;/li&gt;
+&lt;li&gt;如果在主从数据库场景下，需要考虑到主从的延迟性导致分配ID的不一致性&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;所以为了解决上面的问题，笔者参考concurrentHashMap分段锁的思想，将一条记录分段为多个，同时为了避免DB单点可用性，可以将不同的记录分布在不同的数据库上面。&lt;/p&gt;
+&lt;p&gt;具体的表可以是类似这样的：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;字段&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;描述&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;id&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;自增ID，没有业务意义&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;current_num&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;当前已经分配的ID最大值&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;limit&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;一次分配多少个ID&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;offset&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;前后分配的ID间隔数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;initial_id&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;初始自增的ID&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;version&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;版本号，CAS更新用&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;create_time&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;记录创建时间&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;update_time&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;记录更新时间&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt; 新增offset偏移和initial_id字段，offset代表数据库表记录前后分配间隔数量，initial_id代表开始初始的值。&lt;br&gt;
+ 举个例子，现在将记录分为10条，分布在不同数据库上，那么offset就是10000，limit就是1000，第一条记录第一次开始配合获取0-1000，第二次分配获取10000-11000，依次类推。&lt;/p&gt;
+&lt;p&gt; 这里需要考虑一个问题，就是如果请求ID分发的服务的流量&lt;strong&gt;怎么路由&lt;/strong&gt;到具体的记录呢？如果流量全部都请求到第一条记录上了，就会导致请求不均。&lt;br&gt;
+ 这个问题很简单，有一定开发经验的读者自然可以联想到用一致性hash去路由，具体路由的key可以根据业务去定，比如用户手机号。（具体一致性hash路由如何实现，可以参考利用treeMap实现）&lt;/p&gt;
+&lt;p&gt; 以上方案算是解决性能问题，但是还有比较致命的问题，就是无法横向扩展。就比如说现在有10台机器不同数据库，每一个数据库一条记录。假如现在有新的机器10台机器想要加入分配的话，那么就要修改offset和initial_id，所以在不停机实现的话，可能无法实现（目前笔者没有想到方法解决，如果读者有idea可以欢迎和我讨论）。这里笔者提供一种方法去解决：&lt;br&gt;
+ 提前预先分配100条记录，每一条记录一批次获取100个ID，offset设置为10000，当前10台机器每一台有10条记录，后续有新机器的话直接将记录不停机转移到新机器就可以了。&lt;/p&gt;
+&lt;h4 id=&#34;22-redis序列化分发&#34;&gt;2.2 Redis序列化分发&lt;/h4&gt;
+&lt;p&gt;Redis来生成ID，这主要依赖于Redis是单线程的，所以也可以用生成全局唯一的ID。可以用Redis的原子操作 INCR和INCRBY来实现。目前单台redis的qps能够达到5W，所以一定程度上能够解决性能问题。具体实现笔者这里就不阐述了。&lt;/p&gt;
+&lt;p&gt;当然用这个方案也有缺点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;依赖redis，如果业务中没有就要依赖这个中间件&lt;/li&gt;
+&lt;li&gt;生成的ID是单调递增的，容易暴露系统的用户数&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;23-snowflake雪花算法&#34;&gt;2.3 SnowFlake雪花算法&lt;/h4&gt;
+&lt;p&gt;以上2.1 2.2方案都能解决性能问题，但是产生的ID，是连续的，容易暴露自己系统中用户的数量。所以有些系统会要求要趋势递增，而且要保持信息安全。目前雪花算法就能解决这个问题。&lt;/p&gt;
+&lt;p&gt;其中原理就是：给一个64位的二进制数字，其中&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;第1位置为0。&lt;/li&gt;
+&lt;li&gt;第2-42位是相对时间戳，通过当前时间戳减去一个固定的历史时间戳生成。&lt;/li&gt;
+&lt;li&gt;第43-52位是机器号workerID，每个Server的机器ID不同。&lt;/li&gt;
+&lt;li&gt;第53-64位是自增ID。&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1604663039402.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这个方案也有缺点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;实现比较复杂，考验开发人员&lt;/li&gt;
+&lt;li&gt;需要独立部署实现&lt;/li&gt;
+&lt;li&gt;强依赖时钟，时钟回拨会有重复的ID&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;三-当前方案是如何做的&#34;&gt;三、当前方案是如何做的&lt;/h3&gt;
+&lt;p&gt; 参考上述方案后，技术团队考虑到未来业务的增加，流量的增长以及后续的扩展，准备利用方案三去实现。其中具体实现可以参考笔者GitHub的实现：&lt;a href=&#34;https://github.com/zhangyaoo/fastim/blob/master/fastim-leaf/src/main/java/com/zyblue/fastim/leaf/manager/SnowFlakeManager.java&#34;&gt;分布式ID SnowFlake实现&lt;/a&gt;&lt;br&gt;
+ 当然使用方案三也会有缺陷，比如会发生时钟回拨问题，以及分布式ID分发服务强依赖zookeeper。&lt;/p&gt;
+&lt;h4 id=&#34;31-时钟回拨&#34;&gt;3.1 时钟回拨&lt;/h4&gt;
+&lt;p&gt; 发生时钟回拨的原因是，如果分发服务正在生成ID的过程中，系统时间因为不可抗拒的因素或者人为因素导致时间倒流了，会导致可能会有重复的ID生成，作为分布式ID分发这个是不准发生的。所以如果发生时钟回拨那么就抛出异常，实现如下&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;long timestamp = System.currentTimeMillis();
+// 如果当前时间戳小于上次分发的时间戳
+if (timestamp &amp;lt; lastTimestamp) {
+    long offset = lastTimestamp - timestamp;
+    if (offset &amp;lt;= 5) {
+        // 如果时间戳间隔小于5，那么进行等待，等待窗口时间，然后再进行重试
+        try {
+            wait(offset &amp;lt;&amp;lt; 1);
+            timestamp = System.currentTimeMillis();
+            if (timestamp &amp;lt; lastTimestamp) {
+                throw new RuntimeException(String.format(&amp;quot;lastTimestamp %s is after reference time %s&amp;quot;, lastTimestamp, timestamp));
+            }
+        } catch (InterruptedException e) {
+            logger.error(&amp;quot;wait interrupted&amp;quot;);
+            throw new RuntimeException(String.format(&amp;quot;lastTimestamp %s is after reference time %s&amp;quot;, lastTimestamp, timestamp));
+        }
+    } else {
+        // 如果相差过大，直接抛出异常
+        throw new RuntimeException(String.format(&amp;quot;lastTimestamp %s is after reference time %s&amp;quot;, lastTimestamp, timestamp));
+    }
+}
+// 如果等于，表明同一时刻
+if (lastTimestamp == timestamp) {
+    // 如果小于计数器最大值就，增加
+    if (this.counter &amp;lt; MAX_SEQUENCE) {
+        this.counter++;
+    } else {
+        // 表明同一时刻，同一机器下，的所有计数器都用完了
+        throw new RuntimeException(&amp;quot;Sequence exhausted at &amp;quot; + this.counter);
+    }
+} else {
+    //如果是新的ms开始
+    counter = 0L;
+}
+// 记录这一次时间戳，用作下一次比较
+lastTimestamp = timestamp;
+// 后续的生成ID逻辑
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&#34;32-强依赖zookeeper&#34;&gt;3.2 强依赖zookeeper&lt;/h4&gt;
+&lt;p&gt;以上能解决时钟回拨的问题，但是强依赖zookeeper来生成分布式环境下的当前机器的ID。笔者参考dubbo的设计思想，当ID分发服务通过ID+端口注册到zookeeper的递增持久节点后，返回的节点直接存储再本地文件中，实现高可用，如下&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;/**
+ * 高可用，防止zookeeper挂了，本地本机生效
+ * 写入本地文件的时机：当前机器获取zookeeper的持久节点后
+ */
+private void writeWorkerId2Local(int workerId){
+    String path = WORKERID_PATH + File.separator + applicationName + File.separator + &amp;quot;workerId.properties&amp;quot;;
+    File file = new File(path);
+    if(file.exists() &amp;amp;&amp;amp; file.isFile()){
+        try {
+            FileUtils.writeStringToFile(file, &amp;quot;workerId=&amp;quot; + workerId, false);
+        }catch (Exception e){
+            logger.error(&amp;quot;e:&amp;quot;, e);
+        }
+    }else {
+        boolean mkdirs = file.getParentFile().mkdirs();
+        if(mkdirs){
+            try {
+                if (file.createNewFile()) {
+                    FileUtils.writeStringToFile(file, &amp;quot;workerId=&amp;quot; + workerId, false);
+                    logger.info(&amp;quot;local file cache workerID is {}&amp;quot;, workerId);
+                }
+            }catch (Exception e){
+                logger.error(&amp;quot;e:&amp;quot;, e);
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&#34;四-采用分布式id上线后产生的bug&#34;&gt;四、采用分布式ID上线后产生的BUG&lt;/h3&gt;
+&lt;h4 id=&#34;40-问题分析&#34;&gt;4.0 问题分析&lt;/h4&gt;
+&lt;p&gt;当上线分布式ID分发服务后，观察日志，出现大量的报错，如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;io.lettuce.core.RedisCommandExecutionException: ERR bit offset is not an integer or out of range
+at io.lettuce.core.ExceptionFactory.createExecutionException(ExceptionFactory.java:135) ~[lettuce-core-5.2.1.RELEASE.jar:5.2.1.RELEASE]
+at io.lettuce.core.ExceptionFactory.createExecutionException(ExceptionFactory.java:108) ~[lettuce-core-5.2.1.RELEASE.jar:5.2.1.RELEASE]
+at io.lettuce.core.protocol.AsyncCommand.completeResult(AsyncCommand.java:120) ~[lettuce-core-5.2.1.RELEASE.jar:5.2.1.RELEASE]
+at io.lettuce.core.protocol.AsyncCommand.complete(AsyncCommand.java:111) ~[lettuce-core-5.2.1.RELEASE.jar:5.2.1.RELEASE]
+at io.lettuce.core.protocol.CommandHandler.complete(CommandHandler.java:654) ~[lettuce-core-5.2.1.RELEASE.jar:5.2.1.RELEASE]
+at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:614) ~[lettuce-core-5.2.1.RELEASE.jar:5.2.1.RELEASE]
+…………
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;乍看是redis的抛出来的错误，和这次分布式ID改造没有什么关系，但是仔细静下来想一想，这次ID改造是从原来的数据库自增改造的，数据库自增数据主键很小是int类型，然后用了64位二进制数据当作ID后，导致redis中用户的数据存不下去，然后笔者就按照这个思路去发掘问题。&lt;/p&gt;
+&lt;p&gt;笔者从业务抛出的堆栈中发现，这个错误是在判断用户是否是新用户服务方法中抛出的，而判断是新用户的逻辑就是，利用redis的bitmap来解决的：getbit new_user_key userId，其中 userId为用户ID，如果用户发生了交易信息，就会执行：setbit new_user_key userId 1 这个命令。 为什么要用bitmap解决呢，主要是因为如果从交易记录表查询某个用户是否交易信息来判断是新用户的话就会非常耗时，所以只要是发生了交易信息就设置bitmap就可以了。&lt;/p&gt;
+&lt;p&gt;那为什么会抛出out of range这个错误呢，我们知道bitmap底层其实就是String类型，而String类型的最大长度为512M，官网截图：&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1605157810715.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+所以如果offset超过512M这个范围那么就会抛出异常，512M = 2^9 * 2^12 * 2^12 * 2^3 = 2^32 bit，也就是支持Integer类型的最大值，而我们这次分布式ID服务ID是64位的，支持2^64 bit，所以如果offset也就是userId大于2^32的话就会抛出out of range异常了。&lt;/p&gt;
+&lt;h4 id=&#34;41-问题解决&#34;&gt;4.1 问题解决&lt;/h4&gt;
+&lt;p&gt;找到了问题，也就好去做优化了，这里笔者提供几个方法作为参考&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;在数据库用户表或者用户扩展表中增加一个字段，如果发生了交易，那么将字段标记为老用户&lt;/li&gt;
+&lt;li&gt;把用户ID放入redis集合set中，利用SMISMEMBER命令判断当前用户是否在集合内，当然这个会有性能问题，其方法时间复杂度位O(N)，官方截图:&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1605162870590.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;五-总结&#34;&gt;五、总结&lt;/h3&gt;
+&lt;p&gt; 笔者从分布式ID选型出发，介绍了几种业界几种比较常用的生成方法，并且介绍了其优缺点，然后结合实际业务出发，选择合适的方案。然后介绍了使用SnowFlake算法导致的业务问题，以及分析最后提供解方法。从这次踩坑的经历来说，我们要懂技术体系，并且还要非常熟悉业务，最大程度避免功能之间的相互的影响导致的bug。&lt;/p&gt;
+&lt;h3 id=&#34;六-参考&#34;&gt;六、参考&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;美团分布式算法ID几种实现方式——https://tech.meituan.com/2017/04/21/mt-leaf.html&lt;/li&gt;
+&lt;li&gt;SnowFlake算法——https://github.com/twitter-archive/snowflake&lt;/li&gt;
+&lt;/ul&gt;
+">记一次用户中心采用分布式ID踩的坑</a>
       </div>
       
       <div class="item">
@@ -1080,7 +1309,7 @@ public class CheckConfigListener implements ApplicationListener&amp;lt;Applicati
 &lt;ul&gt;
 &lt;li&gt;SaaS系统数据隔离方案——https://blog.arkency.com/comparison-of-approaches-to-multitenancy-in-rails-apps/&lt;/li&gt;
 &lt;/ul&gt;
-">Saas系统多数据源路由优雅解决方案</a>
+">SaaS系统多数据源路由优雅解决方案</a>
       </div>
       
       <div class="item">
@@ -1108,7 +1337,7 @@ public class CheckConfigListener implements ApplicationListener&amp;lt;Applicati
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;寻址过程：&lt;/strong&gt;&lt;br&gt;
-例如语句：select id,name,age from T where name = &amp;quot;张三&amp;quot; and age=25，先根据name字段从辅助聚簇索引定位到哪一个叶子节点数据中，然后根据age节点在上述表格的前6行中，寻找age= 25的数据，然后找出所有符合的数据以及其对应的ID，然后根据ID来进行回表操作查询。这里返回了三条数据，就回了三次表。&lt;br&gt;
+例如语句：select * from T where name = &amp;quot;张三&amp;quot; and age=25，先根据name字段从辅助聚簇索引定位到哪一个叶子节点数据中，然后根据age节点在上述表格的前6行中，寻找age= 25的数据，然后找出所有符合的数据以及其对应的ID，然后根据ID来进行回表操作查询。这里返回了三条数据，就回了三次表。&lt;br&gt;
 上述回表过程中，笔者引入一个&lt;strong&gt;索引下推&lt;/strong&gt;的一个功能，索引下推是MySQL在5.6版本后引入的一个查询优化。就拿上述的例子，在没有优化之前，据name字段查询“张三”后，会拿到6条结果，回表6次，然后从主键索引拿到6条数据后，根据age字段筛选数据；优化之后，先再辅助索引上面根据name字段和age字段筛选符合数据，也就是ID，然后再回表，这里回表了三次。&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -1226,7 +1455,6 @@ public boolean containsQuorum(Set&amp;lt;Long&amp;gt; set){
 &lt;ul&gt;
 &lt;li&gt;如果账户A扣减本地事务成功了，但是消息发出后，因为网络原因或者其他宕机原因，导致消息未发送成功，没有进行B账户远程调用，导致本地事务和消息不一致性。&lt;/li&gt;
 &lt;li&gt;MQ消费端程序如果消费消息成功，请求银行成功了，但是回传ACK给MQ失败了，那么回导致消费端程序重复消费问题，那么就会出现重复转账的问题。&lt;/li&gt;
-&lt;li&gt;在B账户因为某些原因导致账户增加失败，在回调A银行接口通知回滚时网络异常或者宕机，会导致A银行转账无法完成回滚，从而导致数据不一致。&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;异步调用解决了同步调用的主线程阻塞问题，但还是没有解决数据一致性问题。而且引入MQ中间后，还要考虑到本地事务和MQ消息一致性问题，还有其他的引入后的维护工作，比如消息丢失，消息重发等等问题。&lt;/p&gt;
 &lt;h2 id=&#34;二-分布式事务解决方案&#34;&gt;二、分布式事务解决方案&lt;/h2&gt;
@@ -1307,18 +1535,66 @@ public boolean containsQuorum(Set&amp;lt;Long&amp;gt; set){
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;图中的步骤大致分为10步，分别是：&lt;br&gt;
-1.&lt;/p&gt;
+&lt;p&gt;图中的步骤大致分为8步，这里细致讲一下每一步的详细步骤，分别是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;插入初始状态的交易数据。 这一步骤的目的是保证发起同步转账请求和本地初始事务一致性，还有一个目的就是生成转账记录唯一标识，用来标识本次转账&lt;/li&gt;
+&lt;li&gt;同步发起转账请求，带上唯一标识以及其他的业务参数&lt;/li&gt;
+&lt;li&gt;银行乙会校验参数信息，并且同步返回转账通知，类似“我接收到了你的请求了，我还有其他事情，我等会返回结果给你”&lt;/li&gt;
+&lt;li&gt;会根据同步的转账通知来判断这次交易是否合法，然后会记录结果到交易表中。这里并且需要冻结账户的一部分金额，作为临时中间态数据。并且需要更新本地交易表状态为转账中&lt;/li&gt;
+&lt;li&gt;银行乙需要记录本次交易记录，插入一条交易中的数据，直至回调转账结果给银行甲，将这条记录置为转账成功。并且银行乙自己生成的收款交易流号，然后放入到回调结果中，传给银行甲&lt;/li&gt;
+&lt;li&gt;异步回调结果给银行甲，其中回调参数重要的有银行甲的唯一的转账标识，还有银行乙自己生成的收款交易流号&lt;/li&gt;
+&lt;li&gt;根据异步回调的状态，更新交易状态数据，如果成功，那么会扣减账余额，并且释放冻结金额，如果失败，直接释放冻结金额。此时算是正常的一条&lt;strong&gt;流程闭环&lt;/strong&gt;走完&lt;/li&gt;
+&lt;li&gt;当然不是所有的业务能够正常走完流程闭环，也会出现各种原因导致不能走完。为了保证数据一致性，会增加一个补偿程序，定时去拉取异常数据，异常数据指的是交易状态为0和1并且&lt;strong&gt;不在正常窗口业务&lt;/strong&gt;时间内的数据（0和1属于中间态，而2或者3数据终态），窗口时间指的是正常业务从开始到结束的时间。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;如果异常数据状态是0，那么表示有可能是本地更新事务失败了，也有可能是请求或者返回在网络中丢失了，补偿程序里面会根据本地的表数据判断是哪个步骤除问题了，就比如说本地数据没有银行乙的交易流水号，那么就是网络出问题了，后面就可以进行补偿操作&lt;/li&gt;
+&lt;li&gt;如果异常数据状态是1，那么表示可能是银行乙接口有问题或者网络有问题原因导致没有及时回调，这个时候补偿程序就用银行乙的交易流水号是去查询交易是否完成，然后更新自己本地的数据。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;以上流程是一次正常的交易过程，当然不是所有的交易流程都是这样走的，不过大部分转账流程和上述步骤相类似，其中的细致步骤在每个交易系统中略有不同。&lt;/p&gt;
+&lt;p&gt;总结起来，利用本地消息表思想能够解决上面第一部分文章的同步调用的缺点，能够解决第二个第三 个问题，但是第一个问题就无法解决了，只要是同步调用都会出现这个问题，不过有其他方式去解决这个问题。以笔者认知来说，银行转账的业务都是同步调用的。出现接口阻塞这个问题，需要设置超时时间，如果超过超时时间，就记录下这条交易，异步放入&lt;strong&gt;重试队列&lt;/strong&gt;，一段时间后进行&lt;strong&gt;重试&lt;/strong&gt;。&lt;/p&gt;
 &lt;h3 id=&#34;22-事务消息解决本地事务和mq消息一致性问题&#34;&gt;2.2 事务消息解决本地事务和MQ消息一致性问题&lt;/h3&gt;
-&lt;h4 id=&#34;221-消费端重复消费&#34;&gt;2.2.1 消费端重复消费&lt;/h4&gt;
-&lt;h4 id=&#34;222-消费端消费失败&#34;&gt;2.2.2 消费端消费失败&lt;/h4&gt;
-&lt;h3 id=&#34;23-其他问题&#34;&gt;2.3 其他问题&lt;/h3&gt;
-&lt;h4 id=&#34;231-银行交易冲正&#34;&gt;2.3.1 银行交易冲正&lt;/h4&gt;
+&lt;p&gt; 转账业务，如果用异步的话，当出现MQ问题或者消费也者程序出现消息挤压或者消费者端出现问题 的话，那么整个业务时间线会拉的非常长。所以笔者认为异步不适合这种业务，异步&lt;strong&gt;本质上&lt;/strong&gt;是对下游服务的一个缓冲，适合在自己系统中使用，不适合跨系统或者三方调用。当然不是所有的场景都不合适，如果流量非常大话，对方系统有限流机制，使用MQ也算是一种解决方案，这还是看具体业务。&lt;/p&gt;
+&lt;p&gt; 什么样的场景适合使用MQ？一般来说在需要限流削峰、异步解耦等场景使用，所以还是拿上面的图，图中标框的部分业务适合用MQ来解决&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1603790962781.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
+&lt;p&gt; 如果用MQ来做的话，那么会有如下图步骤：&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1603792233049.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+图中的步骤大致分为6步，这里细致讲一下每一步的详细步骤，分别是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;消息生成者发送消息，broker接受消息&lt;/li&gt;
+&lt;li&gt;MQ broker收到消息，随即将消息进行持久化，并且存入库。这一步是防止MQ因为物理原因宕机导致的消息丢失，并且入库的时候要判断幂等，防止没有及时返回ack，导致生产者重发消息。&lt;/li&gt;
+&lt;li&gt;返回ACK给生产者。如果不及时返回或者长时间没有返回，生产者会认为这条消息发送失败，会重新发送。&lt;/li&gt;
+&lt;li&gt;MQ push消息给对应的消费者或者消费者主动来pull消息，然后等待消费者返回ACK&lt;/li&gt;
+&lt;li&gt;如果消息消费者在指定时间内成功返回ack，那么MQ认为消息消费成功，在存储中删除消息，即执行第6步；如果MQ在指定时间内没有收到ACK，则认为消息消费失败，会尝试重新push或者pull消息,重复执行4、5、6步骤&lt;/li&gt;
+&lt;li&gt;MQ删除消息&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt; 以上为一条正常的消息从生产到消费的过程，每一步都是不可或缺的。而且我们可以看到，当引入中间件MQ后，消费端业务需要保持幂等。&lt;/p&gt;
+&lt;p&gt; 回到上面文章最开始的部分，并没有解决异步调用问题一。没有彻底解决本地事务和消息不一致性。所以这个时候，就需要事务消息解决本地事务和MQ消息一致性问题了，笔者重新画了一张图来说明一下事务消息是如何做的：&lt;br&gt;
+&lt;img src=&#34;https://zhangyaoo.github.io/post-images/1603873494446.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;br&gt;
+图中的步骤大致分为几步，分别是：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;生产者发送一条prepare消息&lt;/li&gt;
+&lt;li&gt;MQ接受到消息后，先进行持久化,状态为待确认的消息&lt;/li&gt;
+&lt;li&gt;返回ACK给消息生产者&lt;/li&gt;
+&lt;li&gt;执行本地事务：扣减账户余额，插入交易流水。如果这个事务执行失败，那么相当于业务执行失败，抛给用户交易失败&lt;/li&gt;
+&lt;li&gt;执行完成后，将结果发送执行结果给MQ&lt;/li&gt;
+&lt;li&gt;根据结果将消息commit或者rollback  commit：将消息状态置为已确认  rollback：将消息删除&lt;/li&gt;
+&lt;li&gt;采用pull或者push消费已确认的消息 ，后面流程大致和普通的流程都一样&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt; 这里还没有体现另外一个流程，就是如果消息待确认状态在一定时间内没有转换为已确认，那么MQ会回查本地事务执行状态是否成功。这个是为了保证在第五步发送的消息在网络中丢失或者消费者宕机等情况下，能够回滚。&lt;br&gt;
+ 以上是事务消息大致的流程，能够解决本地事务和MQ消息一致性问题，这里强调的是，不管是是事务消息还是普通的消息，消费端都需要做幂等处理。&lt;br&gt;
+ 总结来说，&lt;strong&gt;ack+补偿+重试+幂等&lt;/strong&gt;是保证一致性的关键。&lt;/p&gt;
+&lt;h4 id=&#34;221-事务消息常见问题&#34;&gt;2.2.1 事务消息常见问题&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;如果consumer消费失败，是否需要producer做回滚呢？&lt;br&gt;
+不需要，MQ作用要保证的就是&lt;strong&gt;最终一致性&lt;/strong&gt;，如果consumer消费失败，就让它进行重试直至成功。如果重试超过一定次数的话，那么就人工介入。&lt;/li&gt;
+&lt;/ol&gt;
 &lt;h2 id=&#34;三-其他方式保证数据一致性&#34;&gt;三、 其他方式保证数据一致性&lt;/h2&gt;
 &lt;p&gt; 当然，保持数据一致性不光是分布式事务来保证，业务上还要配合其他的辅助来保证，这里笔者就列举几种&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;全链路幂等&lt;br&gt;
 全链路幂等保证不产生脏数据，保护核心流程正常执行。&lt;/li&gt;
+&lt;li&gt;重试机制&lt;br&gt;
+对异常业务进行重试，超过指定重试次数仍失败的进行人工介入。&lt;/li&gt;
 &lt;li&gt;业务对账&lt;br&gt;
 业务内部准实时对账，比如业务发生后充值提现，对比用户余额是否正确，用户业务流水是否正确。&lt;br&gt;
 T+1日对账，程序或者人工定时扫描核心业务数据，保证当日数据准确。对账后自动检测并且修复重试业务&lt;/li&gt;
@@ -1331,6 +1607,7 @@ T+1日对账，程序或者人工定时扫描核心业务数据，保证当日�
 &lt;ul&gt;
 &lt;li&gt;有赞出金系统——https://tech.youzan.com/build-a-withdraw-sys/&lt;/li&gt;
 &lt;li&gt;分布式事务的思考——https://www.cnblogs.com/sujing/p/11006424.html&lt;/li&gt;
+&lt;li&gt;阿里云RocketMQ文档——https://help.aliyun.com/document_detail/43348.html&lt;/li&gt;
 &lt;/ul&gt;
 ">金融级业务下分布式事务保证数据一致性</a>
       </div>
@@ -1511,7 +1788,7 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 &lt;p&gt;2、背景：企业借贷，同步请求转异步&lt;br&gt;
 优化之前，三方企业借贷请求，是同步调用，因为一条完整的借贷业务线非常长，中间会RPC调用非常多的底层服务以及其他远程接口，这样的话请求到响应时间会拉的非常长，影响C端的用户体验。&lt;br&gt;
 优化之后，同步改异步，具体做法是，借贷请求进入系统后，会先生成一个进行中的状态借贷数据插入数据库，然后将唯一标识丢入MQ中，然后就返回成功。这样吞吐量会增加，用户端体验会非常好。&lt;br&gt;
-当然如果说要保证高可用，可以利用MQ的事务消息做，利用二阶段提交方式保证MQ能够收到消息。具体方案可以看笔者的这篇文章 &lt;a href=&#34;https://zhangyaoo.github.io/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/&#34;&gt;本地事务消息投递一致性&lt;/a&gt;&lt;/p&gt;
+当然如果说要保证高可用，可以利用MQ的事务消息做，利用二阶段提交方式保证MQ能够收到消息。具体方案可以看笔者的这篇文章 &lt;a href=&#34;https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing//&#34;&gt;金融级业务下分布式事务保证数据一致性&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;3、背景：C端用户在APP上，某一个标开启募集资金后进行投标，这里的标类似支付宝的理财产品，开始募集的时候会有高并发流量涌入，当APP端用户同时投标，会有大量请求，这就形成了抢购的动作，因为一个产品标的可投金额是有限的，只有少数人能投标成功&lt;br&gt;
 优化之前：笔者在上文中提到的，尽管说频繁将更新行锁的数据放到事务的最后， 会有性能提升，但是随着并发数增长，MySQL也会成为性能瓶颈。&lt;br&gt;
 优化之后：利用redis的纯内存操作高性能的优点，将产品的可投金额放入缓存redis（这里redis里面的金额比数据库中少保证不超卖），利用redis的decrby命令或者lua脚本，保证产品标剩余可投金额能够进行原子减少，每一次减少成功后，将用户这一次投标的数据丢入MQ中异步处理，消费端做的就是将插入预状态的借款数据、冻结用户金额和减少产品的可投金额放入同一个事务中处理。&lt;br&gt;
@@ -1855,9 +2132,9 @@ public class LRUCacheV2 {
 &lt;h2 id=&#34;博主是谁&#34;&gt;👨‍💻 博主是谁&lt;/h2&gt;
 &lt;p&gt;还在打怪升级的菜鸟&lt;/p&gt;
 &lt;h2 id=&#34;兴趣爱好&#34;&gt;⛹ 兴趣爱好&lt;/h2&gt;
-&lt;p&gt;二次元、骑行、篮球、LOL、编码&lt;/p&gt;
+&lt;p&gt;撸码、二次元、骑行、篮球、LOL&lt;/p&gt;
 &lt;h2 id=&#34;联系我呀&#34;&gt;📬 联系我呀&lt;/h2&gt;
-&lt;p&gt;QQ：1124826889&lt;/p&gt;
+&lt;p&gt;手机（微信同）：15112342449&lt;/p&gt;
 ">关于</a>
       </div>
       

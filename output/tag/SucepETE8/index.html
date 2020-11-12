@@ -8,7 +8,7 @@
 <meta name="keywords" content="zhangyao blog">
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
-<title>金融级业务下分布式事务保证数据一致性 | will</title>
+<title>will</title>
 <link rel="shortcut icon" href="/favicon.ico?v=1605162937628">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
@@ -38,8 +38,6 @@
 
 
 
-  <meta name="description" content="金融级业务下分布式事务保证数据一致性" />
-  <meta name="keywords" content="分布式事务" />
 </head>
 
 <body>
@@ -172,26 +170,10 @@
   <div class="main-continer">
     
     <div
-      class="section-layout pisces ">
+      class="section-layout  pisces">
       <div class="section-layout-wrapper">
-        
-
-<div class="sidebar">
-  
-    <div class="sidebar-box box-shadow-wrapper bg-color right-motion" id="sidebar">
-      
-        <div class="post-list-sidebar">
-          <div class="sidebar-title">
-            <span id="tocSideBar" class="sidebar-title-item sidebar-title-active language" data-lan="index">文章目录</span>
-            <span id="metaSideBar" class="sidebar-title-item language" data-lan="preview">站点概览</span>
-          </div>
-        </div>
-      
-      <div class="sidebar-body pisces" id="sidebar_body">
-        
-          
-            <div class="post-side-meta" id="post_side_meta">
-              
+        <div id="sidebarMeta" class="sidebar">
+    
 <div class="sidebar-wrapper box-shadow-wrapper bg-color">
   <div class="sidebar-item">
     <img class="site-author-image right-motion" src="/images/avatar.png"/>
@@ -234,569 +216,92 @@
 
 
 </div>
-            </div>
-            <div class="post-toc sidebar-body-active" id="post_toc" style="opacity: 1;">
-              <div class="toc-box right-motion">
-  <div class="toc-wrapper auto-number auto"
-    id="toc_wrapper">
-    <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
-<li><a href="#%E4%B8%80-%E5%BC%95%E5%85%A5">一、引入</a></li>
-<li><a href="#%E4%BA%8C-%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">二、分布式事务解决方案</a>
-<ul>
-<li><a href="#21-%E5%88%A9%E7%94%A8%E6%9C%AC%E5%9C%B0%E6%B6%88%E6%81%AF%E8%A1%A8%E6%80%9D%E6%83%B3%E8%A7%A3%E5%86%B3%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98">2.1 利用本地消息表思想解决一致性问题</a></li>
-<li><a href="#22-%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E8%A7%A3%E5%86%B3%E6%9C%AC%E5%9C%B0%E4%BA%8B%E5%8A%A1%E5%92%8Cmq%E6%B6%88%E6%81%AF%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98">2.2 事务消息解决本地事务和MQ消息一致性问题</a>
-<ul>
-<li><a href="#221-%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98">2.2.1 事务消息常见问题</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#%E4%B8%89-%E5%85%B6%E4%BB%96%E6%96%B9%E5%BC%8F%E4%BF%9D%E8%AF%81%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7">三、 其他方式保证数据一致性</a></li>
-<li><a href="#%E5%9B%9B-%E6%80%BB%E7%BB%93">四、总结</a></li>
-<li><a href="#%E4%BA%94-%E5%8F%82%E8%80%83">五、参考</a></li>
-</ul>
-</li>
-</ul>
-
-  </div>
 </div>
-
 <script>
-
-  let lastTop = 0, lList = [], hList = [], postBody, lastIndex = -1;
-  let active = 'active-show', activeClass = 'active-current';
-  let tocWrapper = document.querySelector('#toc_wrapper');
-  let tocContent = tocWrapper.children[0];
-  let autoNumber = tocWrapper && tocWrapper.classList.contains('auto-number');
-
-  function addTocNumber(elem, deep) {
-    if (!elem) {
-      return;
-    }
-    let prop = elem.__proto__;
-
-    if (prop === HTMLUListElement.prototype) {
-      for (let i = 0; i < elem.children.length; i++) {
-        addTocNumber(elem.children[i], deep + (i + 1) + '.');
+  let sidebarMeta = document.querySelector('#sidebarMeta');
+  let scheme = 'pisces';
+  let sidebarWrapper = document.querySelector('.sidebar-wrapper');
+  if (sidebarMeta && (scheme === 'pisces' || scheme === 'gemini')) {
+    document.addEventListener('scroll', function(e) {
+      if (document.scrollingElement.scrollTop > parseInt(sidebarMeta.style.marginTop) + 10) {
+        sidebarWrapper.classList.add('home-sidebar-fixed')
+      } else {
+        sidebarWrapper.classList.remove('home-sidebar-fixed')
       }
-    } else if (prop === HTMLLIElement.prototype) {
-      // 保存li元素
-      if (elem.children[0] && elem.children[0].__proto__ === HTMLAnchorElement.prototype) {
-        lList.push(elem);
-      }
-      for (let i = 0; i < elem.children.length; i++) {
-        let cur = elem.children[i];
-        if (cur.__proto__ === HTMLAnchorElement.prototype) {
-          if (autoNumber) {
-            cur.text = deep + ' ' + cur.text;
-          }
-        } else if (cur.__proto__ === HTMLUListElement.prototype) {
-          addTocNumber(cur, deep);
-        }
-      }
-    }
-  }
-
-  function removeParentActiveClass() {
-    let parents = tocContent.querySelectorAll('.' + active)
-    parents.forEach(function (elem) {
-      elem.classList.remove(active);
     });
   }
-
-  function addActiveClass(index) {
-    if (index >= 0 && index < hList.length) {
-      lList[index].classList.add(activeClass);
-    }
-  }
-
-  function removeActiveClass(index) {
-    if (index >= 0 && index < hList.length) {
-      lList[index].classList.remove(activeClass);
-    }
-  }
-
-  function addActiveLiElemment(elem, parent) {
-    if (!elem || elem === parent) {
-      return;
-    } else {
-      if (elem.__proto__ === HTMLLIElement.prototype) {
-        elem.classList.add(active);
-      }
-      addActiveLiElemment(elem.parentElement, parent);
-    }
-  }
-
-  function showToc() {
-    if (tocWrapper) {
-      postBody = document.querySelector('#post_body');
-      for (let i = 0; i < postBody.children.length; i++) {
-        if (postBody.children[i].__proto__ === HTMLHeadingElement.prototype) {
-          hList.push(postBody.children[i]);
-        }
-      }
-      if (tocWrapper.classList.contains('compress')) {
-        tocContent.classList.add('closed');
-      } else if (tocWrapper.classList.contains('no_compress')) {
-        tocContent.classList.add('expanded');
-      } else {
-        if (hList.length > 10) {
-          active = 'active-hidden'
-          tocContent.classList.add('closed');
-        } else {
-          tocContent.classList.add('expanded');
-        }
-      }
-    }
-  }
-
-  (function () {
-    // 处理不是从#一级标题开始目录
-    if (tocContent.children.length === 1 && tocContent.children[0].__proto__ === HTMLLIElement.prototype) {
-      let con = tocContent.children[0].children[0];
-      tocContent.innerHTML = con.innerHTML;
-    }
-    let markdownItTOC = document.querySelector('.markdownIt-TOC');
-    let innerHeight = window.innerHeight;
-    markdownItTOC.style = `max-height: ${innerHeight - 80 > 0 ? innerHeight - 80 : innerHeight}px`
-    addTocNumber(tocContent, '');
-  })();
-
-  document.addEventListener('scroll', function (e) {
-    if (lList.length <= 0) {
-      return;
-    }
-    let scrollTop = document.scrollingElement.scrollTop + 10;
-    let dir;
-
-    if (lastTop - scrollTop > 0) {
-      dir = 'up';
-    } else {
-      dir = 'down';
-    }
-
-    lastTop = scrollTop;
-    if (scrollTop <= 0) {
-      if (lastIndex >= 0 && lastIndex < hList.length) {
-        lList[lastIndex].classList.remove(activeClass);
-      }
-      return;
-    }
-
-    let current = 0, hasFind = false;
-    for (let i = 0; i < hList.length; i++) {
-      if (hList[i].offsetTop > scrollTop) {
-        current = i;
-        hasFind = true;
-        break;
-      }
-    }
-    if (!hasFind && scrollTop > lList[lList.length - 1].offsetTop) {
-      current = hList.length - 1;
-    } else {
-      current--;
-    }
-    if (dir === 'down') {
-      if (current > lastIndex) {
-        addActiveClass(current);
-        removeActiveClass(lastIndex)
-        lastIndex = current;
-        removeParentActiveClass();
-        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
-      }
-    } else {
-      if (current < lastIndex) {
-        addActiveClass(current);
-        removeActiveClass(lastIndex);
-        lastIndex = current;
-        removeParentActiveClass();
-        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
-      }
-    }
-  });
-
-
-  window.addEventListener('load', function () {
-    showToc();
-    document.querySelector('#sidebar').style = 'display: block;';
-    tocWrapper.classList.add('toc-active');
-    setTimeout(function () {
-      if ("createEvent" in document) {
-        let evt = document.createEvent("HTMLEvents");
-        evt.initEvent("scroll", false, true);
-        document.dispatchEvent(evt);
-      }
-      else {
-        document.fireEvent("scroll");
-      }
-    }, 500)
-  })
-
-</script>
-            </div>
-          
-        
+  </script>
+        <div class="section-box tag-line box-shadow-wrapper">
+          <section class="section tags-section posts-expand bg-color">
+            <div class="padding-wrapper">
+  <div class="tag-timeline-box">
+    <div class="tag-timeline-wrapper">
+      <div class="tag-timeline-title">
+        <h2>
+          Redis
+          <small class="language" data-lan="tag">标签</small>
+        </h2>
       </div>
-    </div>
-  
-</div>
-<script>
-  const SIDEBAR_TITLE_ACTIVE = 'sidebar-title-active';
-  const SIDEBAR_BODY_ACTIVE = 'sidebar-body-active';
-  const SLIDE_UP_IN = 'slide-up-in';
-
-  let sidebar = document.querySelector('#sidebar'),
-  tocSideBar = document.querySelector('#tocSideBar'),
-  metaSideBar = document.querySelector('#metaSideBar'),
-  postToc = document.querySelector('#post_toc'),
-  postSiteMeta = document.querySelector('#post_side_meta'),
-  sidebarTitle = document.querySelector('.sidebar-title'),
-  sidebarBody = document.querySelector('#sidebar_body');
-
-  tocSideBar && tocSideBar.addEventListener('click', (e) => {
-    toggleSidebar(e);
-  });
-
-  metaSideBar && metaSideBar.addEventListener('click', (e) => {
-    toggleSidebar(e);
-  });
-
-  function toggleSidebar(e) {
-    let currentTitle = document.querySelector("."+SIDEBAR_TITLE_ACTIVE);
-    if (currentTitle == e.srcElement) {
-      return ;
-    }
-    let current, showElement, hideElement;
-    if (e.srcElement == metaSideBar) {
-      showElement = postSiteMeta;
-      hideElement = postToc;
-    } else if (e.srcElement == tocSideBar){
-      showElement = postToc;
-      hideElement = postSiteMeta;
-    }
-    currentTitle.classList.remove(SIDEBAR_TITLE_ACTIVE);
-    e.srcElement.classList.add(SIDEBAR_TITLE_ACTIVE);
-
-    window.Velocity(hideElement, 'stop');
-    window.Velocity(hideElement, 'transition.slideUpOut', {
-      display: 'none',
-      duration: 200,
-      complete: function () {
-        window.Velocity(showElement, 'transition.slideDownIn', {
-          duration: 200
-        });
-      }
-    })
-    hideElement.classList.remove(SIDEBAR_BODY_ACTIVE);
-    showElement.classList.add(SIDEBAR_BODY_ACTIVE);
-  }
-
-  postToc && postToc.addEventListener('transitionend', function() {
-    this.classList.remove(SLIDE_UP_IN);
-  });
-
-  if (sidebarBody) {
-    if (sidebarBody.classList.contains('pisces') || sidebarBody.classList.contains('gemini')) {
-      let hasFix = false;
-      let scrollEl = document.querySelector('.main-continer');
-      let limitTop = document.querySelector('#nav_ul').children.length * 42 + 162;
-      window.addEventListener('scroll', function(e) {
-        if (document.scrollingElement.scrollTop >= limitTop) {
-          if (!hasFix) {
-            sidebar.classList.add('sidebar-fixed');
-            hasFix = true;
-          }
-        } else {
-          if (hasFix) {
-            sidebar.classList.remove('sidebar-fixed');
-            hasFix = false;
-          }
-        }
-      });
-    }
-  }
-  
-</script>
-        <div class="section-box box-shadow-wrapper">
-          <div class="section bg-color post post-page">
-            <header class="post-header">
-  <h1 class="post-title">
-    <a class="post-title-link" href="https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/">
-      金融级业务下分布式事务保证数据一致性
-    </a>
-  </h1>
-  <div class="post-meta">
-    
-    <span class="meta-item pc-show">
-      <i class="fa fa-calendar-o"></i>
-      <span class="language" data-lan="publish">发布于</span>
-      <span>2020-06-22</span>
-      <span class="post-meta-divider pc-show">|</span>
-    </span>
-    
-    <span class="meta-item">
-      <i class="fa fa-folder-o"></i>
-      <span class="pc-show language" data-lan="category-in">分类于</span>
       
       
-      <a href="https://zhangyaoo.github.io/tag/3TlXXSVtT/">
-        <span>分布式事务</span>
+      
+      <a href="https://zhangyaoo.github.io/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/">
+        <div class="motion-warpper">
+          <div class="tag-post-node">
+            <h1>
+              10-16
+              <small>记一次用户中心采用分布式ID踩的坑</small>
+            </h1>
+          </div>
+        </div>
       </a>
       
       
-    </span>
-    <span class="post-meta-divider">|</span>
-    
-    <span class="meta-item">
-      <i class="fa fa-clock-o"></i>
-      <span>14<span class="language" data-lan="minute">分钟</span></span>
-    </span>
-    <span class="meta-item">
-      <span class="post-meta-divider">|</span>
-      <i class="fa fa-file-word-o"></i>
-      <span>3920<span class="pc-show language" data-lan="words">字数</span></span>
-    </span>
-    
-  </div>
-</header>
-            <div class="post-body next-md-body" id="post_body">
-              <h2 id="前言">前言</h2>
-<blockquote>
-<p>随着分布式服务架构的流行与普及，原来在单体应用中执行的多个逻辑操作，现在被拆分成了多个服务之间的远程调用。微服务化后，随着带来的服务之间的分布式事务问题，尤其是在金融业务下，分布式事务是保证数据一致性的重要保证。本文着重会讲分布式事务场景和业界主流的解决方案。</p>
-</blockquote>
-<h2 id="一-引入">一、引入</h2>
-<p> 资金转账在金融业务下是一个非常重要而且常见的场景，如果因为技术问题导致资金转账错误，导致数据不一致问题，那么就会造成无法预测的后果。<br>
- 笔者这里拿银行转账的例子来说（这里的转账有很多场景比如银行卡之间充值提现、银行账户之间的转账等等），比如甲银行账户A向乙银行账户B转账1W：</p>
-<p>同步调用：</p>
-<ol>
-<li>A银行对转出账户执行检查校验，进行账户金额扣减。</li>
-<li>A银行同步调用B银行转账接口。</li>
-<li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
-<li>B银行返回处理结果给A银行。<br>
-<img src="https://zhangyaoo.github.io/post-images/1593745125729.png" alt="" loading="lazy"><br>
-同步调用问题：</li>
-</ol>
-<ul>
-<li>如果B银行因为网络原因导致接口不通，那么A调用线程会长时间阻塞。</li>
-<li>如果A扣减后，发送请求后，在网络中丢失了，B银行没有收到请求，导致账户A扣减了，账户B没有加</li>
-<li>如果账户B扣减成功了，由于某种原因比如网络异常没有及时回调给甲银行，那么账户A就认为是异常请求，则会回滚事务，导致数据不一致。</li>
-</ul>
-<p>再来看一下异步调用：</p>
-<ol>
-<li>A银行对转出账户执行检查校验，进行账户金额扣减。</li>
-<li>主线程将请求数据异步写入队列MQ</li>
-<li>真正消费者程序对B银行进行远程调用</li>
-<li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
-<li>B银行返回处理结果给A银行。<br>
-<img src="https://zhangyaoo.github.io/post-images/1593743096206.png" alt="" loading="lazy"><br>
-异步调用问题：</li>
-</ol>
-<ul>
-<li>如果账户A扣减本地事务成功了，但是消息发出后，因为网络原因或者其他宕机原因，导致消息未发送成功，没有进行B账户远程调用，导致本地事务和消息不一致性。</li>
-<li>MQ消费端程序如果消费消息成功，请求银行成功了，但是回传ACK给MQ失败了，那么回导致消费端程序重复消费问题，那么就会出现重复转账的问题。</li>
-</ul>
-<p>异步调用解决了同步调用的主线程阻塞问题，但还是没有解决数据一致性问题。而且引入MQ中间后，还要考虑到本地事务和MQ消息一致性问题，还有其他的引入后的维护工作，比如消息丢失，消息重发等等问题。</p>
-<h2 id="二-分布式事务解决方案">二、分布式事务解决方案</h2>
-<p> 讲到了分布式事务，自然离不开分布式系统的一些基本原则和定理：CAP原则和BASE理论，相信读者应该都知道，这里不做过多阐述。业界根据这些规则和理论，衍生出了各种分布式事务解决方案：XA规范，2PC，3PC，本地消息表方案，基于消息中间件的最终一致性方案，TCC方案，阿里的SEATA，SAGA方案和最大努力通知等等。<br>
- 以上每个方案都有自己的应用场景，就拿2PC来说，MySQL的事务型日志redolog二段提交（redolog(prepare)--》binlog--》redolog(commit)）保证binlog和redolog数据一致性，Zookeeper的proposal事务二段提交（半数以上ack返回成功表示写入数据成功）保证leader和foller的数据一致性，这些都是2PC的应用。<br>
- 金融场景下类似资金业务需要保证最终一致性解决分布式事务，不需要保证转账实时性。所以本地消息表、基于MQ中间件的最终一致性等柔性方案是首选的方案。这些基于消息的分布式事务，本质上就是，本地事务+从事务，从事务从消息中获取信息进行本地提交，这里保持<strong>异步事务机制、只能保证最终一致性</strong>。</p>
-<h3 id="21-利用本地消息表思想解决一致性问题">2.1 利用本地消息表思想解决一致性问题</h3>
-<p> 一般来说，跨行转账的原理，会存在一个中国人民银行的中间人角色来操作转账，但不在本次讨论的范围内。<br>
- 业界银行转账大部分都是同步转账，异步获取转账结果，包括第三方支付平台对接银行都是这样玩的。这里笔者就利用本地消息表思想来具体叙述数据一致性是如何保证的，老规矩先放图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603274563955.png" alt="" loading="lazy"><br>
-其中交易记录表大概长这个样子：</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">字段</th>
-<th style="text-align:center">描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">id</td>
-<td style="text-align:center">自增ID，没有业务意义</td>
-</tr>
-<tr>
-<td style="text-align:center">trade_order_num</td>
-<td style="text-align:center">交易订单号，作为转账记录唯一标识</td>
-</tr>
-<tr>
-<td style="text-align:center">source_account_num</td>
-<td style="text-align:center">交易转出方账户ID</td>
-</tr>
-<tr>
-<td style="text-align:center">target_account_num</td>
-<td style="text-align:center">交易收款方账户ID</td>
-</tr>
-<tr>
-<td style="text-align:center">status</td>
-<td style="text-align:center">状态机，0=预创建，1=转账中，2=转账成功，3=转账失败</td>
-</tr>
-<tr>
-<td style="text-align:center">pay_success_time</td>
-<td style="text-align:center">记录转账成功时间</td>
-</tr>
-<tr>
-<td style="text-align:center">create_time</td>
-<td style="text-align:center">记录创建时间，可作为窗口时间内判断标准</td>
-</tr>
-<tr>
-<td style="text-align:center">update_time</td>
-<td style="text-align:center">记录 更新时间</td>
-</tr>
-</tbody>
-</table>
-<p>账户表大概长这个样子：</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">字段</th>
-<th style="text-align:center">描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">id</td>
-<td style="text-align:center">自增ID，没有业务意义</td>
-</tr>
-<tr>
-<td style="text-align:center">account_num</td>
-<td style="text-align:center">账户ID</td>
-</tr>
-<tr>
-<td style="text-align:center">current_amt</td>
-<td style="text-align:center">当前账户余额</td>
-</tr>
-<tr>
-<td style="text-align:center">lock_amt</td>
-<td style="text-align:center">冻结金额，用来记录临时状态的核心转账数据 。真实余额=current_amt-lock_amt</td>
-</tr>
-</tbody>
-</table>
-<p>图中的步骤大致分为8步，这里细致讲一下每一步的详细步骤，分别是：</p>
-<ol>
-<li>插入初始状态的交易数据。 这一步骤的目的是保证发起同步转账请求和本地初始事务一致性，还有一个目的就是生成转账记录唯一标识，用来标识本次转账</li>
-<li>同步发起转账请求，带上唯一标识以及其他的业务参数</li>
-<li>银行乙会校验参数信息，并且同步返回转账通知，类似“我接收到了你的请求了，我还有其他事情，我等会返回结果给你”</li>
-<li>会根据同步的转账通知来判断这次交易是否合法，然后会记录结果到交易表中。这里并且需要冻结账户的一部分金额，作为临时中间态数据。并且需要更新本地交易表状态为转账中</li>
-<li>银行乙需要记录本次交易记录，插入一条交易中的数据，直至回调转账结果给银行甲，将这条记录置为转账成功。并且银行乙自己生成的收款交易流号，然后放入到回调结果中，传给银行甲</li>
-<li>异步回调结果给银行甲，其中回调参数重要的有银行甲的唯一的转账标识，还有银行乙自己生成的收款交易流号</li>
-<li>根据异步回调的状态，更新交易状态数据，如果成功，那么会扣减账余额，并且释放冻结金额，如果失败，直接释放冻结金额。此时算是正常的一条<strong>流程闭环</strong>走完</li>
-<li>当然不是所有的业务能够正常走完流程闭环，也会出现各种原因导致不能走完。为了保证数据一致性，会增加一个补偿程序，定时去拉取异常数据，异常数据指的是交易状态为0和1并且<strong>不在正常窗口业务</strong>时间内的数据（0和1属于中间态，而2或者3数据终态），窗口时间指的是正常业务从开始到结束的时间。</li>
-</ol>
-<ul>
-<li>如果异常数据状态是0，那么表示有可能是本地更新事务失败了，也有可能是请求或者返回在网络中丢失了，补偿程序里面会根据本地的表数据判断是哪个步骤除问题了，就比如说本地数据没有银行乙的交易流水号，那么就是网络出问题了，后面就可以进行补偿操作</li>
-<li>如果异常数据状态是1，那么表示可能是银行乙接口有问题或者网络有问题原因导致没有及时回调，这个时候补偿程序就用银行乙的交易流水号是去查询交易是否完成，然后更新自己本地的数据。</li>
-</ul>
-<p>以上流程是一次正常的交易过程，当然不是所有的交易流程都是这样走的，不过大部分转账流程和上述步骤相类似，其中的细致步骤在每个交易系统中略有不同。</p>
-<p>总结起来，利用本地消息表思想能够解决上面第一部分文章的同步调用的缺点，能够解决第二个第三 个问题，但是第一个问题就无法解决了，只要是同步调用都会出现这个问题，不过有其他方式去解决这个问题。以笔者认知来说，银行转账的业务都是同步调用的。出现接口阻塞这个问题，需要设置超时时间，如果超过超时时间，就记录下这条交易，异步放入<strong>重试队列</strong>，一段时间后进行<strong>重试</strong>。</p>
-<h3 id="22-事务消息解决本地事务和mq消息一致性问题">2.2 事务消息解决本地事务和MQ消息一致性问题</h3>
-<p> 转账业务，如果用异步的话，当出现MQ问题或者消费也者程序出现消息挤压或者消费者端出现问题 的话，那么整个业务时间线会拉的非常长。所以笔者认为异步不适合这种业务，异步<strong>本质上</strong>是对下游服务的一个缓冲，适合在自己系统中使用，不适合跨系统或者三方调用。当然不是所有的场景都不合适，如果流量非常大话，对方系统有限流机制，使用MQ也算是一种解决方案，这还是看具体业务。</p>
-<p> 什么样的场景适合使用MQ？一般来说在需要限流削峰、异步解耦等场景使用，所以还是拿上面的图，图中标框的部分业务适合用MQ来解决<br>
-<img src="https://zhangyaoo.github.io/post-images/1603790962781.png" alt="" loading="lazy"></p>
-<p> 如果用MQ来做的话，那么会有如下图步骤：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603792233049.png" alt="" loading="lazy"><br>
-图中的步骤大致分为6步，这里细致讲一下每一步的详细步骤，分别是：</p>
-<ol>
-<li>消息生成者发送消息，broker接受消息</li>
-<li>MQ broker收到消息，随即将消息进行持久化，并且存入库。这一步是防止MQ因为物理原因宕机导致的消息丢失，并且入库的时候要判断幂等，防止没有及时返回ack，导致生产者重发消息。</li>
-<li>返回ACK给生产者。如果不及时返回或者长时间没有返回，生产者会认为这条消息发送失败，会重新发送。</li>
-<li>MQ push消息给对应的消费者或者消费者主动来pull消息，然后等待消费者返回ACK</li>
-<li>如果消息消费者在指定时间内成功返回ack，那么MQ认为消息消费成功，在存储中删除消息，即执行第6步；如果MQ在指定时间内没有收到ACK，则认为消息消费失败，会尝试重新push或者pull消息,重复执行4、5、6步骤</li>
-<li>MQ删除消息</li>
-</ol>
-<p> 以上为一条正常的消息从生产到消费的过程，每一步都是不可或缺的。而且我们可以看到，当引入中间件MQ后，消费端业务需要保持幂等。</p>
-<p> 回到上面文章最开始的部分，并没有解决异步调用问题一。没有彻底解决本地事务和消息不一致性。所以这个时候，就需要事务消息解决本地事务和MQ消息一致性问题了，笔者重新画了一张图来说明一下事务消息是如何做的：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603873494446.png" alt="" loading="lazy"><br>
-图中的步骤大致分为几步，分别是：</p>
-<ol>
-<li>生产者发送一条prepare消息</li>
-<li>MQ接受到消息后，先进行持久化,状态为待确认的消息</li>
-<li>返回ACK给消息生产者</li>
-<li>执行本地事务：扣减账户余额，插入交易流水。如果这个事务执行失败，那么相当于业务执行失败，抛给用户交易失败</li>
-<li>执行完成后，将结果发送执行结果给MQ</li>
-<li>根据结果将消息commit或者rollback  commit：将消息状态置为已确认  rollback：将消息删除</li>
-<li>采用pull或者push消费已确认的消息 ，后面流程大致和普通的流程都一样</li>
-</ol>
-<p> 这里还没有体现另外一个流程，就是如果消息待确认状态在一定时间内没有转换为已确认，那么MQ会回查本地事务执行状态是否成功。这个是为了保证在第五步发送的消息在网络中丢失或者消费者宕机等情况下，能够回滚。<br>
- 以上是事务消息大致的流程，能够解决本地事务和MQ消息一致性问题，这里强调的是，不管是是事务消息还是普通的消息，消费端都需要做幂等处理。<br>
- 总结来说，<strong>ack+补偿+重试+幂等</strong>是保证一致性的关键。</p>
-<h4 id="221-事务消息常见问题">2.2.1 事务消息常见问题</h4>
-<ol>
-<li>如果consumer消费失败，是否需要producer做回滚呢？<br>
-不需要，MQ作用要保证的就是<strong>最终一致性</strong>，如果consumer消费失败，就让它进行重试直至成功。如果重试超过一定次数的话，那么就人工介入。</li>
-</ol>
-<h2 id="三-其他方式保证数据一致性">三、 其他方式保证数据一致性</h2>
-<p> 当然，保持数据一致性不光是分布式事务来保证，业务上还要配合其他的辅助来保证，这里笔者就列举几种</p>
-<ol>
-<li>全链路幂等<br>
-全链路幂等保证不产生脏数据，保护核心流程正常执行。</li>
-<li>重试机制<br>
-对异常业务进行重试，超过指定重试次数仍失败的进行人工介入。</li>
-<li>业务对账<br>
-业务内部准实时对账，比如业务发生后充值提现，对比用户余额是否正确，用户业务流水是否正确。<br>
-T+1日对账，程序或者人工定时扫描核心业务数据，保证当日数据准确。对账后自动检测并且修复重试业务</li>
-<li>业务指标监控<br>
-监控数据库中的订单预占资金没有释放，状态机是不是最终态监控，单位窗口时间内业务状态是否异常，账户中的预扣减金额是否释放，业务重试次数是否超过阈值等等业务监控。</li>
-</ol>
-<h2 id="四-总结">四、总结</h2>
-<p> 分布式场景，要用分布式的思维去思考问题。要考虑任何的超时，断电，维护不同物理存储的数据的可能存在的状态不一致的场景，说白了要面向失败编程。</p>
-<h2 id="五-参考">五、参考</h2>
-<ul>
-<li>有赞出金系统——https://tech.youzan.com/build-a-withdraw-sys/</li>
-<li>分布式事务的思考——https://www.cnblogs.com/sujing/p/11006424.html</li>
-<li>阿里云RocketMQ文档——https://help.aliyun.com/document_detail/43348.html</li>
-</ul>
-
-            </div>
-            
-            
-              <div class="post-footer">
-  <ul class="post-copyright">
-    <li class="post-copyright-author">
-      <strong class="language" data-lan="author">本文作者：</strong>
-      will
-    </li>
-    <li class="post-copyright-link">
-      <strong class="language" data-lan="link">本文链接：</strong>
-      <a href="https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/" title="金融级业务下分布式事务保证数据一致性">https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/</a>
-    </li>
-    <li class="post-copyright-license">
-      <strong class="language" data-lan="copyright">版权声明： </strong>
-      本博客所有文章除特别声明外，均采用<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i> BY-NC-SA</a> 许可协议。转载请注明出处！
-    </li>
-  </ul>
-  <div class="tags">
-    
-      <a href="https://zhangyaoo.github.io/tag/3TlXXSVtT/"># 分布式事务</a>
-    
-  </div>
-  <div class="nav">
-    <div class="nav-prev">
       
-        <i class="fa fa-chevron-left"></i>
-        <a class="nav-pc-next" title="关于Zookeeper奇数节点以及脑裂问题" href="https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">关于Zookeeper奇数节点以及脑裂问题</a class="nav-pc-next">
-        <a class="nav-mobile-prev" title="关于Zookeeper奇数节点以及脑裂问题" href="https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">上一篇</a>
       
-    </div>
-    <div class="nav-next">
       
-        <a class="nav-pc-next" title="O(N)时间复杂度下，二进制反转" href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/">O(N)时间复杂度下，二进制反转</a>
-        <a class="nav-mobile-next" title="O(N)时间复杂度下，二进制反转" href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/">下一篇</a>
-        <i class="fa fa-chevron-right"></i>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       
     </div>
   </div>
 </div>
-            
-            
-  
-
-          </div>
+          </section>
         </div>
       </div>
     </div>
@@ -984,253 +489,6 @@ T+1日对账，程序或者人工定时扫描核心业务数据，保证当日�
   }
 
 </script>
-    <div class="light-box" id="light_box"></div>
-<script>
-  let imgs = document.querySelectorAll('.post-body img');
-  let lightBox = document.querySelector('#light_box');
-  lightBox.addEventListener('mousedown', (e) => {
-    e.preventDefault()
-  })
-  lightBox.addEventListener('mousewheel', (e) => {
-    e.preventDefault()
-  })
-  let width = window.innerWidth * 0.8;
-  lightBox.onclick = () => {
-    let img = lightBox.querySelector('img');
-    lightBox.style = '';
-    img && img.remove();
-  }
-  imgs.forEach(item => {
-    item.onclick = function (e) {
-      let lightImg = document.createElement('img');
-      lightImg.src = this.src;
-      lightBox.style = `height: 100%; opacity: 1; background-color: rgba(0, 0, 0, 0.5);cursor: zoom-out;`;
-      lightImg.style = `width: ${width}px; border: 1px solid #fff; border-radius: 2px;`;
-      lightImg.onclick = function () {
-        lightBox.style = '';
-        this.remove();
-      }
-      lightBox.append(lightImg);
-    }
-  })
-</script>
-    <div class="reward-mask" style="display: none;">
-  <div class="reward-relative">
-    <span class="close" aria-hidden="true">x</span>
-    <div class="reward-body">
-      <h2>感谢您的支持，我会继续努力的!</h2>
-      <div class="reward-img-box">
-        <div style="position: relative; width: 140px; height: 140px;">
-          
-          
-          
-        </div>
-      </div>
-      <p class="reward-word">扫码打赏，你说多少就多少</p>
-      <p class="reward-tip">打开微信扫一扫，即可进行扫码打赏哦</p>
-    </div>
-    <div class="bottom">
-      
-      
-    </div>
-  </div>
-</div>
-<style>
-  .reward-mask {
-    position: fixed;
-    z-index: 99999;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: #00000054;
-  }
-
-  .reward-relative {
-    position: relative;
-    width: 480px;
-    text-align: center;
-    margin: 0 auto;
-    border-radius: 5px;
-    background-color: #fff;
-    top: 50%;
-    margin-top: -205px;
-  }
-
-  .reward-relative .close {
-    position: absolute;
-    right: 10px;
-    font-weight: normal;
-    font-size: 16px;
-    color: #929292;
-  }
-
-  .reward-body {
-    padding: 40px 20px 20px;
-  }
-
-  .bottom {
-    display: flex;
-  }
-
-  .reward-btn {
-    text-align: center;
-  }
-
-  .reward-btn-text {
-    display: inline-block;
-    cursor: pointer;
-    width: 60px;
-    height: 60px;
-    line-height: 60px;
-    border-radius: 50%;
-    background-color: #ff9734;
-    color: #FFF;
-    margin-top: 20px;
-  }
-
-  .pay-text {
-    margin-top: 10px;
-    padding: 10px;
-    flex: 1;
-    transition: all .2s linear;
-  }
-
-  .pay-text:hover {
-    background-color: #a5a5a536;
-  }
-
-  .reward-body h2 {
-    padding-top: 10px;
-    text-align: center;
-    color: #a3a3a3;
-    font-size: 16px;
-    font-weight: normal;
-    margin: 0 0 20px;
-  }
-
-  .reward-body h2:after,
-  .reward-body h2:before {
-    font-family: Arial, Helvetica, sans-serif;
-    background: 0 0;
-    width: 0;
-    height: 0;
-    font-style: normal;
-    color: #eee;
-    font-size: 80px;
-    position: absolute;
-    top: 20px;
-  }
-
-  .reward-body h2:before {
-    content: '\201c';
-    left: 50px;
-  }
-
-  .reward-body h2:after {
-    content: '\201d';
-    right: 80px;
-  }
-
-  .reward-img-box {
-    display: inline-block;
-    padding: 10px;
-    border: 6px solid #ea5f00;
-    margin: 0 auto;
-    border-radius: 3px;
-    position: relative;
-  }
-
-  .reward-img {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100%;
-    height: 100%;
-  }
-
-  @media (max-width: 767px) {
-    .reward-relative {
-      height: 100%;
-      top: 0px;
-      margin-top: 0;
-      width: auto;
-    }
-
-    .reward-relative .bottom {
-      flex-direction: column;
-    }
-
-    .reward-relative .pay-text {
-      width: 80%;
-      margin: 5px auto;
-      border: 1px solid silver;
-      padding: 6px;
-      border-radius: 4px;
-    }
-
-    .reward-body h2:after {
-      right: 40px;
-    }
-
-    .reward-body h2:after,
-    .reward-body h2:before {
-      font-size: 60px;
-    }
-
-    .reward-body h2:before {
-      left: 20px;
-    }
-  }
-</style>
-<script>
-  !function () {
-    var mask = document.querySelector('.reward-mask');
-    let close = document.querySelector('.reward-relative .close');
-    let rewardBtn = document.querySelector('.reward-btn');
-
-    let zfb = document.querySelector('#zfb'),
-      wx = document.querySelector('#wx'),
-      zfbBtn = document.querySelector('#zfbBtn'),
-      wxBtn = document.querySelector('#wxBtn');
-
-    if (zfbBtn && wxBtn) {
-      zfbBtn.addEventListener('click', () => {
-        window.Velocity(zfb, 'transition.slideLeftIn', {
-          duration: 400
-        });
-        window.Velocity(wx, 'transition.slideRightOut', {
-          display: 'none',
-          duration: 400
-        });
-      });
-
-      wxBtn.addEventListener('click', () => {
-        window.Velocity(wx, 'transition.slideRightIn', {
-          duration: 400
-        });
-        window.Velocity(zfb, 'transition.slideLeftOut', {
-          display: 'none',
-          duration: 400
-        });
-      });
-    }
-
-    rewardBtn.addEventListener('click', (e) => {
-      window.Velocity(mask, 'transition.slideDownIn', {
-        duration: 400
-      })
-    });
-
-    close.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.Velocity(mask, 'transition.slideUpOut', {
-        duration: 400
-      })
-    })
-  }()
-</script>
-
   </div>
 </body>
 
@@ -2804,6 +2062,7 @@ public class LRUCacheV2 {
 
 
 <script src="/media/js/mouse/love.js"></script>
+
 
 
 </html>

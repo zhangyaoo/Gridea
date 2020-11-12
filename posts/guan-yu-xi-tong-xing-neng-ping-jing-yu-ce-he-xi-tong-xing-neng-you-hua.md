@@ -5,7 +5,7 @@ tags: [性能调优]
 published: true
 hideInList: false
 feature: https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1592810879330&di=84a8094e31dabae6a1cbe120e32baa9e&imgtype=0&src=http%3A%2F%2Fpcs4.clubstatic.lenovo.com.cn%2Fdata%2Fattachment%2Fforum%2F201610%2F05%2F151814x05lyhh1x0w8519w.jpg
-isTop: true
+isTop: false
 ---
 
 ### 前言
@@ -157,7 +157,7 @@ ElasticSearch可以解决大数据量下的搜索慢问题，这里笔者就拿 
 2、背景：企业借贷，同步请求转异步
 优化之前，三方企业借贷请求，是同步调用，因为一条完整的借贷业务线非常长，中间会RPC调用非常多的底层服务以及其他远程接口，这样的话请求到响应时间会拉的非常长，影响C端的用户体验。
 优化之后，同步改异步，具体做法是，借贷请求进入系统后，会先生成一个进行中的状态借贷数据插入数据库，然后将唯一标识丢入MQ中，然后就返回成功。这样吞吐量会增加，用户端体验会非常好。
-当然如果说要保证高可用，可以利用MQ的事务消息做，利用二阶段提交方式保证MQ能够收到消息。具体方案可以看笔者的这篇文章 [本地事务消息投递一致性](https://zhangyaoo.github.io/post/jie-jue-bing-fa-xia-ben-di-shi-wu-he-xiao-xi-tou-di-yi-zhi-xing/)
+当然如果说要保证高可用，可以利用MQ的事务消息做，利用二阶段提交方式保证MQ能够收到消息。具体方案可以看笔者的这篇文章 [金融级业务下分布式事务保证数据一致性](https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing//)
 
 3、背景：C端用户在APP上，某一个标开启募集资金后进行投标，这里的标类似支付宝的理财产品，开始募集的时候会有高并发流量涌入，当APP端用户同时投标，会有大量请求，这就形成了抢购的动作，因为一个产品标的可投金额是有限的，只有少数人能投标成功
 优化之前：笔者在上文中提到的，尽管说频繁将更新行锁的数据放到事务的最后， 会有性能提升，但是随着并发数增长，MySQL也会成为性能瓶颈。
