@@ -1,19 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://zhangyaoo.github.io</id>
+    <id>http://localhost:4000</id>
     <title>will</title>
-    <updated>2020-11-12T06:35:40.923Z</updated>
+    <updated>2021-01-04T07:55:56.284Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://zhangyaoo.github.io"/>
-    <link rel="self" href="https://zhangyaoo.github.io/atom.xml"/>
+    <link rel="alternate" href="http://localhost:4000"/>
+    <link rel="self" href="http://localhost:4000/atom.xml"/>
     <subtitle>生死看淡，不服就干</subtitle>
-    <logo>https://zhangyaoo.github.io/images/avatar.png</logo>
-    <icon>https://zhangyaoo.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, will</rights>
+    <logo>http://localhost:4000/images/avatar.png</logo>
+    <icon>http://localhost:4000/favicon.ico</icon>
+    <rights>All rights reserved 2021, will</rights>
+    <entry>
+        <title type="html"><![CDATA[2020年总结]]></title>
+        <id>http://localhost:4000/post/2020-nian-zong-jie/</id>
+        <link href="http://localhost:4000/post/2020-nian-zong-jie/">
+        </link>
+        <updated>2020-12-31T03:59:36.000Z</updated>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1609517863900.jpg" alt="" loading="lazy"></figure>
+<h3 id="开头">开头</h3>
+<p>今天是1月1号，新年第一天，抓住2020年的小尾巴，随便絮絮叨叨一下，做个小总结。回想一下今年一整年，开心，困难，心酸，大部分都经历过，没有什么值得说的经历，倒是小事挺多。</p>
+<p>值得提的事情就是疫情了，今年疫情在家呆了2个月，那时候因为年前被裁，已经是失业的状态，没有收入来源，开始坐立不安，烦躁 。后面意识到了在家也有在家值得做的事情，不必因为疫情打乱自己的内心，充实陪家人过每一天。</p>
+<p>作为成年人，现在认为时常开心快乐倒是一件很难的事情，想起一句话，小时候快乐是一件简单的事情，长大后，简单是一件快乐的事情。不过后面还是要时常开心为主，然后就是今年以后要沉静下来，理性思考，不管对人还是对事。还要多看些关于生活上的书，不只是盯着技术书死啃，提醒一下自己要停下来多思考，低头做事，抬头看路。</p>
+<p>今年总结方面有些少，因为我自己认为这些方面值得去总结，至于其他的，可能我没有意识到或者是今年经历事情的太少。</p>
+<h3 id="学习">学习</h3>
+<p><img src="http://localhost:4000/post-images/1609517630829.jpg" alt="" loading="lazy"><br>
+关于学习这件事，还是要放在第一来说。学无止境，活到老学到老。人不能总是停留在原地，还是要多看书多学习，增长知识。中国人大部分劳动人民以前（80年代）是基本靠努力，靠勤奋，获得属于自己的劳动果实，现在信息时代，除了靠努力勤奋以外，还要有效利用专业知识去解决生活工作中的问题，享受现在信息时代给与的成果。<br>
+就像文臣武将，谋士当出谋划策，武士当战场厮杀。每个人当去发挥自己的专业本领。不管最终目的是啥，精忠报国还是养家糊口，小有小义，大有大义。</p>
+<p>扯远了，今年准备还是以技术学习为主，然后以公众号和GitHub为辅助进行学习。<br>
+今年准备看完这些学习资料，其中有书籍以及网络课程<br>
+1、MySQL是如何运行的<br>
+2、redis设计和实现<br>
+3、架构师视频课<br>
+4、极客时间MySQL<br>
+5、Netty网络编程学习+技术书籍+Netty实战</p>
+<p>不多，列多了就看不完了[dog]。</p>
+<p>其他则按时及时总结工作上遇到的问题，提升自己的技术深度。毕竟工作中遇到的最容易加深理解的和提升能力的。<br>
+顺便看一些优秀的博客及时总结，输出自己的理解。然后维护到自己的个人网站上面去。</p>
+<p>然后其他时间，准备看一些其他类型的书籍，比如人文历史，以及其他优秀的国内外著作，现在已经想好看些什么，就不一一列举了，今年今后会抽空余时间去看这些，提升自己对人和生活的一些思考。</p>
+<p>最后的话要提醒自己少看动漫二次元多学习，早睡早起~~</p>
+<h3 id="运动">运动</h3>
+<p><img src="http://localhost:4000/post-images/1609517659211.jpg" alt="" loading="lazy"><br>
+运动这件事情，算是我个人每年立的flag中，自己最满意的了。一周最少一次跑步+篮球。基本上也不算全部，每周都做了。<br>
+我身边的朋友或者亲人，我会经常提醒他们，要适当的锻炼。虽然总是被当作耳边风，但是每次过年祝别人身体健康只是噱头，只有真正关心你的人会在乎你的健康。我个人不管是生日还是新年愿望，大部分都是希望身边的人过的平平安安开开心心就行了，其他都是扯淡。<br>
+而我自己运动的动力来源是，如果我自己身体不行，那就没有能力照护身边人。我自己能够成长为大树，让别人安心倚靠。</p>
+<p>现在虽然毕业了3年，6块腹肌已经变成了4快，身体没有毕业那会好，但是我自己还是会坚持的，朝着更man的目标奋斗。想当年我可是拥有8块腹肌的男人。。。。</p>
+<h3 id="爱情">爱情</h3>
+<p><img src="http://localhost:4000/post-images/1609517842818.jpg" alt="" loading="lazy"><br>
+今年最开心的就是和女朋友度过第一年的恋爱期（不要脸的我，自认为网恋了一年的热恋期），这一年有开心和难过，不过难过时刻很少，大部分都是开心时刻，我觉得已经可以了，能够和对方每天都很开心，已经很不错了。毕竟和喜欢的人在一起不就是开心撒，这个是最难能可贵的。。</p>
+<p>我自认为我是个不好i相处的人，个人的小脾气很多，而且有时候会常有不自信。谢谢我女朋友的理解和鼓励。今年往后，还希望一起开心度过每一天，哈哈哈哈。</p>
+<p>新的一年，希望咱俩都身体健康，开开心心~</p>
+<h3 id="2021flag">2021flag</h3>
+<p>国际惯例，最后说一些打脸的flag<br>
+1、完成上面的资料的学习<br>
+2、每个月一次文章总结，工作总结，4次个人网站文章的发表和维护<br>
+3、一周一次运动+篮球<br>
+4、身体体重不超130<br>
+5、经营好个人博客<br>
+6、 早睡早起，11点半之前睡</p>
+<p><strong>2021年，干就完事</strong>。<br>
+<img src="http://localhost:4000/post-images/1609517948326.jpg" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[概率相等的拼手气红包算法实现]]></title>
+        <id>http://localhost:4000/post/shou-lu-yi-ge-hong-bao-suan-fa/</id>
+        <link href="http://localhost:4000/post/shou-lu-yi-ge-hong-bao-suan-fa/">
+        </link>
+        <updated>2020-12-17T14:17:09.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="1-要求">1、要求</h3>
+<p>红包算法 function：拼手气红包<br>
+1、每个红包获得的数学概率要一样<br>
+2、红包最小值：1分钱</p>
+<h3 id="2-思路">2、思路：</h3>
+<p>利用切片的思想，比如有5个红包，20分，就从0-20的范围内获取四个随机数，就被分成5份，然后顺序抽取。这样保证每个红包的的概率一样<br>
+这种方案需要考虑到几个注意点：<br>
+1）重复的随机切片如何处理；<br>
+2）需要考虑1分钱如何处理；</p>
+<h3 id="3-实现">3、实现：</h3>
+<p>遇到随机切片重复:重新生成切片直至不重复<br>
+1分钱处理：判断相邻间隔的大小</p>
+<p>###4、 代码实现：<br>
+利用treeMap的顺序有序性</p>
+<p>直接上代码（笔者已经调试过没有问题，可以运行）</p>
+<pre><code class="language-java">public class RedPackage {
+   /**
+    * 红包最小金额
+    */
+   private long minAmount = 1L;
+
+   /**
+    * 最大的红包是平均值的N倍
+    */
+   private static final long N = 2;
+
+   /**
+    * 红包最大金额
+    */
+   private long maxAmount;
+
+   /**
+    * 红包金额 分
+    */
+   private long packageAmount;
+
+   /**
+    * 红包个数
+    */
+   private long packageSize;
+
+   /**
+    * 是否抢完
+    */
+   private boolean finish;
+
+   /**
+    * 存储红包的金额顺序
+    */
+   private final TreeMap&lt;Long, Long&gt; treeMap = Maps.newTreeMap((o1, o2) -&gt; o1 &gt; o2 ? 1 : o1.equals(o2) ? 0 : -1);
+
+   /**
+    * 构造函数不写业务逻辑
+    */
+   public RedPackage(long packageAmount, int packageSize){
+       this.packageAmount = packageAmount;
+       this.packageSize = packageSize;
+       maxAmount = (packageAmount * N)/ packageSize;
+   }
+
+   public RedPackage(long packageAmount, int packageSize, long minAmount){
+       this.packageAmount = packageAmount;
+       this.packageSize = packageSize;
+       this.minAmount = minAmount;
+   }
+
+   /**
+    * 获取金额
+    */
+   public synchronized long nextAmount(){
+       // 前置校验，初始化
+       if(!finish &amp;&amp; treeMap.size() == 0){
+           treeMap.put(packageAmount, 0L);
+           for (int i = 0; i &lt; packageSize - 1; i++) {
+               // 随机抽取切片
+               long splitNum = RandomUtils.nextLong(minAmount, packageAmount);
+               Long higher = treeMap.higherKey(splitNum);
+               higher = higher == null ? packageAmount : higher;
+               Long lower = treeMap.lowerKey(splitNum);
+               lower = lower == null ? 0 : lower;
+               // 相同切片重新生成,和上一个或者下一个切片间隔小于minAmount的重新生成
+               while (higher - splitNum &lt;= minAmount
+                       || splitNum - lower &lt;= minAmount
+                       || treeMap.containsKey(splitNum)){
+                   splitNum = RandomUtils.nextLong(minAmount, packageAmount);
+               }
+               // value放入上一个entry的key,组成链条，防止再次循环
+               treeMap.put(splitNum, lower);
+               treeMap.put(higher, splitNum);
+           }
+           System.out.println(&quot;init finish&quot;);
+       }
+       Map.Entry&lt;Long, Long&gt; entry = treeMap.pollFirstEntry();
+       if(treeMap.size() == 0){
+           // 用完红包
+           this.finish = true;
+           if(entry == null){
+               return 0L;
+           }
+       }
+       return entry.getKey() - entry.getValue();
+   }
+
+   public static void main(String[] args) {
+       RedPackage redPackage = new RedPackage(1500L, 10, 10L);
+       long result = 0;
+       for (int i = 0; i &lt; 15; i++) {
+           long amount = redPackage.nextAmount()；
+           System.out.println(amount);
+           result = result + amount;
+       }
+       System.out.println(result);
+   }
+}
+</code></pre>
+<h3 id="5-todo-设置单个红包最大限额值">5、TODO 设置单个红包最大限额值</h3>
+<p>目前还没有实现思路</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[记一次用户中心采用分布式ID踩的坑]]></title>
-        <id>https://zhangyaoo.github.io/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/</id>
-        <link href="https://zhangyaoo.github.io/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/">
+        <id>http://localhost:4000/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/</id>
+        <link href="http://localhost:4000/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/">
         </link>
         <updated>2020-10-16T02:55:39.000Z</updated>
         <content type="html"><![CDATA[<h3 id="一-背景">一、背景</h3>
@@ -135,7 +311,7 @@
 <li>第2-42位是相对时间戳，通过当前时间戳减去一个固定的历史时间戳生成。</li>
 <li>第43-52位是机器号workerID，每个Server的机器ID不同。</li>
 <li>第53-64位是自增ID。<br>
-<img src="https://zhangyaoo.github.io/post-images/1604663039402.png" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1604663039402.png" alt="" loading="lazy"></li>
 </ul>
 <p>这个方案也有缺点：</p>
 <ol>
@@ -231,14 +407,14 @@ at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:614) ~[let
 <p>乍看是redis的抛出来的错误，和这次分布式ID改造没有什么关系，但是仔细静下来想一想，这次ID改造是从原来的数据库自增改造的，数据库自增数据主键很小是int类型，然后用了64位二进制数据当作ID后，导致redis中用户的数据存不下去，然后笔者就按照这个思路去发掘问题。</p>
 <p>笔者从业务抛出的堆栈中发现，这个错误是在判断用户是否是新用户服务方法中抛出的，而判断是新用户的逻辑就是，利用redis的bitmap来解决的：getbit new_user_key userId，其中 userId为用户ID，如果用户发生了交易信息，就会执行：setbit new_user_key userId 1 这个命令。 为什么要用bitmap解决呢，主要是因为如果从交易记录表查询某个用户是否交易信息来判断是新用户的话就会非常耗时，所以只要是发生了交易信息就设置bitmap就可以了。</p>
 <p>那为什么会抛出out of range这个错误呢，我们知道bitmap底层其实就是String类型，而String类型的最大长度为512M，官网截图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1605157810715.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1605157810715.png" alt="" loading="lazy"><br>
 所以如果offset超过512M这个范围那么就会抛出异常，512M = 2^9 * 2^12 * 2^12 * 2^3 = 2^32 bit，也就是支持Integer类型的最大值，而我们这次分布式ID服务ID是64位的，支持2^64 bit，所以如果offset也就是userId大于2^32的话就会抛出out of range异常了。</p>
 <h4 id="41-问题解决">4.1 问题解决</h4>
 <p>找到了问题，也就好去做优化了，这里笔者提供几个方法作为参考</p>
 <ol>
 <li>在数据库用户表或者用户扩展表中增加一个字段，如果发生了交易，那么将字段标记为老用户</li>
 <li>把用户ID放入redis集合set中，利用SMISMEMBER命令判断当前用户是否在集合内，当然这个会有性能问题，其方法时间复杂度位O(N)，官方截图:<br>
-<img src="https://zhangyaoo.github.io/post-images/1605162870590.png" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1605162870590.png" alt="" loading="lazy"></li>
 </ol>
 <h3 id="五-总结">五、总结</h3>
 <p> 笔者从分布式ID选型出发，介绍了几种业界几种比较常用的生成方法，并且介绍了其优缺点，然后结合实际业务出发，选择合适的方案。然后介绍了使用SnowFlake算法导致的业务问题，以及分析最后提供解方法。从这次踩坑的经历来说，我们要懂技术体系，并且还要非常熟悉业务，最大程度避免功能之间的相互的影响导致的bug。</p>
@@ -251,8 +427,8 @@ at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:614) ~[let
     </entry>
     <entry>
         <title type="html"><![CDATA[SaaS系统多数据源路由优雅解决方案]]></title>
-        <id>https://zhangyaoo.github.io/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/</id>
-        <link href="https://zhangyaoo.github.io/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/">
+        <id>http://localhost:4000/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/</id>
+        <link href="http://localhost:4000/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/">
         </link>
         <updated>2020-10-16T02:26:30.000Z</updated>
         <content type="html"><![CDATA[<h2 id="背景">背景</h2>
@@ -276,19 +452,19 @@ at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:614) ~[let
 </ol>
 <h3 id="具体技术实现">具体技术实现</h3>
 <p><strong>简单的架构图</strong><br>
-<img src="https://zhangyaoo.github.io/post-images/1603179800053.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603179800053.png" alt="" loading="lazy"><br>
 如图所示，SaaS项目大概架构图，关键点是应用层传参，以及路由层的实现。</p>
 <p><strong>实现</strong><br>
 1、应用层：项目中应用service层是dubbo服务，而且项目分多层，这里需要考虑到多层服务场景下，如何优雅传参问题，如下图所示<br>
-<img src="https://zhangyaoo.github.io/post-images/1603181882775.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603181882775.png" alt="" loading="lazy"><br>
 我们考虑到租户ID是唯一标识，和业务参数绑定在一起不优雅，所以两种参数分开处理，业务参数直接参数透传，租户ID唯一标识通过隐式传参来处理（参考dubbo http://dubbo.apache.org/zh-cn/docs/user/demos/attachment.html），并且参数记录到服务本地的threadlocal中，以便后续其他业务需要。具体实现如下：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603183675071.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1603183675071.png" alt="" loading="lazy"></p>
 <p>2、路由层：路由层实现主要是自行实现spring框架中DataSource接口，自定义dynamicDataSource类，然后implement DataSource接口，实现getConnection方法。然后重新定义SqlSessionFactory的bean，将自定义DataSource类属性注入。<br>
-<img src="https://zhangyaoo.github.io/post-images/1603183148592.png" alt="" loading="lazy"><br>
-<img src="https://zhangyaoo.github.io/post-images/1603183156251.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603183148592.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603183156251.png" alt="" loading="lazy"><br>
 然后我们只需要关注getConnection方法根据租户ID，选择相对应的租户连接池就可以了。<br>
 如图中，我们只需要实现这个selectTenantCodeDataSource()这个方法就可以了，这个方法实现很简单，这里就不贴图了。selectTenantCodeDataSource()方法主要就是从threadlocal中拿租户ID，然后去缓存池map中拿出连接池信息。<br>
-<img src="https://zhangyaoo.github.io/post-images/1603183509071.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603183509071.png" alt="" loading="lazy"><br>
 其中，dataSourceCachePool是在初始化配置时候，将所有的租户连接池直接创建，然后扔到dataSourceCachePool。key是租户的ID，value是连接池信息。</p>
 <p>具体的初始化配置：</p>
 <pre><code class="language-java">/**
@@ -323,10 +499,10 @@ public class DataSourceInit {
 <h3 id="隐藏的缺陷">隐藏的缺陷</h3>
 <p>相信有一定开发经验的读者应该能想到，上述方案最大的缺点就是性能问题，对MySQL有非常大的影响。因为一开始初始化非常多的连接池，就会占用连接资源，比如租户从100个扩展到了1000个以及更多，那么连接池数量就线性增长，如果一个连接池保持15个活跃连接的话，那么连接数就是15*1000，此时如果MySQL的maxconntion的数量非常小，那么MySQL侧就会抛出”too many connctions“错误，在应用层方面就是MySQL不可用了。<br>
 没优化之前的架构：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603190851131.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1603190851131.png" alt="" loading="lazy"></p>
 <h3 id="解决">解决</h3>
 <p>想保持数据库分离，又要考虑到MySQL性能问题，只能向连接池优化的方向去考虑，其实可以减少数量就可以了，这里实现方案就是一个数据库实例一个连接池，如下图所示：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603190889253.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603190889253.png" alt="" loading="lazy"><br>
 具体实现就是将上述方案中的dataSourceCachePool的key改为 “IP+端口”，作为key。然后再数据源路由层，多一层映射（租户ID——&gt;数据库实例）就可以了。</p>
 <h2 id="三-更优雅方案解决企业内部开发痛点">三、更优雅方案解决企业内部开发痛点</h2>
 <h3 id="现状">现状</h3>
@@ -399,8 +575,8 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
     </entry>
     <entry>
         <title type="html"><![CDATA[MySQL联合索引在B+树的存储和查找]]></title>
-        <id>https://zhangyaoo.github.io/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/</id>
-        <link href="https://zhangyaoo.github.io/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">
+        <id>http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/</id>
+        <link href="http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">
         </link>
         <updated>2020-06-29T09:32:43.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
@@ -411,9 +587,9 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
 <p>先看一下Innodb B+树的主键索引和辅助索引。这里直接拿张洋大神的图：</p>
 <ul>
 <li>聚簇索引:<br>
-<img src="https://zhangyaoo.github.io/post-images/1593425796639.png" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1593425796639.png" alt="" loading="lazy"></li>
 <li>辅助非聚簇索引:<br>
-<img src="https://zhangyaoo.github.io/post-images/1593425801180.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593425801180.png" alt="" loading="lazy"><br>
 <strong>结构</strong>：当一个表T（id,name,age,sex,high）建一个普通索引  KEY(name)，name的索引结果就和上面辅助非聚簇索引结构一样。<br>
 <strong>查询</strong>：当有一个select id,name,age from T where name = &quot;&quot; 辅助索引会根据name在B+树上进行二叉树查找，找出叶子节点数据后发现没有age这个数据，就会进行<strong>回表</strong>操作到主键聚簇索引去查找，拿到聚簇索引叶子节点的age数据。</li>
 </ul>
@@ -421,7 +597,7 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
 <ul>
 <li>
 <p><strong>索引结构</strong>：我们知道上述回表过程也会消耗性能，相当于多查一次，所以系统可以根据业务情况加上一个组合索引，当然并不是一直加组合索引就可以了，因为要考虑到索引存储空间的问题。例如给上述加上一个组合索引  KEY（name,age,sex）【 KEY（col1,col2,col3）】。那么这个组合索引的B+树非叶子节点数据结构和上述辅助非聚簇索引图一样，但是叶子节点是这样的：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593425790647.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593425790647.png" alt="" loading="lazy"><br>
 叶子节点存储col1,col2,col3这三列数据以及加上ID这一列数据。</p>
 </li>
 <li>
@@ -444,8 +620,8 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
     </entry>
     <entry>
         <title type="html"><![CDATA[关于Zookeeper奇数节点以及脑裂问题]]></title>
-        <id>https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/</id>
-        <link href="https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
+        <id>http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/</id>
+        <link href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
         </link>
         <updated>2020-06-22T02:32:00.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -478,22 +654,22 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <ul>
 <li>
 <p>比如集群中有6个节点，一个master和5个slave，分两个机房，每个机房分别三台，发生了机房不可通信的情况，如下图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593419532309.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593419532309.png" alt="" loading="lazy"><br>
 然后机房B就会产生新的master，如图<br>
-<img src="https://zhangyaoo.github.io/post-images/1593419550068.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593419550068.png" alt="" loading="lazy"><br>
 这个时候Zookeeper为了防止这样的情况发生，利用了<strong>过半机制</strong>的这个特性。<br>
 上图中，机房B节点为3 小于集群数量的一半，所以，最终上面图中机房B是不会选举出新的master节点的。</p>
 </li>
 <li>
 <p>我们再来看一种情况：比如集群中有5个节点，一个master和4个slave，分两个机房，如下图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593419973725.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593419973725.png" alt="" loading="lazy"><br>
 如果发生了机房不能通信的情况，那么机房B因为节点是2个，没有超过一半，就不会产生出新的master节点了。</p>
 </li>
 <li>
 <p>再来看最后一种情况，比如集群中有5个节点，一个master和4个slave，分两个机房，不同的是master节点在机房B，如下图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593420189914.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593420189914.png" alt="" loading="lazy"><br>
 如果发生了机房不能通信的情况，那么机房A节点是3个，超过了一半，就会进入崩坏恢复模式产生新的master节点，那么此时集群中就会出现两个master节点了。如下图所示<br>
-<img src="https://zhangyaoo.github.io/post-images/1593420219104.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593420219104.png" alt="" loading="lazy"><br>
 那么遇到这种情况Zookeeper是如何处理的？答：旧的leader所有的写请求同步到其他followers节点是会被拒绝的。因为每当新leader产生时，会生成一个epoch，这个epoch是递增的，followers如果确认了新的leader存在，知道其epoch，就会拒绝epoch小于现任leader epoch的所有请求。这个时候旧的master进入恢复模式进行数据同步。<br>
 所以按照上面的情况，机房A的所有followers节点正常通信，机房B的所有节点重新进入恢复模式进行数据同步。</p>
 </li>
@@ -512,8 +688,8 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
     </entry>
     <entry>
         <title type="html"><![CDATA[金融级业务下分布式事务保证数据一致性]]></title>
-        <id>https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/</id>
-        <link href="https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/">
+        <id>http://localhost:4000/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/</id>
+        <link href="http://localhost:4000/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/">
         </link>
         <updated>2020-06-22T02:27:01.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
@@ -529,7 +705,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <li>A银行同步调用B银行转账接口。</li>
 <li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
 <li>B银行返回处理结果给A银行。<br>
-<img src="https://zhangyaoo.github.io/post-images/1593745125729.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593745125729.png" alt="" loading="lazy"><br>
 同步调用问题：</li>
 </ol>
 <ul>
@@ -544,7 +720,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <li>真正消费者程序对B银行进行远程调用</li>
 <li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
 <li>B银行返回处理结果给A银行。<br>
-<img src="https://zhangyaoo.github.io/post-images/1593743096206.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593743096206.png" alt="" loading="lazy"><br>
 异步调用问题：</li>
 </ol>
 <ul>
@@ -559,7 +735,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <h3 id="21-利用本地消息表思想解决一致性问题">2.1 利用本地消息表思想解决一致性问题</h3>
 <p> 一般来说，跨行转账的原理，会存在一个中国人民银行的中间人角色来操作转账，但不在本次讨论的范围内。<br>
  业界银行转账大部分都是同步转账，异步获取转账结果，包括第三方支付平台对接银行都是这样玩的。这里笔者就利用本地消息表思想来具体叙述数据一致性是如何保证的，老规矩先放图：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603274563955.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603274563955.png" alt="" loading="lazy"><br>
 其中交易记录表大概长这个样子：</p>
 <table>
 <thead>
@@ -650,9 +826,9 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <h3 id="22-事务消息解决本地事务和mq消息一致性问题">2.2 事务消息解决本地事务和MQ消息一致性问题</h3>
 <p> 转账业务，如果用异步的话，当出现MQ问题或者消费也者程序出现消息挤压或者消费者端出现问题 的话，那么整个业务时间线会拉的非常长。所以笔者认为异步不适合这种业务，异步<strong>本质上</strong>是对下游服务的一个缓冲，适合在自己系统中使用，不适合跨系统或者三方调用。当然不是所有的场景都不合适，如果流量非常大话，对方系统有限流机制，使用MQ也算是一种解决方案，这还是看具体业务。</p>
 <p> 什么样的场景适合使用MQ？一般来说在需要限流削峰、异步解耦等场景使用，所以还是拿上面的图，图中标框的部分业务适合用MQ来解决<br>
-<img src="https://zhangyaoo.github.io/post-images/1603790962781.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1603790962781.png" alt="" loading="lazy"></p>
 <p> 如果用MQ来做的话，那么会有如下图步骤：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603792233049.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603792233049.png" alt="" loading="lazy"><br>
 图中的步骤大致分为6步，这里细致讲一下每一步的详细步骤，分别是：</p>
 <ol>
 <li>消息生成者发送消息，broker接受消息</li>
@@ -664,7 +840,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 </ol>
 <p> 以上为一条正常的消息从生产到消费的过程，每一步都是不可或缺的。而且我们可以看到，当引入中间件MQ后，消费端业务需要保持幂等。</p>
 <p> 回到上面文章最开始的部分，并没有解决异步调用问题一。没有彻底解决本地事务和消息不一致性。所以这个时候，就需要事务消息解决本地事务和MQ消息一致性问题了，笔者重新画了一张图来说明一下事务消息是如何做的：<br>
-<img src="https://zhangyaoo.github.io/post-images/1603873494446.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1603873494446.png" alt="" loading="lazy"><br>
 图中的步骤大致分为几步，分别是：</p>
 <ol>
 <li>生产者发送一条prepare消息</li>
@@ -708,8 +884,8 @@ T+1日对账，程序或者人工定时扫描核心业务数据，保证当日�
     </entry>
     <entry>
         <title type="html"><![CDATA[O(N)时间复杂度下，二进制反转]]></title>
-        <id>https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/</id>
-        <link href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/">
+        <id>http://localhost:4000/post/er-jin-zhi-fan-zhuan/</id>
+        <link href="http://localhost:4000/post/er-jin-zhi-fan-zhuan/">
         </link>
         <updated>2020-06-19T08:11:36.000Z</updated>
         <content type="html"><![CDATA[<h4 id="题目描述">题目描述</h4>
@@ -750,8 +926,8 @@ public class BitReverse {
     </entry>
     <entry>
         <title type="html"><![CDATA[系统性能优化的思考和总结]]></title>
-        <id>https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/</id>
-        <link href="https://zhangyaoo.github.io/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
+        <id>http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/</id>
+        <link href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
         </link>
         <updated>2020-06-17T13:05:11.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -789,7 +965,7 @@ public class BitReverse {
   2）方法区meta space空间占满<br>
   3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC<br>
   4）内存泄漏导致空间不足进而GC<br>
-这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子<img src="https://zhangyaoo.github.io/post-images/1592463486063.png" alt="" loading="lazy"><br>
+这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子<img src="http://localhost:4000/post-images/1592463486063.png" alt="" loading="lazy"><br>
 这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。<br>
     2、 <strong>频繁 YOUNG GC</strong>  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题</p>
 <p><strong>这里笔者以自己开发经验，提供一些“简单的”JVM优化拙见</strong>：</p>
@@ -811,17 +987,17 @@ public class BitReverse {
 <p>以上，合理分配JVM内存资源以及做好系统内存的监控机制是我们系统稳定性运行的保障。</p>
 <h5 id="网络负载和io">网络负载和IO</h5>
 <p>来一张IO发生场景图片：<br>
-<img src="https://zhangyaoo.github.io/post-images/1593333928024.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1593333928024.png" alt="" loading="lazy"><br>
  对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。<br>
  笔者在开发中就遇到因为IO问题带来的线程资源耗尽的线上问题：我们系统业务在借贷业务成功后，要生成借款协议，协议是一个PDF文件，当时主业务逻辑完成后同步调用生成PDF的逻辑，因为当时大流量并发，导致整个借贷业务性能瓶颈就在磁盘IO上，CPU处于空闲状态，借用网上的一个图，TOP命令可以看出IO花费的时间在76.6%，后面优化后就多线程异步处理。<br>
-<img src="https://zhangyaoo.github.io/post-images/1593334249512.webp" alt="" loading="lazy"></p>
-<p> 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：<img src="https://zhangyaoo.github.io/post-images/1593334346151.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1593334249512.webp" alt="" loading="lazy"></p>
+<p> 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：<img src="http://localhost:4000/post-images/1593334346151.png" alt="" loading="lazy"></p>
 <p> 分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。</p>
 <h3 id="2-中间件层">2、中间件层</h3>
 <p>  这里中间件，泛指数据存储层，以笔者经验来看，大多数系统性能问题和瓶颈都是与数据存储相关，这里笔者就拿这方面展开讨论总结。</p>
 <h5 id="mysql">MySQL</h5>
 <p>一般来说MySQL在很多线程更新同一行的场景下，TPS性能曲线如图所示，参考丁奇的《秒杀场景下MySQL的低效》<br>
-<img src="https://zhangyaoo.github.io/post-images/1592893242022.png" alt="秒杀场景下MySQL的低效" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1592893242022.png" alt="秒杀场景下MySQL的低效" loading="lazy"><br>
 图中我们可以看到，线程数在6的时候TPS达到巅峰2W，随着线程数的增长，TPS会随之降低。在高并发场景下，可以根据这个结论来进行优化，比如，当有瞬间大流量冲击数据库时候，我们可以进行数据缓冲，比如用队列削峰，开启6个线程消费，然后访问数据库。<br>
 当然这个看业务场景，如果是对同一个资源进行竞争的话，这个证削峰是可行的。但是，如果场景是每一个线程对不同资源进行访问修改时候，不涉及资源竞争的话，那么就不要进行削峰处理，直接访问数据库即可，当然这个也要考虑到MySQL的性能问题。<br>
 举个例子，就拿光插入数据的性能测试来说（没有建唯一索引），4核4G的7200转的机械硬盘机器配置，最高能够承受7500的并发插入数。[参考MySQL性能压测]</p>
@@ -859,9 +1035,9 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 </ul>
 <h5 id="redis">Redis</h5>
 <p>Redis作为开发人员接触最频繁的中间件，首先，笔者先拿出官网给出的Redis性能测试结果：从下图可以得出结论：redis单机测试结果是TPS是7W,QPS只能比这个数据更高。<br>
-<img src="https://zhangyaoo.github.io/post-images/1592983835284.png" alt="" loading="lazy"><br>
+<img src="http://localhost:4000/post-images/1592983835284.png" alt="" loading="lazy"><br>
 当使用了管道pipline后性能大约提升了6倍，如下图所示<br>
-<img src="https://zhangyaoo.github.io/post-images/1592986207480.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1592986207480.png" alt="" loading="lazy"></p>
 <p>根据官网的文档，影响Redis性能有以下因素，笔者认为开发人员做一些基准测试压测以及日常开发中使用Redis的时候，注意这些优化点，就能高效使用Redis：<br>
 1、网络延迟和网络带宽，作为运维人员，最好将服务器和Redis服务部署到同一个局域网内，降低网络延迟。作为开发人员，尽量不要使用大key和大value，因为随着这种数据越来越多，在网络传输的时候会占用大部分网络宽带，举个例子，如果一个redis对象大小超过1KB，当你的QPS达到100万，会把你的千兆路由器的带宽打满，因此网络带宽可能就会成为性能瓶颈。<br>
 2、使用pipline，当使用以太网访问Redis时，保据大小保持在以太网数据包大小（约1500字节）以下时，使用流水线进行聚合的命令特别有效。<br>
@@ -869,7 +1045,7 @@ MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就
 4、使用scan代替keys，keys会造成严重的性能问题<br>
 5、设置内存的大小阈值并且设置好内存缓存淘汰的策略，线上设置LRU策略来淘汰缓存这样做是为了避免物理内存使用完后，造成卡顿的情况。并且线上要避免大量key同时失效的场景，因为redis删除失效的key是循环删除的，并且频繁的删除会促使内存管理器回收内存页，这样也会导致卡顿的现象。<br>
 6、connection客户端连接数量，Redis作为一个事件驱动模型，因为base epoll能够实现O(1)时间复杂度的响应操作，因此能够提供很好性能。Redis已经以超过60000个连接为基准，并且在这些条件下仍能够维持50000 q / s的吞吐量，而且具有30000个连接的实例只能处理100个连接可达到的吞吐量的一半，可参考下图（来源官网）：<br>
-<img src="https://zhangyaoo.github.io/post-images/1592991673063.png" alt="" loading="lazy"></p>
+<img src="http://localhost:4000/post-images/1592991673063.png" alt="" loading="lazy"></p>
 <h5 id="elasticsearch">ElasticSearch</h5>
 <p>ElasticSearch可以解决大数据量下的搜索慢问题，这里笔者就拿 死磕ElasticSearch社区作者的优化建议，给出几点在日常开发ElasticSearch的优化方案：<br>
 1、尽量将所有数据的一半都缓存在内存当中file cache system 当中<br>
@@ -936,8 +1112,8 @@ MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久
     </entry>
     <entry>
         <title type="html"><![CDATA[O(1)时间复杂度下，双向链表实现LRU]]></title>
-        <id>https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/</id>
-        <link href="https://zhangyaoo.github.io/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/">
+        <id>http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/</id>
+        <link href="http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/">
         </link>
         <updated>2020-06-15T11:17:45.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -951,14 +1127,14 @@ MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久
 <li>2、put还是get都会进行重排序，get entry1 还是put entry1都会先把Entry1从双向链表中删除，然后再把Entry1加入到双向链表的表尾。</li>
 <li>3、遍历访问的时候，会访问header的下一个next节点，这就形成了顺序访问</li>
 </ul>
-<figure data-type="image" tabindex="1"><img src="https://zhangyaoo.github.io/post-images/1592968145044.png" alt="" loading="lazy"></figure>
+<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1592968145044.png" alt="" loading="lazy"></figure>
 <h3 id="链表实现">链表实现</h3>
 <p>实现思路：</p>
 <ul>
 <li>1、数据是直接利用 HashMap 来存放的。</li>
 <li>2、内部使用了一个双向链表来存放数据，所以有一个头结点 header，以及尾结点 tailer。</li>
 <li>3、每次写入头结点，删除尾结点时都是依赖于 header tailer<br>
-<img src="https://zhangyaoo.github.io/post-images/1592220507945.png" alt="" loading="lazy"></li>
+<img src="http://localhost:4000/post-images/1592220507945.png" alt="" loading="lazy"></li>
 </ul>
 <pre><code>import com.google.common.collect.Maps;
 import java.util.Map;
@@ -1136,25 +1312,6 @@ public class LRUCacheV2 {
 <p>参考：<br>
 1、https://www.iteye.com/blog/gogole-692103<br>
 2、https://crossoverjie.top/2018/04/07/algorithm/LRU-cache/</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关于]]></title>
-        <id>https://zhangyaoo.github.io/post/about/</id>
-        <link href="https://zhangyaoo.github.io/post/about/">
-        </link>
-        <updated>2019-01-25T11:09:48.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>欢迎来到我的小站呀，很高兴遇见你！🤝</p>
-</blockquote>
-<h2 id="关于本站">🏠 关于本站</h2>
-<p>一些技术博客和一些闲言碎语</p>
-<h2 id="博主是谁">👨‍💻 博主是谁</h2>
-<p>还在打怪升级的菜鸟</p>
-<h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
-<p>撸码、二次元、骑行、篮球、LOL</p>
-<h2 id="联系我呀">📬 联系我呀</h2>
-<p>手机（微信同）：15112342449</p>
 ]]></content>
     </entry>
 </feed>
