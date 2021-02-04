@@ -120,7 +120,30 @@ public class DataSourceAutoConfigure {
     }
 }
 ```
-2、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置filter这个参数，无需增加任何的配置。
+2、Java SPI机制：利用Javaspi 来获取用户自定义的mybatis plugin。这样做的好处是，不用每次增加一个plugin，就改动数据路由组件的代码。
+```java
+public SqlSessionFactory sqlSessionFactory(@Qualifier("tenantRoutingDataSource") TenantRoutingDataSource tenantRoutingDataSource) throws Exception{
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(tenantRoutingDataSource);
+        Interceptor[] plugins = loadMybatisPlugin();
+        if(plugins.length > 0){
+            sqlSessionFactoryBean.setPlugins(plugins);
+        }
+        Objects.requireNonNull(sqlSessionFactoryBean.getObject()).getConfiguration().setMapUnderscoreToCamelCase(true);
+        return sqlSessionFactoryBean.getObject();
+    }
+
+    // SPI机制获取插件
+    private Interceptor[] loadMybatisPlugin(){
+        List<Interceptor> interceptors = new ArrayList<>();
+        ServiceLoader<Interceptor> load = ServiceLoader.load(Interceptor.class);
+        load.forEach(interceptors::add);
+        return interceptors.toArray(new Interceptor[0]);
+    }
+}
+```
+
+3、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置filter这个参数，无需增加任何的配置。
 ```java
 @Activate(group = {"provider"})
 public class TenantCodeContextFilter implements Filter {
@@ -132,7 +155,7 @@ public class TenantCodeContextFilter implements Filter {
     }
 }
 ```
-3、检查用户侧自定义配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常
+4、检查用户侧自定义配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常
 ```java
 @Component
 public class CheckConfigListener implements ApplicationListener<ApplicationReadyEvent> {
@@ -146,6 +169,16 @@ public class CheckConfigListener implements ApplicationListener<ApplicationReady
     }
 }
 ```
+5、利用缓存池保存多个dataSource对象，一个MySQL实例对应一个dataSource对象，一个dataSource对应多个租户，而不是一个dataSource对应一个租户，这样的好处就是，如果一个MySQL实例里面的租户数据库过多，不会导致一个MySQL实例连接数膨胀问题。
+```java
+    /**
+     * 数据源缓存池
+     * Key 一个MySQL数据库连接信息key
+     * Value 缓存时RDS连接信息与DataSource
+     */
+    private final Map<String, DataSourceCache> dataSourceCachePool = new ConcurrentHashMap<>();
+```
+
 **用户使用**：直接引入相应的maven，方便快捷
 
 

@@ -1,29 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>http://localhost:4000</id>
+    <id>https://zhangyaoo.github.io</id>
     <title>will</title>
-    <updated>2021-01-04T07:55:56.284Z</updated>
+    <updated>2021-02-04T08:31:21.093Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="http://localhost:4000"/>
-    <link rel="self" href="http://localhost:4000/atom.xml"/>
+    <link rel="alternate" href="https://zhangyaoo.github.io"/>
+    <link rel="self" href="https://zhangyaoo.github.io/atom.xml"/>
     <subtitle>生死看淡，不服就干</subtitle>
-    <logo>http://localhost:4000/images/avatar.png</logo>
-    <icon>http://localhost:4000/favicon.ico</icon>
+    <logo>https://zhangyaoo.github.io/images/avatar.png</logo>
+    <icon>https://zhangyaoo.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, will</rights>
     <entry>
+        <title type="html"><![CDATA[记一次多数据源路由造成的数据库连接泄露排查过程]]></title>
+        <id>https://zhangyaoo.github.io/post/ji-yi-ci-duo-shu-ju-yuan-lu-you-zao-cheng-de-shu-ju-ku-lian-jie-nei-cun-xie-lu/</id>
+        <link href="https://zhangyaoo.github.io/post/ji-yi-ci-duo-shu-ju-yuan-lu-you-zao-cheng-de-shu-ju-ku-lian-jie-nei-cun-xie-lu/">
+        </link>
+        <updated>2021-02-02T03:32:16.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="前言">前言</h3>
+<p>之前一篇文章讲了自己写了一个多数据源路由组件给公司内部使用，进行快速迭代。文章URL是 <a href="https://zhangyaoo.github.io/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an">SaaS系统多数据源路由优雅解决方案</a><br>
+随着时间推移，某一天运维找上门说数据库连接打满，就刚好这一台机器上装了Java服务导致的。<br>
+下面文章就是讲的这次连接泄露导致的数据库hang住问题以及后面的解决过程。</p>
+<h3 id="一-案发当时的情况">一、案发当时的情况：</h3>
+<p>线上MySQL session 逐渐增加，不活跃的的数量逐渐增加，导致的后果：占用链接，导致链接满了无法分配新的连接<br>
+<img src="https://zhangyaoo.github.io/post-images/1612261925869.jpg" alt="" loading="lazy"></p>
+<h3 id="二-紧急处理方式">二、紧急处理方式：</h3>
+<p>用自研的应用层网关将流量切换为旧的版本中，并且不停机切换，然后将当前的版本的服务停调，然后观察阿里云的数据库连接数量变回正常。</p>
+<p>目前线上存在多个版本存在docker，然后用K8s部署，实现快速不停机切换上线。<br>
+自研网关这篇文章有介绍： <a href="ying-yong-ceng-wang-guan-she-ji-yu-shi-xian">应用层网关设计和实现</a></p>
+<h3 id="三-第一次查找问题并且解决的过程">三、第一次查找问题并且解决的过程：</h3>
+<p>1、开启本地服务，让它飞一会，或者多线程并且切租户查询数据库，dump内存快照进行分析<br>
+<img src="https://zhangyaoo.github.io/post-images/1612253583270.png" alt="" loading="lazy"></p>
+<p>2、然后查看本地服务相关数据库连接的对象<br>
+1）分析sqlsession 对象，发现sqlsession对象为0，而且日志中有打印及时关闭sqlsession。结论：sqlsession正常，说明正常关闭了sqlsession<br>
+<img src="https://zhangyaoo.github.io/post-images/1612237357285.png" alt="" loading="lazy"><br>
+2）分析datasource 对象，发现datasource对象和数据库连接配置中的max-pool-size一致。结论：datasource正常，说明正常关闭了datasource<br>
+<img src="https://zhangyaoo.github.io/post-images/1612237380060.png" alt="" loading="lazy"><br>
+3）分析connection对象，发现HikariProxyConnection对象和数据库配置一致。结论：HikariProxyConnection正常<br>
+<img src="https://zhangyaoo.github.io/post-images/1612237411657.png" alt="" loading="lazy"></p>
+<p>3、在分析本地内存快照，发现一个类随着时间的推移，逐渐增多，并且没有被回收，正是connectionImpl对象，这个对象是MySQL底层连接的实现，来自com.mysql.cj.jdbc<br>
+<img src="https://zhangyaoo.github.io/post-images/1612237433473.png" alt="" loading="lazy"><br>
+（图片中指的类有100多个对象）</p>
+<p>4、跟踪了一波源码，发现HikariProxyConnection对象，实质上底层就是new了一个并管理connectionImpl对象，猜测某个因为参数原因导致HikariProxyConnection及时释放，而connectionImpl没有释放，积累没有及时清除导致的。</p>
+<p>5、经过Google查找问题，怀疑是max_lifetime导致的问题。max_lifetime官网解释：一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired）。建议比数据库的wait_timeout小几分钟。默认30分钟<br>
+<img src="https://zhangyaoo.github.io/post-images/1612237640791.png" alt="" loading="lazy"></p>
+<p>6、查看线上配置和测试环境配置，果然是只配置了1分钟。<img src="https://zhangyaoo.github.io/post-images/1612262047685.jpg" alt="" loading="lazy"><br>
+随后将其改成30分钟，然后继续多线程并发跑测试用例。测试环境验证，dump内存，观察connectionImpl对象并没有随着时间的推移增加。发现connectionImpl对象并没有随着时间的推移增加。验证了个人的猜想。<br>
+<img src="https://zhangyaoo.github.io/post-images/1612237699007.png" alt="" loading="lazy"></p>
+<p>7、最终将配置更新后上线，过了没2个小时，连接数又飙升。初步观察还是connectionImpl对象增多，连接没有释放。所以认为，不是max_lifetime配置的问题。还是得从源码中入手和线上的dump入手看。</p>
+<p>第一次查找问题并<strong>没有解决根本问题</strong>，对此总结了一下：</p>
+<ol>
+<li>自己的猜想缺少实际的数据支持和多方位的有力证明</li>
+<li>对源码研究不够深入，只是停留在表明</li>
+<li>对官网的配置参数理解不够透彻</li>
+</ol>
+<h3 id="四-第二次查找问题并且解决的过程">四、第二次查找问题并且解决的过程：</h3>
+<p>本地环境观察没有问题，正式环境观察就有问题。像这种问题算是比较难解决的，为了快速解决问题，避免把线上数据copy到本地进行测试，直接down线上的dump文件下来进行仔细分析。</p>
+<p>1、查找线上的内存，dump数量，刚好100个，并且随着时间偏移，这个类对象越来越多，个人猜想就是这个对象没有被回收导致连接数未释放。有强引用引用这个对象。<br>
+<img src="https://zhangyaoo.github.io/post-images/1612420897419.png" alt="" loading="lazy"></p>
+<p>2、查找这个对象GC root对象，右键选择Merge Shortest Paths to GC roots -&gt; exclude all phantom/weak/soft etc.reference(排除所有虚弱软引用)，发现这100个对象大部分被一个名字叫做housekeeper线程所强引用，如下图。个人验证猜想是线程没有及时回收关闭或者是没有关闭线程池。<br>
+<img src="https://zhangyaoo.github.io/post-images/1612423498302.png" alt="" loading="lazy"></p>
+<p>3、这个时候dump文件里面就没法发现更多有用的信息了，然后就去看源码看这个housekeeper线程为什么一直强引用。查找源码发现在获取datasource 的 getConnetcion方法，会初始化HikariPool连接池。<br>
+<img src="https://zhangyaoo.github.io/post-images/1612423896839.png" alt="" loading="lazy"></p>
+<p>初始化连接池里面会初始化housekeeper连接池，刚好对应了上面在根引用的对象。<br>
+<img src="https://zhangyaoo.github.io/post-images/1612423966034.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1612425624943.png" alt="" loading="lazy"></p>
+<p>看了下这个housekeeper对象的作用，目的是为了维持最少的空闲的连接，说白了就是根据配置参数idleTimeout和minIdle来维持最小的空闲连接数。<br>
+<img src="https://zhangyaoo.github.io/post-images/1612425545450.png" alt="" loading="lazy"></p>
+<p>4、至此，可以初步得出结论，是由于应用程序不停的new HikariPool，然后没有及时close导致的问题。然后顺着这个结论去查看应用程序的BUG</p>
+<p>5、在程序发现下面逻辑，下面这一段逻辑就是根据租户来获取缓存中租户对应的datasource对象</p>
+<pre><code class="language-java">   /**
+     * 获取已缓存的数据源
+     */
+    private Optional&lt;DataSource&gt; getDataSourceIfCache(SelectRdsConfigDto rdsConfigDto) {
+        String key = getUniqueMysqlKey(rdsConfigDto.getHost(), rdsConfigDto.getPort());
+        if (Objects.nonNull(dataSourceCachePool.get(key))) {
+            DataSourceCache dataSourceCache = dataSourceCachePool.get(key);
+            //cache中已经缓存了租户的连接并且没有修改rds config信息
+            if (dataSourceCache.verifyRdsConfig(rdsConfigDto)) {
+                return Optional.ofNullable(dataSourceCachePool.get(key).getDataSource());
+            }
+            //cache中已经缓存了租户的连接，但是校验不通过
+            else {
+                dataSourceCachePool.remove(key);
+                return Optional.empty();
+            }
+        }
+        return Optional.empty();
+    }
+
+   // 校验
+   private boolean verifyRdsConfig(SelectRdsConfigDto rdsConfigDto) {
+        return rdsConfigDto.getAccount().equals(this.account) &amp;&amp;
+                rdsConfigDto.getHost().equals(this.host) &amp;&amp;
+                rdsConfigDto.getPort().equals(this.port) &amp;&amp;    rdsConfigDto.getPwd().equals(this.pwd) &amp;&amp;；
+
+    //  dataSourceCachePool的key组成，一个MySQL连接对应的key
+    private String getUniqueMysqlKey(String host, Integer port){
+        return host + &quot;:&quot; + port;
+    }
+
+ }
+</code></pre>
+<p>这里逻辑有一段是校验不通过，会remove对应的datasource对象，问题就出现在这里，这里没有及时close。校验不通过的原因就是，一个host port作为一个dataSourceCachePool的key，因为线上有一个MySQL实例多个账号，导致校验总是不通过误以为成是修改了用户名或者密码，随后就是一直new datasource对象。</p>
+<h3 id="五-根本原因">五、根本原因</h3>
+<p>所以综上，最终得出结论是，因为程序问题导致HikariDataSource对象增多，而且因为HikariDataSource对象内部有一个线程池，如果外部丢失了对这个HikariDataSource对象的引用，也不会被垃圾回收，导致HikariDataSource对象不释放，然后结果就是数据库连接未释放。</p>
+<h3 id="六-最终处理方式">六、最终处理方式：</h3>
+<p>1、修改代码：<br>
+1） dataSourceCachePool的key组成由host port 改成 host port account pwd 四个维度作为一个key。</p>
+<p>2）关闭datasource对象，remove那段代码的逻辑修改成下面这个样子</p>
+<pre><code class="language-java">//cache中已经缓存了租户的连接,但是修改了rds config信息
+        DataSource dataSource = dataSourceCachePool.remove(key).getDataSource();
+        log.info(&quot;remove datasource:{}, {}&quot;, key, rdsConfigDto.toString());
+        new Thread(() -&gt; {
+            while (true) {
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    log.error(&quot;e:&quot;, e);
+                }
+                if (dataSource instanceof HikariDataSource) {
+                    if (((HikariDataSource) dataSource).getHikariPoolMXBean().getActiveConnections() &gt; 0){
+                        log.info(&quot;ActiveConnections &gt; 0, continue&quot;);
+                        continue;
+                    }
+                    log.info(&quot;HikariDataSource close...&quot;);
+                    ((HikariDataSource) dataSource).close();
+                } else if (dataSource instanceof DruidDataSource) {
+                    if (((DruidDataSource) dataSource).getActiveCount() &gt; 0) {
+                        log.info(&quot;ActiveConnections &gt; 0, continue&quot;);
+                        continue;
+                    }
+                    log.info(&quot;DruidDataSource close...&quot;);
+                    ((DruidDataSource) dataSource).close();
+                } else {
+                    log.error(&quot;close datasource|datasource is wrong&quot;);
+                    throw new RuntimeException(&quot;close datasource|datasource is wrong&quot;);
+                }
+                break;
+            }
+        }).start();
+</code></pre>
+<p>Q：为什么要判断活跃的连接 ActiveCount &gt; 0 ？<br>
+A：因为close的时候要判断是否有正在使用的connection对象，如果强制关闭，那么会出现一个线程查询的时候，connetion突然不可用，导致错误。</p>
+<p>2、改配置，改成和官方默认的配置<br>
+<img src="https://zhangyaoo.github.io/post-images/1612426469625.png" alt="" loading="lazy"></p>
+<p>最后，重新上线后，观测对象内存数据，正常。</p>
+<h3 id="七-总结">七、总结</h3>
+<p>底层的数据库组件的代码编写，要注意使用数据库连接资源的时候，一定要检查代码中是否释放，不然会造成严重的事故。而且平常还要熟悉官方配置，并且多研究源码。以免出现这种情况时束手无策。<br>
+可以的话还可以叫身边的资深大牛给review代码，做到双重保障。</p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[2020年总结]]></title>
-        <id>http://localhost:4000/post/2020-nian-zong-jie/</id>
-        <link href="http://localhost:4000/post/2020-nian-zong-jie/">
+        <id>https://zhangyaoo.github.io/post/2020-nian-zong-jie/</id>
+        <link href="https://zhangyaoo.github.io/post/2020-nian-zong-jie/">
         </link>
         <updated>2020-12-31T03:59:36.000Z</updated>
-        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1609517863900.jpg" alt="" loading="lazy"></figure>
+        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://zhangyaoo.github.io/post-images/1609517863900.jpg" alt="" loading="lazy"></figure>
 <h3 id="开头">开头</h3>
 <p>今天是1月1号，新年第一天，抓住2020年的小尾巴，随便絮絮叨叨一下，做个小总结。回想一下今年一整年，开心，困难，心酸，大部分都经历过，没有什么值得说的经历，倒是小事挺多。</p>
 <p>值得提的事情就是疫情了，今年疫情在家呆了2个月，那时候因为年前被裁，已经是失业的状态，没有收入来源，开始坐立不安，烦躁 。后面意识到了在家也有在家值得做的事情，不必因为疫情打乱自己的内心，充实陪家人过每一天。</p>
 <p>作为成年人，现在认为时常开心快乐倒是一件很难的事情，想起一句话，小时候快乐是一件简单的事情，长大后，简单是一件快乐的事情。不过后面还是要时常开心为主，然后就是今年以后要沉静下来，理性思考，不管对人还是对事。还要多看些关于生活上的书，不只是盯着技术书死啃，提醒一下自己要停下来多思考，低头做事，抬头看路。</p>
 <p>今年总结方面有些少，因为我自己认为这些方面值得去总结，至于其他的，可能我没有意识到或者是今年经历事情的太少。</p>
 <h3 id="学习">学习</h3>
-<p><img src="http://localhost:4000/post-images/1609517630829.jpg" alt="" loading="lazy"><br>
+<p><img src="https://zhangyaoo.github.io/post-images/1609517630829.jpg" alt="" loading="lazy"><br>
 关于学习这件事，还是要放在第一来说。学无止境，活到老学到老。人不能总是停留在原地，还是要多看书多学习，增长知识。中国人大部分劳动人民以前（80年代）是基本靠努力，靠勤奋，获得属于自己的劳动果实，现在信息时代，除了靠努力勤奋以外，还要有效利用专业知识去解决生活工作中的问题，享受现在信息时代给与的成果。<br>
 就像文臣武将，谋士当出谋划策，武士当战场厮杀。每个人当去发挥自己的专业本领。不管最终目的是啥，精忠报国还是养家糊口，小有小义，大有大义。</p>
 <p>扯远了，今年准备还是以技术学习为主，然后以公众号和GitHub为辅助进行学习。<br>
@@ -39,13 +179,13 @@
 <p>然后其他时间，准备看一些其他类型的书籍，比如人文历史，以及其他优秀的国内外著作，现在已经想好看些什么，就不一一列举了，今年今后会抽空余时间去看这些，提升自己对人和生活的一些思考。</p>
 <p>最后的话要提醒自己少看动漫二次元多学习，早睡早起~~</p>
 <h3 id="运动">运动</h3>
-<p><img src="http://localhost:4000/post-images/1609517659211.jpg" alt="" loading="lazy"><br>
+<p><img src="https://zhangyaoo.github.io/post-images/1609517659211.jpg" alt="" loading="lazy"><br>
 运动这件事情，算是我个人每年立的flag中，自己最满意的了。一周最少一次跑步+篮球。基本上也不算全部，每周都做了。<br>
 我身边的朋友或者亲人，我会经常提醒他们，要适当的锻炼。虽然总是被当作耳边风，但是每次过年祝别人身体健康只是噱头，只有真正关心你的人会在乎你的健康。我个人不管是生日还是新年愿望，大部分都是希望身边的人过的平平安安开开心心就行了，其他都是扯淡。<br>
 而我自己运动的动力来源是，如果我自己身体不行，那就没有能力照护身边人。我自己能够成长为大树，让别人安心倚靠。</p>
 <p>现在虽然毕业了3年，6块腹肌已经变成了4快，身体没有毕业那会好，但是我自己还是会坚持的，朝着更man的目标奋斗。想当年我可是拥有8块腹肌的男人。。。。</p>
 <h3 id="爱情">爱情</h3>
-<p><img src="http://localhost:4000/post-images/1609517842818.jpg" alt="" loading="lazy"><br>
+<p><img src="https://zhangyaoo.github.io/post-images/1609517842818.jpg" alt="" loading="lazy"><br>
 今年最开心的就是和女朋友度过第一年的恋爱期（不要脸的我，自认为网恋了一年的热恋期），这一年有开心和难过，不过难过时刻很少，大部分都是开心时刻，我觉得已经可以了，能够和对方每天都很开心，已经很不错了。毕竟和喜欢的人在一起不就是开心撒，这个是最难能可贵的。。</p>
 <p>我自认为我是个不好i相处的人，个人的小脾气很多，而且有时候会常有不自信。谢谢我女朋友的理解和鼓励。今年往后，还希望一起开心度过每一天，哈哈哈哈。</p>
 <p>新的一年，希望咱俩都身体健康，开开心心~</p>
@@ -58,13 +198,22 @@
 5、经营好个人博客<br>
 6、 早睡早起，11点半之前睡</p>
 <p><strong>2021年，干就完事</strong>。<br>
-<img src="http://localhost:4000/post-images/1609517948326.jpg" alt="" loading="lazy"></p>
+<img src="https://zhangyaoo.github.io/post-images/1609517948326.jpg" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[应用层网关设计与实现]]></title>
+        <id>https://zhangyaoo.github.io/post/ying-yong-ceng-wang-guan-she-ji-yu-shi-xian/</id>
+        <link href="https://zhangyaoo.github.io/post/ying-yong-ceng-wang-guan-she-ji-yu-shi-xian/">
+        </link>
+        <updated>2020-12-22T03:12:25.000Z</updated>
+        <content type="html"><![CDATA[<p>##还没完成，敬请期待</p>
 ]]></content>
     </entry>
     <entry>
         <title type="html"><![CDATA[概率相等的拼手气红包算法实现]]></title>
-        <id>http://localhost:4000/post/shou-lu-yi-ge-hong-bao-suan-fa/</id>
-        <link href="http://localhost:4000/post/shou-lu-yi-ge-hong-bao-suan-fa/">
+        <id>https://zhangyaoo.github.io/post/shou-lu-yi-ge-hong-bao-suan-fa/</id>
+        <link href="https://zhangyaoo.github.io/post/shou-lu-yi-ge-hong-bao-suan-fa/">
         </link>
         <updated>2020-12-17T14:17:09.000Z</updated>
         <content type="html"><![CDATA[<h3 id="1-要求">1、要求</h3>
@@ -188,8 +337,8 @@
     </entry>
     <entry>
         <title type="html"><![CDATA[记一次用户中心采用分布式ID踩的坑]]></title>
-        <id>http://localhost:4000/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/</id>
-        <link href="http://localhost:4000/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/">
+        <id>https://zhangyaoo.github.io/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/</id>
+        <link href="https://zhangyaoo.github.io/post/ji-yi-ci-cai-yong-fen-bu-shi-id-jie-jue-fen-ku-fen-biao-cai-de-keng/">
         </link>
         <updated>2020-10-16T02:55:39.000Z</updated>
         <content type="html"><![CDATA[<h3 id="一-背景">一、背景</h3>
@@ -311,7 +460,7 @@
 <li>第2-42位是相对时间戳，通过当前时间戳减去一个固定的历史时间戳生成。</li>
 <li>第43-52位是机器号workerID，每个Server的机器ID不同。</li>
 <li>第53-64位是自增ID。<br>
-<img src="http://localhost:4000/post-images/1604663039402.png" alt="" loading="lazy"></li>
+<img src="https://zhangyaoo.github.io/post-images/1604663039402.png" alt="" loading="lazy"></li>
 </ul>
 <p>这个方案也有缺点：</p>
 <ol>
@@ -407,14 +556,14 @@ at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:614) ~[let
 <p>乍看是redis的抛出来的错误，和这次分布式ID改造没有什么关系，但是仔细静下来想一想，这次ID改造是从原来的数据库自增改造的，数据库自增数据主键很小是int类型，然后用了64位二进制数据当作ID后，导致redis中用户的数据存不下去，然后笔者就按照这个思路去发掘问题。</p>
 <p>笔者从业务抛出的堆栈中发现，这个错误是在判断用户是否是新用户服务方法中抛出的，而判断是新用户的逻辑就是，利用redis的bitmap来解决的：getbit new_user_key userId，其中 userId为用户ID，如果用户发生了交易信息，就会执行：setbit new_user_key userId 1 这个命令。 为什么要用bitmap解决呢，主要是因为如果从交易记录表查询某个用户是否交易信息来判断是新用户的话就会非常耗时，所以只要是发生了交易信息就设置bitmap就可以了。</p>
 <p>那为什么会抛出out of range这个错误呢，我们知道bitmap底层其实就是String类型，而String类型的最大长度为512M，官网截图：<br>
-<img src="http://localhost:4000/post-images/1605157810715.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1605157810715.png" alt="" loading="lazy"><br>
 所以如果offset超过512M这个范围那么就会抛出异常，512M = 2^9 * 2^12 * 2^12 * 2^3 = 2^32 bit，也就是支持Integer类型的最大值，而我们这次分布式ID服务ID是64位的，支持2^64 bit，所以如果offset也就是userId大于2^32的话就会抛出out of range异常了。</p>
 <h4 id="41-问题解决">4.1 问题解决</h4>
 <p>找到了问题，也就好去做优化了，这里笔者提供几个方法作为参考</p>
 <ol>
 <li>在数据库用户表或者用户扩展表中增加一个字段，如果发生了交易，那么将字段标记为老用户</li>
 <li>把用户ID放入redis集合set中，利用SMISMEMBER命令判断当前用户是否在集合内，当然这个会有性能问题，其方法时间复杂度位O(N)，官方截图:<br>
-<img src="http://localhost:4000/post-images/1605162870590.png" alt="" loading="lazy"></li>
+<img src="https://zhangyaoo.github.io/post-images/1605162870590.png" alt="" loading="lazy"></li>
 </ol>
 <h3 id="五-总结">五、总结</h3>
 <p> 笔者从分布式ID选型出发，介绍了几种业界几种比较常用的生成方法，并且介绍了其优缺点，然后结合实际业务出发，选择合适的方案。然后介绍了使用SnowFlake算法导致的业务问题，以及分析最后提供解方法。从这次踩坑的经历来说，我们要懂技术体系，并且还要非常熟悉业务，最大程度避免功能之间的相互的影响导致的bug。</p>
@@ -427,8 +576,8 @@ at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:614) ~[let
     </entry>
     <entry>
         <title type="html"><![CDATA[SaaS系统多数据源路由优雅解决方案]]></title>
-        <id>http://localhost:4000/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/</id>
-        <link href="http://localhost:4000/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/">
+        <id>https://zhangyaoo.github.io/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/</id>
+        <link href="https://zhangyaoo.github.io/post/saas-xi-tong-duo-shu-ju-yuan-lu-you-you-ya-jie-jue-fang-an/">
         </link>
         <updated>2020-10-16T02:26:30.000Z</updated>
         <content type="html"><![CDATA[<h2 id="背景">背景</h2>
@@ -452,19 +601,19 @@ at io.lettuce.core.protocol.CommandHandler.decode(CommandHandler.java:614) ~[let
 </ol>
 <h3 id="具体技术实现">具体技术实现</h3>
 <p><strong>简单的架构图</strong><br>
-<img src="http://localhost:4000/post-images/1603179800053.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603179800053.png" alt="" loading="lazy"><br>
 如图所示，SaaS项目大概架构图，关键点是应用层传参，以及路由层的实现。</p>
 <p><strong>实现</strong><br>
 1、应用层：项目中应用service层是dubbo服务，而且项目分多层，这里需要考虑到多层服务场景下，如何优雅传参问题，如下图所示<br>
-<img src="http://localhost:4000/post-images/1603181882775.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603181882775.png" alt="" loading="lazy"><br>
 我们考虑到租户ID是唯一标识，和业务参数绑定在一起不优雅，所以两种参数分开处理，业务参数直接参数透传，租户ID唯一标识通过隐式传参来处理（参考dubbo http://dubbo.apache.org/zh-cn/docs/user/demos/attachment.html），并且参数记录到服务本地的threadlocal中，以便后续其他业务需要。具体实现如下：<br>
-<img src="http://localhost:4000/post-images/1603183675071.png" alt="" loading="lazy"></p>
+<img src="https://zhangyaoo.github.io/post-images/1603183675071.png" alt="" loading="lazy"></p>
 <p>2、路由层：路由层实现主要是自行实现spring框架中DataSource接口，自定义dynamicDataSource类，然后implement DataSource接口，实现getConnection方法。然后重新定义SqlSessionFactory的bean，将自定义DataSource类属性注入。<br>
-<img src="http://localhost:4000/post-images/1603183148592.png" alt="" loading="lazy"><br>
-<img src="http://localhost:4000/post-images/1603183156251.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603183148592.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603183156251.png" alt="" loading="lazy"><br>
 然后我们只需要关注getConnection方法根据租户ID，选择相对应的租户连接池就可以了。<br>
 如图中，我们只需要实现这个selectTenantCodeDataSource()这个方法就可以了，这个方法实现很简单，这里就不贴图了。selectTenantCodeDataSource()方法主要就是从threadlocal中拿租户ID，然后去缓存池map中拿出连接池信息。<br>
-<img src="http://localhost:4000/post-images/1603183509071.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603183509071.png" alt="" loading="lazy"><br>
 其中，dataSourceCachePool是在初始化配置时候，将所有的租户连接池直接创建，然后扔到dataSourceCachePool。key是租户的ID，value是连接池信息。</p>
 <p>具体的初始化配置：</p>
 <pre><code class="language-java">/**
@@ -499,10 +648,10 @@ public class DataSourceInit {
 <h3 id="隐藏的缺陷">隐藏的缺陷</h3>
 <p>相信有一定开发经验的读者应该能想到，上述方案最大的缺点就是性能问题，对MySQL有非常大的影响。因为一开始初始化非常多的连接池，就会占用连接资源，比如租户从100个扩展到了1000个以及更多，那么连接池数量就线性增长，如果一个连接池保持15个活跃连接的话，那么连接数就是15*1000，此时如果MySQL的maxconntion的数量非常小，那么MySQL侧就会抛出”too many connctions“错误，在应用层方面就是MySQL不可用了。<br>
 没优化之前的架构：<br>
-<img src="http://localhost:4000/post-images/1603190851131.png" alt="" loading="lazy"></p>
+<img src="https://zhangyaoo.github.io/post-images/1603190851131.png" alt="" loading="lazy"></p>
 <h3 id="解决">解决</h3>
 <p>想保持数据库分离，又要考虑到MySQL性能问题，只能向连接池优化的方向去考虑，其实可以减少数量就可以了，这里实现方案就是一个数据库实例一个连接池，如下图所示：<br>
-<img src="http://localhost:4000/post-images/1603190889253.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603190889253.png" alt="" loading="lazy"><br>
 具体实现就是将上述方案中的dataSourceCachePool的key改为 “IP+端口”，作为key。然后再数据源路由层，多一层映射（租户ID——&gt;数据库实例）就可以了。</p>
 <h2 id="三-更优雅方案解决企业内部开发痛点">三、更优雅方案解决企业内部开发痛点</h2>
 <h3 id="现状">现状</h3>
@@ -536,7 +685,28 @@ public class DataSourceAutoConfigure {
     }
 }
 </code></pre>
-<p>2、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置filter这个参数，无需增加任何的配置。</p>
+<p>2、Java SPI机制：利用Javaspi 来获取用户自定义的mybatis plugin。这样做的好处是，不用每次增加一个plugin，就改动数据路由组件的代码。</p>
+<pre><code class="language-java">public SqlSessionFactory sqlSessionFactory(@Qualifier(&quot;tenantRoutingDataSource&quot;) TenantRoutingDataSource tenantRoutingDataSource) throws Exception{
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(tenantRoutingDataSource);
+        Interceptor[] plugins = loadMybatisPlugin();
+        if(plugins.length &gt; 0){
+            sqlSessionFactoryBean.setPlugins(plugins);
+        }
+        Objects.requireNonNull(sqlSessionFactoryBean.getObject()).getConfiguration().setMapUnderscoreToCamelCase(true);
+        return sqlSessionFactoryBean.getObject();
+    }
+
+    // SPI机制获取插件
+    private Interceptor[] loadMybatisPlugin(){
+        List&lt;Interceptor&gt; interceptors = new ArrayList&lt;&gt;();
+        ServiceLoader&lt;Interceptor&gt; load = ServiceLoader.load(Interceptor.class);
+        load.forEach(interceptors::add);
+        return interceptors.toArray(new Interceptor[0]);
+    }
+}
+</code></pre>
+<p>3、dubbo filter扩展接口：获取租户ID，并且需要加@Activate注解，这样dubbo在初始化filter链的时候，自动将这个filter注册到filter链中，这样做的好处就是，用户在自己工程中不需要配置filter这个参数，无需增加任何的配置。</p>
 <pre><code class="language-java">@Activate(group = {&quot;provider&quot;})
 public class TenantCodeContextFilter implements Filter {
     @Override
@@ -547,7 +717,7 @@ public class TenantCodeContextFilter implements Filter {
     }
 }
 </code></pre>
-<p>3、检查用户侧自定义配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常</p>
+<p>4、检查用户侧自定义配置是否正确：检查用户的配置是否合理，不合理的话再容器就绪阶段就会抛出异常</p>
 <pre><code class="language-java">@Component
 public class CheckConfigListener implements ApplicationListener&lt;ApplicationReadyEvent&gt; {
 
@@ -559,6 +729,14 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
         checkDatasourceConfig(environment);
     }
 }
+</code></pre>
+<p>5、利用缓存池保存多个dataSource对象，一个MySQL实例对应一个dataSource对象，一个dataSource对应多个租户，而不是一个dataSource对应一个租户，这样的好处就是，如果一个MySQL实例里面的租户数据库过多，不会导致一个MySQL实例连接数膨胀问题。</p>
+<pre><code class="language-java">    /**
+     * 数据源缓存池
+     * Key 一个MySQL数据库连接信息key
+     * Value 缓存时RDS连接信息与DataSource
+     */
+    private final Map&lt;String, DataSourceCache&gt; dataSourceCachePool = new ConcurrentHashMap&lt;&gt;();
 </code></pre>
 <p><strong>用户使用</strong>：直接引入相应的maven，方便快捷</p>
 <h2 id="四-todo后续优化">四、TODO后续优化</h2>
@@ -575,8 +753,8 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
     </entry>
     <entry>
         <title type="html"><![CDATA[MySQL联合索引在B+树的存储和查找]]></title>
-        <id>http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/</id>
-        <link href="http://localhost:4000/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">
+        <id>https://zhangyaoo.github.io/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/</id>
+        <link href="https://zhangyaoo.github.io/post/mysql-lian-he-suo-yin-zai-bshu-de-cun-chu-he-cha-zhao/">
         </link>
         <updated>2020-06-29T09:32:43.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
@@ -587,9 +765,9 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
 <p>先看一下Innodb B+树的主键索引和辅助索引。这里直接拿张洋大神的图：</p>
 <ul>
 <li>聚簇索引:<br>
-<img src="http://localhost:4000/post-images/1593425796639.png" alt="" loading="lazy"></li>
+<img src="https://zhangyaoo.github.io/post-images/1593425796639.png" alt="" loading="lazy"></li>
 <li>辅助非聚簇索引:<br>
-<img src="http://localhost:4000/post-images/1593425801180.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593425801180.png" alt="" loading="lazy"><br>
 <strong>结构</strong>：当一个表T（id,name,age,sex,high）建一个普通索引  KEY(name)，name的索引结果就和上面辅助非聚簇索引结构一样。<br>
 <strong>查询</strong>：当有一个select id,name,age from T where name = &quot;&quot; 辅助索引会根据name在B+树上进行二叉树查找，找出叶子节点数据后发现没有age这个数据，就会进行<strong>回表</strong>操作到主键聚簇索引去查找，拿到聚簇索引叶子节点的age数据。</li>
 </ul>
@@ -597,7 +775,7 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
 <ul>
 <li>
 <p><strong>索引结构</strong>：我们知道上述回表过程也会消耗性能，相当于多查一次，所以系统可以根据业务情况加上一个组合索引，当然并不是一直加组合索引就可以了，因为要考虑到索引存储空间的问题。例如给上述加上一个组合索引  KEY（name,age,sex）【 KEY（col1,col2,col3）】。那么这个组合索引的B+树非叶子节点数据结构和上述辅助非聚簇索引图一样，但是叶子节点是这样的：<br>
-<img src="http://localhost:4000/post-images/1593425790647.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593425790647.png" alt="" loading="lazy"><br>
 叶子节点存储col1,col2,col3这三列数据以及加上ID这一列数据。</p>
 </li>
 <li>
@@ -620,8 +798,8 @@ public class CheckConfigListener implements ApplicationListener&lt;ApplicationRe
     </entry>
     <entry>
         <title type="html"><![CDATA[关于Zookeeper奇数节点以及脑裂问题]]></title>
-        <id>http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/</id>
-        <link href="http://localhost:4000/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
+        <id>https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/</id>
+        <link href="https://zhangyaoo.github.io/post/guan-yu-zookeeper-qi-shu-jie-dian-yi-ji-nao-lie-wen-ti/">
         </link>
         <updated>2020-06-22T02:32:00.000Z</updated>
         <content type="html"><![CDATA[<h3 id="前言">前言</h3>
@@ -654,22 +832,22 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <ul>
 <li>
 <p>比如集群中有6个节点，一个master和5个slave，分两个机房，每个机房分别三台，发生了机房不可通信的情况，如下图：<br>
-<img src="http://localhost:4000/post-images/1593419532309.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593419532309.png" alt="" loading="lazy"><br>
 然后机房B就会产生新的master，如图<br>
-<img src="http://localhost:4000/post-images/1593419550068.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593419550068.png" alt="" loading="lazy"><br>
 这个时候Zookeeper为了防止这样的情况发生，利用了<strong>过半机制</strong>的这个特性。<br>
 上图中，机房B节点为3 小于集群数量的一半，所以，最终上面图中机房B是不会选举出新的master节点的。</p>
 </li>
 <li>
 <p>我们再来看一种情况：比如集群中有5个节点，一个master和4个slave，分两个机房，如下图：<br>
-<img src="http://localhost:4000/post-images/1593419973725.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593419973725.png" alt="" loading="lazy"><br>
 如果发生了机房不能通信的情况，那么机房B因为节点是2个，没有超过一半，就不会产生出新的master节点了。</p>
 </li>
 <li>
 <p>再来看最后一种情况，比如集群中有5个节点，一个master和4个slave，分两个机房，不同的是master节点在机房B，如下图：<br>
-<img src="http://localhost:4000/post-images/1593420189914.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593420189914.png" alt="" loading="lazy"><br>
 如果发生了机房不能通信的情况，那么机房A节点是3个，超过了一半，就会进入崩坏恢复模式产生新的master节点，那么此时集群中就会出现两个master节点了。如下图所示<br>
-<img src="http://localhost:4000/post-images/1593420219104.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593420219104.png" alt="" loading="lazy"><br>
 那么遇到这种情况Zookeeper是如何处理的？答：旧的leader所有的写请求同步到其他followers节点是会被拒绝的。因为每当新leader产生时，会生成一个epoch，这个epoch是递增的，followers如果确认了新的leader存在，知道其epoch，就会拒绝epoch小于现任leader epoch的所有请求。这个时候旧的master进入恢复模式进行数据同步。<br>
 所以按照上面的情况，机房A的所有followers节点正常通信，机房B的所有节点重新进入恢复模式进行数据同步。</p>
 </li>
@@ -688,8 +866,8 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
     </entry>
     <entry>
         <title type="html"><![CDATA[金融级业务下分布式事务保证数据一致性]]></title>
-        <id>http://localhost:4000/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/</id>
-        <link href="http://localhost:4000/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/">
+        <id>https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/</id>
+        <link href="https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing/">
         </link>
         <updated>2020-06-22T02:27:01.000Z</updated>
         <content type="html"><![CDATA[<h2 id="前言">前言</h2>
@@ -705,7 +883,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <li>A银行同步调用B银行转账接口。</li>
 <li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
 <li>B银行返回处理结果给A银行。<br>
-<img src="http://localhost:4000/post-images/1593745125729.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593745125729.png" alt="" loading="lazy"><br>
 同步调用问题：</li>
 </ol>
 <ul>
@@ -720,7 +898,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <li>真正消费者程序对B银行进行远程调用</li>
 <li>B银行对转入账户进行检查校验，进行账户金额增加。</li>
 <li>B银行返回处理结果给A银行。<br>
-<img src="http://localhost:4000/post-images/1593743096206.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1593743096206.png" alt="" loading="lazy"><br>
 异步调用问题：</li>
 </ol>
 <ul>
@@ -735,7 +913,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <h3 id="21-利用本地消息表思想解决一致性问题">2.1 利用本地消息表思想解决一致性问题</h3>
 <p> 一般来说，跨行转账的原理，会存在一个中国人民银行的中间人角色来操作转账，但不在本次讨论的范围内。<br>
  业界银行转账大部分都是同步转账，异步获取转账结果，包括第三方支付平台对接银行都是这样玩的。这里笔者就利用本地消息表思想来具体叙述数据一致性是如何保证的，老规矩先放图：<br>
-<img src="http://localhost:4000/post-images/1603274563955.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603274563955.png" alt="" loading="lazy"><br>
 其中交易记录表大概长这个样子：</p>
 <table>
 <thead>
@@ -826,9 +1004,9 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 <h3 id="22-事务消息解决本地事务和mq消息一致性问题">2.2 事务消息解决本地事务和MQ消息一致性问题</h3>
 <p> 转账业务，如果用异步的话，当出现MQ问题或者消费也者程序出现消息挤压或者消费者端出现问题 的话，那么整个业务时间线会拉的非常长。所以笔者认为异步不适合这种业务，异步<strong>本质上</strong>是对下游服务的一个缓冲，适合在自己系统中使用，不适合跨系统或者三方调用。当然不是所有的场景都不合适，如果流量非常大话，对方系统有限流机制，使用MQ也算是一种解决方案，这还是看具体业务。</p>
 <p> 什么样的场景适合使用MQ？一般来说在需要限流削峰、异步解耦等场景使用，所以还是拿上面的图，图中标框的部分业务适合用MQ来解决<br>
-<img src="http://localhost:4000/post-images/1603790962781.png" alt="" loading="lazy"></p>
+<img src="https://zhangyaoo.github.io/post-images/1603790962781.png" alt="" loading="lazy"></p>
 <p> 如果用MQ来做的话，那么会有如下图步骤：<br>
-<img src="http://localhost:4000/post-images/1603792233049.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603792233049.png" alt="" loading="lazy"><br>
 图中的步骤大致分为6步，这里细致讲一下每一步的详细步骤，分别是：</p>
 <ol>
 <li>消息生成者发送消息，broker接受消息</li>
@@ -840,7 +1018,7 @@ public boolean containsQuorum(Set&lt;Long&gt; set){
 </ol>
 <p> 以上为一条正常的消息从生产到消费的过程，每一步都是不可或缺的。而且我们可以看到，当引入中间件MQ后，消费端业务需要保持幂等。</p>
 <p> 回到上面文章最开始的部分，并没有解决异步调用问题一。没有彻底解决本地事务和消息不一致性。所以这个时候，就需要事务消息解决本地事务和MQ消息一致性问题了，笔者重新画了一张图来说明一下事务消息是如何做的：<br>
-<img src="http://localhost:4000/post-images/1603873494446.png" alt="" loading="lazy"><br>
+<img src="https://zhangyaoo.github.io/post-images/1603873494446.png" alt="" loading="lazy"><br>
 图中的步骤大致分为几步，分别是：</p>
 <ol>
 <li>生产者发送一条prepare消息</li>
@@ -884,8 +1062,8 @@ T+1日对账，程序或者人工定时扫描核心业务数据，保证当日�
     </entry>
     <entry>
         <title type="html"><![CDATA[O(N)时间复杂度下，二进制反转]]></title>
-        <id>http://localhost:4000/post/er-jin-zhi-fan-zhuan/</id>
-        <link href="http://localhost:4000/post/er-jin-zhi-fan-zhuan/">
+        <id>https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/</id>
+        <link href="https://zhangyaoo.github.io/post/er-jin-zhi-fan-zhuan/">
         </link>
         <updated>2020-06-19T08:11:36.000Z</updated>
         <content type="html"><![CDATA[<h4 id="题目描述">题目描述</h4>
@@ -922,396 +1100,6 @@ public class BitReverse {
     }
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[系统性能优化的思考和总结]]></title>
-        <id>http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/</id>
-        <link href="http://localhost:4000/post/guan-yu-xi-tong-xing-neng-ping-jing-yu-ce-he-xi-tong-xing-neng-you-hua/">
-        </link>
-        <updated>2020-06-17T13:05:11.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="前言">前言</h3>
-<blockquote>
-<p>对于任何系统，都会存在系统性能瓶颈，这里笔者作为一名Java工程师列出了自己在工作中的优化思路，仅供参考。</p>
-</blockquote>
-<h2 id="一-系统性能预测">一、系统性能预测</h2>
-<p> 任何一个系统都是从0到1慢慢发展的，当系统业务随着时间的推移，业务量和流量随之增大，系统性能就随着凸显出来。这个时候，开发人员和架构师要从架构层面、代码层面、产品业务层面等一一去演进业务系统来维持高流量下系统稳定性。</p>
-<p> 现在服务都是微服务部署开发，如果要模拟服务压测的话要在本地开启相同的服务，前提是机器配置是一样的。而且需要将线上的持久化数据同样copy到本地数据库中，这样才能真正模拟线上的环境。拿单台机器进行压测，压测的对象可以是某个核心的接口或者业务模块（这个接口可以是日志服务中统计的访问量比较高的具体的接口API），压测的指标可以是吞吐量，平均响应时间，最大响应时间，TPS，QPS等等。</p>
-<p> 通过性能指标可以度量目前存在的性能问题，同时作为性能优化的评估依据。具体的指标主要是要分析系统的QPS、TPS、平均响应时间以及最大响应时间，我们预测一个单体的应用能够承受多少的并发量，看这这些指标是否能够达到我们预期的值，比如作为一个健康的系统，最大响应时间不超过1s。后面进行压测时候，观察流量巅峰时刻观察系统的运行情况。以下就性能分析优化展开总结。<br>
-<br></p>
-<h2 id="二-系统性能分析优化">二、系统性能分析优化</h2>
-<h3 id="1-硬件方面">1、硬件方面：</h3>
-<h5 id="cpu">CPU：</h5>
-<p> 在压测的时候观察CPU的占用情况，是否长期处于100%状态，正常来说80%以下是正常的。如果非常低，那么说明系统不是在做IO密集型运算动作，性能瓶颈是在其他方面，不是在CPU上面，具体的操作方法可以用top命令查看。<br>
- 以笔者经验来看，一般CPU飙高的原因无非三种：</p>
-<ol>
-<li>第一种就是代码中存在死循环，并且循环中有大量的CPU计算操作；</li>
-<li>第二种就是多线程并发下，竞争相同的资源导致大量线程获取不到资源，如果此时线程进行自旋操作，不释放CPU资源，那就导致CPU飙升；</li>
-<li>第三种就是代码中有内存泄漏，导致内存一直处于阈值状态，GC线程会持续GC，导致CPU飙高。</li>
-</ol>
-<p> 上面三种情况中第二种和第三种情况在日常开发工作中会遇到，对于第二种情况对于自旋锁情况，一般会用CAS乐观锁去实现，并且设置一定的超时时间和重试次数，然后返回失败或者进入阻塞队列释放CPU分片，防止线程一直占用CPU资源。<br>
- 对于第三种情况，就是代码的BUG，开发过程中要注意泄漏的问题，就比如多线程操作链表，如果没有做同步的锁，那么很有可能导致链表的引用指针混乱，引起内存泄漏。<br>
- 以上，如果我们开发工作中避免了上述几种情况，CPU就能够发挥它应该有的能力，提升系统性能。同时，开发人员做好硬件CPU监控是非常有必要的。</p>
-<h5 id="内存">内存：</h5>
-<p>  在Java中，内存JVM是一个很重要的指标，这个关乎到系统是否可以稳定运行。我们可以借助三方工具可以查看系统的JVM内存的运行情况，笔者提供几个通用的预测内存的运行情况的思路：<br>
-- 每秒占用多少内存？<br>
-- 多长时间触发一次Minor GC？<br>
-- 多长时间触发一次Major GC？<br>
-- Minor  GC耗时多久？Major  GC耗时多久？<br>
-- 会不会频繁因为Survivor放不下导致对象进入老年代？</p>
-<p>在日常开发中，开发人员需要关注的就是，判断系统JVM是否有频繁FULL GC和频繁YOUNG GC，如果有，那么会严重影响系统性能。笔者就这两个方面去分析一下<br>
-   1、<strong>频繁FULL GC</strong> ：首先我们应该要了解到频繁FULL GC危害，一般的中大型系统，系统的JVM会设置很大，比如会给堆内存分配4~8G的空间，因为遍历对象图的过程中堆越大，遍历时间就会长，而且如果垃圾越多，垃圾回收也会拉长整个GC的时间，这就导致每一次FULL GC会有长时间的STW，影响系统稳定性。然后我们要清楚导致触发Full GC的场景，这里列出了可能会导致的几个场景：<br>
-  1）大对象<br>
-  2）方法区meta space空间占满<br>
-  3）年轻代的存活的生命周期长对象一直汇入老年代，导致GC<br>
-  4）内存泄漏导致空间不足进而GC<br>
-这里笔者就拿内存泄漏（内存泄漏指的是有引用无法被回收但是没有用的对象持续增长）来说，一般如果有内存泄漏。大概的内存监控图长这个样子<img src="http://localhost:4000/post-images/1592463486063.png" alt="" loading="lazy"><br>
-这样导致的后果就是，频繁的FULL GC，最后内存一直持续增长到爆满，然后FULL GC执行间隔缩短，最终会导致GC线程持续GC，CPU使用率会直线飙升，导致系统瘫痪。<br>
-    2、 <strong>频繁 YOUNG GC</strong>  ：YOUNG GC如果过于频繁的话，一般是短周期小对象较多，这时候可以从 Eden 区/新生代设置的太小了这个方面考虑，看能否通过调整-Xmn、-XX:SurvivorRatio 等参数设置来解决问题</p>
-<p><strong>这里笔者以自己开发经验，提供一些“简单的”JVM优化拙见</strong>：</p>
-<ol>
-<li>尽量将新生代的垃圾回收掉，不让存活对象进入老年代，因为老年代的GC代价比年轻代高，这里可以设置分代年龄-XX:MaxTenuringThreshold=XX<br>
-  例子1：比如说业务上一分钟产生几百兆的数据，而且需要存活一分钟，如果一分钟YGC的次数少于默认分代年龄，那么对象会进去老年代引发FGC，FGC会引起更大的停顿时间<br>
-  例子2：如果说对象都是一些短期对象，那么可以设置分代年龄更小，因为长期对象肯定是大对象或者单例对象永驻内存的，这样可以腾出空间给新生代GC，避免新生代频繁GC</li>
-<li>增加新生代内存的大小，防止导致频繁的minor GC，这样老年代的Major GC频率也会降低</li>
-<li>尽量将大内存的服务，拆分成几个相同服务，也就是多实例部署，分散堆内存资源，避免堆大内存导致GC时间过长（这个和G1分区回收思想相似）</li>
-<li>每个线程占用的内存不应过大或者过小，不然会导致OOM<br>
-  如果线程内存过小，会导致线程里面的栈内存小，临时变量如果超出这个阈值就会无法分配栈，导致栈溢出，出现stackoverflow<br>
-  如果线程内存过大，在多线程并发下，如果线程数量过多，会占用非常多JVM内存，有内存溢出的风险</li>
-<li>合理设置垃圾回收器，在大内存或者在内存碎片化环境下，G1垃圾回收器会有很好的效果<br>
-  G1垃圾回收器是Java9默认回收器，G1能够在指定的停顿时间内，根据每个region的回收价值，选择可以去回收的region，并且存活对象移动复制是多线程进行的。这里要注意如果设置停顿时间的话，不能设置太小，因为太小会导致每次进行回收的region太少，导致垃圾回收速度更不上垃圾生产的速度，这样随着时间推移，系统垃圾对象会越来越多，占满JVM</li>
-<li>对象生命周期的分布情况：如果应用存在大量的短期对象，应该适当增大年轻代 -Xmn；如果存在相对较多的持久对象，老年代应该适当增大。-Xms -Xmx</li>
-<li>Xms和Xmx也设置为相同，这样可以减少内存自动扩容和收缩带来的性能损失</li>
-<li>设置大对象对象的大小，一般系统中大对象大部分都是一些系统的缓存，像这些对象尽早让它们的进入老年代，避免占用新生代的空间。</li>
-</ol>
-<p>以上，合理分配JVM内存资源以及做好系统内存的监控机制是我们系统稳定性运行的保障。</p>
-<h5 id="网络负载和io">网络负载和IO</h5>
-<p>来一张IO发生场景图片：<br>
-<img src="http://localhost:4000/post-images/1593333928024.png" alt="" loading="lazy"><br>
- 对于磁盘IO，我们可以用Linux下的iostat命令去查看当前IO负载的情况，比如r_wait和w_wait指标，这些指标较大则说明I/O负载较大，I/O等待比较严重，磁盘读写遇到瓶颈。这个时候我们要看压测的接口是否有文件读取和写入的操作，如果有说明接口性能瓶颈在于文件读写，这个时候可以利用文件buffer缓存API等功能进行优化，或者可以用异步的方式进行文件读写。<br>
- 笔者在开发中就遇到因为IO问题带来的线程资源耗尽的线上问题：我们系统业务在借贷业务成功后，要生成借款协议，协议是一个PDF文件，当时主业务逻辑完成后同步调用生成PDF的逻辑，因为当时大流量并发，导致整个借贷业务性能瓶颈就在磁盘IO上，CPU处于空闲状态，借用网上的一个图，TOP命令可以看出IO花费的时间在76.6%，后面优化后就多线程异步处理。<br>
-<img src="http://localhost:4000/post-images/1593334249512.webp" alt="" loading="lazy"></p>
-<p> 对于网络负载，因为网络负载或者网络堵塞是不受控制的，这个涉及到底层的TCP通信的优化（比如利用滑动窗口和拥塞控制），这个就不展开讨论。工程师可控范围可以是选择IO读写高效率的中间件，比如redis、tomcat、activeMq、nginx、dubbo、netty等，这些中间件的底层IO模型的是多路复用IO，多路复用IO指的是一个IO线程能够服务于多个socket连接，线程监听每个连接的资源描述符。如下图所示：<img src="http://localhost:4000/post-images/1593334346151.png" alt="" loading="lazy"></p>
-<p> 分布式微服务环境下，服务之间的RPC同步调用会非常频繁，随之服务之间的网络负载会影响到整个系统的服务性能，因此，每个服务的机器放置到同一个局域网下性能效果会很好。而且，对于服务之间的调用，最好利用自研或者第三方中间件去监控服务链路调用的整体情况（比如Zipkin或者SkyWalking ）,并且要合理设置服务与服务之间的超时时间，避免因为网络原因导致服务线程池耗尽，导致OOM。</p>
-<h3 id="2-中间件层">2、中间件层</h3>
-<p>  这里中间件，泛指数据存储层，以笔者经验来看，大多数系统性能问题和瓶颈都是与数据存储相关，这里笔者就拿这方面展开讨论总结。</p>
-<h5 id="mysql">MySQL</h5>
-<p>一般来说MySQL在很多线程更新同一行的场景下，TPS性能曲线如图所示，参考丁奇的《秒杀场景下MySQL的低效》<br>
-<img src="http://localhost:4000/post-images/1592893242022.png" alt="秒杀场景下MySQL的低效" loading="lazy"><br>
-图中我们可以看到，线程数在6的时候TPS达到巅峰2W，随着线程数的增长，TPS会随之降低。在高并发场景下，可以根据这个结论来进行优化，比如，当有瞬间大流量冲击数据库时候，我们可以进行数据缓冲，比如用队列削峰，开启6个线程消费，然后访问数据库。<br>
-当然这个看业务场景，如果是对同一个资源进行竞争的话，这个证削峰是可行的。但是，如果场景是每一个线程对不同资源进行访问修改时候，不涉及资源竞争的话，那么就不要进行削峰处理，直接访问数据库即可，当然这个也要考虑到MySQL的性能问题。<br>
-举个例子，就拿光插入数据的性能测试来说（没有建唯一索引），4核4G的7200转的机械硬盘机器配置，最高能够承受7500的并发插入数。[参考MySQL性能压测]</p>
-<p>以上算是一种在特定场景下的优化的思路，下面笔者讨论一下日常开发中通用的MySQL优化：<br>
-1、避免长期的事务锁占用，避免锁范围过大，避免单个资源的并发竞争</p>
-<ul>
-<li>首先我们知道数据库Innodb存储引擎的RR和RC隔离级别下，类似update语句，锁的释放时机是在事务提交之后，这个叫做两阶段锁协议。所以为了避免事务之间锁同一行数据出现长时间的互相等待的场景，<strong>要把最可能造成锁冲突、最可能影响并发度的锁尽量往后放</strong>。<br>
-举个例子，个人账户A转账给公共账户B，流程是：开启事务——》给 B 的账户余额增加钱；从账户 A 账户余额中扣除钱；记录一条交易日志——》结束事务。因为公共账户B可能被多个线程修改，所以可以优化为：从账户 A 账户余额中扣除钱；记录一条交易日志；给 B 的账户余额增加钱。</li>
-<li>然后，要尽量将锁细化，一个大锁可以分割为多个锁，类似<strong>分段锁机制</strong>。拿笔者公司业务来说，比如APP上投资某一个产品标（包含了标的开始募集时间、结束时间、可投金额、年利率等等），在到达开始募集时间会有一段时间的高并发投标，这个时候会对具体标的行数据进行频繁的更新操作，就是扣减剩余可投金额，如果其他耗时操作中有对同一资源进行竞争的话，那么产品锁持有时间过长，导致性能低。如果有高并发秒杀下单等动作，会造成行锁抢占问题。<br>
-这个时候，优化思路是，将这个产品标在数据库分为10份，每一份的可投金额减少10倍，每一个投标请求进行随机路由分配到这10个小的产品标中。这样就减少锁的并发竞争问题，优化性能。<br>
-但是笔者因为遇到这种分段锁的问题导致的<strong>死锁</strong>问题，场景是这样的，当一份投标的金额大于其中一份产品金额的话，会持有这份产品的锁，并且循环获取下一份小产品，这个时候如果有两个线程都大于小产品金额的话，有概率会产生死锁问题，笔者最终通过顺序加锁以及加上锁的过期时间解决了这个问题。</li>
-<li>最后，对同一个资源的并发竞争，举个例子，像12306抢票、商城活动秒杀等都是对同一个有限资源进行竞争的场景，笔者认为，这种场景是非常难处理的，需要考虑到锁同步数据安全、并发竞争性能瓶颈、超卖等问题，都是会影响C端用户实际的体验的。<br>
-像这种场景，优化的思路就是——&gt;<strong>能用分段锁的就不要用悲观锁，能用乐观锁的就不要用悲观锁，能用无锁编程的就不要用锁，能用异步的场景就不要用同步的场景，能在内存操作的就不要再放到数据库磁盘层面操作</strong>。当然，有些对于数据安全性要求很高的场景，比如金融，加锁是必要的。这个就是业务一致性和并发的折中考虑，这个需要考虑具体的业务场景。</li>
-</ul>
-<p>2、关闭死锁检测<br>
-MySQL默认开启死锁检测，概念：每当一个事务被锁的时候，就要看看它所依赖的线程有没有被别人锁住，如此循环，最后判断是否出现了循环等待，也就是死锁。死锁检测对数据库有非常大的性能影响，会消耗CPU资源，最后会压垮数据库。<br>
-在这种并发场景下可以关闭死锁检测功能，会有明显的性能提升。当然关闭死锁检测也会带来问题，比如当死锁发生时，会一直持有锁资源，直至到超时时间后，释放，这段等待的时候可能会造成线程持续等待造成严重后果。所以为了避免死锁的发生，对行资源进行加锁的时候可以根据ID主键等进行<strong>顺序加锁</strong>。</p>
-<p>3、SQL优化</p>
-<ul>
-<li>SQL避免多表连接查询、in和exits合理应用、考虑索引失效场景</li>
-<li>在经常查询和排序的列上加索引，对离散度不高的不建议加锁，遵循索引规范</li>
-<li>在写场景多余读场景的索引选择，唯一索引和普通索引的选择</li>
-<li>尽量进行覆盖索引，避免回表查询</li>
-<li>尽量建立联合索引，来进行索引复用</li>
-<li>字符串的前缀索引的建立</li>
-<li>用explain分析整个SQL的执行情况，包括执行计划、索引分析</li>
-<li>修改数据比较多的字段场景尽量加索引，尽量使用行锁，避免表锁</li>
-</ul>
-<p>4、在大数据量的情况下（一般单表超2000W）的优化思路：</p>
-<ul>
-<li>加缓存，对于高并发读场景用缓存，一级缓存Redis或者二级缓存Cache</li>
-<li>架构层面MySQL就做主从复制或主主复制，读写分离，可以在应用层做，效率高</li>
-<li>垂直拆分，根据你模块的耦合度，将一个大的系统分为多个小的系统，也就是分布式系统；</li>
-<li>水平切分，因为水平切分会增加代码开发复杂度，所以能尽量避免就不要做。针对数据量大的表，对于日志流水、配置型等类型数据，进行归档操作；对于状态业务数据进行分库分表，这里就不展开讨论。其次，要选择一个合理的sharding key，为了有好的查询效率，表结构也要改动，做一定的冗余；</li>
-</ul>
-<h5 id="redis">Redis</h5>
-<p>Redis作为开发人员接触最频繁的中间件，首先，笔者先拿出官网给出的Redis性能测试结果：从下图可以得出结论：redis单机测试结果是TPS是7W,QPS只能比这个数据更高。<br>
-<img src="http://localhost:4000/post-images/1592983835284.png" alt="" loading="lazy"><br>
-当使用了管道pipline后性能大约提升了6倍，如下图所示<br>
-<img src="http://localhost:4000/post-images/1592986207480.png" alt="" loading="lazy"></p>
-<p>根据官网的文档，影响Redis性能有以下因素，笔者认为开发人员做一些基准测试压测以及日常开发中使用Redis的时候，注意这些优化点，就能高效使用Redis：<br>
-1、网络延迟和网络带宽，作为运维人员，最好将服务器和Redis服务部署到同一个局域网内，降低网络延迟。作为开发人员，尽量不要使用大key和大value，因为随着这种数据越来越多，在网络传输的时候会占用大部分网络宽带，举个例子，如果一个redis对象大小超过1KB，当你的QPS达到100万，会把你的千兆路由器的带宽打满，因此网络带宽可能就会成为性能瓶颈。<br>
-2、使用pipline，当使用以太网访问Redis时，保据大小保持在以太网数据包大小（约1500字节）以下时，使用流水线进行聚合的命令特别有效。<br>
-3、延时删除，当某一个redisObject很大的时候，做删除操作会长时间占有线程持有时间，影响性能，redis新版本有延迟删除的功能。<br>
-4、使用scan代替keys，keys会造成严重的性能问题<br>
-5、设置内存的大小阈值并且设置好内存缓存淘汰的策略，线上设置LRU策略来淘汰缓存这样做是为了避免物理内存使用完后，造成卡顿的情况。并且线上要避免大量key同时失效的场景，因为redis删除失效的key是循环删除的，并且频繁的删除会促使内存管理器回收内存页，这样也会导致卡顿的现象。<br>
-6、connection客户端连接数量，Redis作为一个事件驱动模型，因为base epoll能够实现O(1)时间复杂度的响应操作，因此能够提供很好性能。Redis已经以超过60000个连接为基准，并且在这些条件下仍能够维持50000 q / s的吞吐量，而且具有30000个连接的实例只能处理100个连接可达到的吞吐量的一半，可参考下图（来源官网）：<br>
-<img src="http://localhost:4000/post-images/1592991673063.png" alt="" loading="lazy"></p>
-<h5 id="elasticsearch">ElasticSearch</h5>
-<p>ElasticSearch可以解决大数据量下的搜索慢问题，这里笔者就拿 死磕ElasticSearch社区作者的优化建议，给出几点在日常开发ElasticSearch的优化方案：<br>
-1、尽量将所有数据的一半都缓存在内存当中file cache system 当中<br>
-2、将少量（查询字段比较频繁）字段放入ES，其他全量字段放入Hbase中，采用ES + Hbase方式提升查询效率，节省ES存储空间，file cache system的数据就会存的更多<br>
-3、缓存预热，可以做一个缓存预热系统，定时查询热点数据将其缓存在filesystem cache 中<br>
-4、冷热分离，将访问量高的和冷数据分别放置索引<br>
-5、ES ducoment设计，尽量避免连接、父子文档等连接操作，将数据准备好后再存入ES<br>
-6、不允许深度分页，页数越大，深度越深，从每一个shard返回的数据就越多，耗时越久。可以通过scroll api游标进行查询。<br>
-7、必须限制模糊搜索的长度，不然CPU会飙高，可参考 https://elasticsearch.cn/article/171</p>
-<h3 id="3-业务层方面">3、业务层方面</h3>
-<p>每个公司业务层面优化不相同，要根据具体业务场景去优化，别人的方案只能作为参考。<br>
-这里笔者就拿金融行业背景下，列举三个优化例子。<br>
-1、背景：企业借贷，会从用户的投的银行某个产品的资金池中匹配查找合适的资金，然后进行资金占有，银行真实转账后，生成终态的债权关系。<br>
-优化之前：使用同步锁，同一时间只能又一个线程去资金池中匹配资金，这种方案有严重的性能问题，其他线程没有拿到锁之前只能自旋尝试获取锁，损耗CPU资源。<br>
-优化之后：去掉同步锁，改成乐观锁，放到数据库做，资金表的字段增加一个标识表示是否占用，线程进来尝试匹配资金，乐观锁去预占资金表，成功表示匹配成功。这里要注意的是，尽量一个借贷匹配一比资金，这样资金池里面的资金锁行范围会减少（因为有多线程抢占资金资源），资金匹配的速度会加快，并且这样优化这样银行转账的次数会减少（如果匹配一批资金就要进行相同数量转账次数），防止多个投资人账户进行银行转账，减少整个借款业务线的耗时，避免其中一个转账出错导致全部要回滚这样的情况。<br>
-这里其实还可以进行优化，比如一笔一笔的占有资金，占有失败的continue继续下一笔资金含有，不用一次在一个事务里面占有大量资金，防止大事务执行失败以及出现其他会有死锁的可能性。这里优化的思想就是大事务拆成小事务，防止事务执行失败的概率。</p>
-<p>2、背景：企业借贷，同步请求转异步<br>
-优化之前，三方企业借贷请求，是同步调用，因为一条完整的借贷业务线非常长，中间会RPC调用非常多的底层服务以及其他远程接口，这样的话请求到响应时间会拉的非常长，影响C端的用户体验。<br>
-优化之后，同步改异步，具体做法是，借贷请求进入系统后，会先生成一个进行中的状态借贷数据插入数据库，然后将唯一标识丢入MQ中，然后就返回成功。这样吞吐量会增加，用户端体验会非常好。<br>
-当然如果说要保证高可用，可以利用MQ的事务消息做，利用二阶段提交方式保证MQ能够收到消息。具体方案可以看笔者的这篇文章 <a href="https://zhangyaoo.github.io/post/jin-rong-ji-ye-wu-xia-fen-bu-shi-shi-wu-bao-zheng-shu-ju-yi-zhi-xing//">金融级业务下分布式事务保证数据一致性</a></p>
-<p>3、背景：C端用户在APP上，某一个标开启募集资金后进行投标，这里的标类似支付宝的理财产品，开始募集的时候会有高并发流量涌入，当APP端用户同时投标，会有大量请求，这就形成了抢购的动作，因为一个产品标的可投金额是有限的，只有少数人能投标成功<br>
-优化之前：笔者在上文中提到的，尽管说频繁将更新行锁的数据放到事务的最后， 会有性能提升，但是随着并发数增长，MySQL也会成为性能瓶颈。<br>
-优化之后：利用redis的纯内存操作高性能的优点，将产品的可投金额放入缓存redis（这里redis里面的金额比数据库中少保证不超卖），利用redis的decrby命令或者lua脚本，保证产品标剩余可投金额能够进行原子减少，每一次减少成功后，将用户这一次投标的数据丢入MQ中异步处理，消费端做的就是将插入预状态的借款数据、冻结用户金额和减少产品的可投金额放入同一个事务中处理。<br>
-上面做的优化能够保证C端用户的良好体验，但是引入各种中间件的话会出现各种问题需要去解决，比如重复投标怎么办，Redis挂了怎么？MQ挂了怎么办？消息丢失怎么办？等一系列问题。<br>
-重复投标，可以利用用户标识的唯一token做，短信生成token，设置token失效时间（短信失效时间60s），投标时候校验token是否过期和使用过。<br>
-Redis挂，这时候就要考虑持久化和集群哨兵保持redis高可用。<br>
-MQ挂了，消息丢失，重复消费等，这时候就要考虑broker的持久化，生产端和消费端的重试机制和ack机制。<br>
-以上需要开发人员去应对每一个可能出现问题的场景。</p>
-<h2 id="三-后续流量增长系统性能优化思路">三、后续流量增长系统性能优化思路</h2>
-<p>当流量激增的时候，首先要考虑到系统的稳定性和高可用，后续针对特定的场景，分析性能瓶颈，然后再去做并发的优化。这里笔者就<strong>简单的</strong>列举一下业界的做法，下面每一条读者都可以自行扩展大篇幅深入去了解。</p>
-<h4 id="高可用">高可用</h4>
-<ol>
-<li>使用反向代理和<strong>负载均衡</strong>实现分流，并且实现动态切换主备机器， 网关负载均衡，DNS多机房负载均衡</li>
-<li>通过<strong>限流</strong>保护应用免受雪崩之灾</li>
-<li>通过<strong>降级</strong>实现核心服务服务可用，牺牲非核心服务</li>
-<li>通过<strong>隔离</strong>实现故障隔离和资源隔离，比如线程隔离，对方法或者类具体分配线程数量，防止相互影响</li>
-<li>通过设置合理的<strong>超时</strong>调用与重试机制避免请求堆积造成雪崩</li>
-<li>通过<strong>回滚</strong>机制快速修复错误版本</li>
-<li>Redis<strong>集群</strong>保证高可用，<strong>哨兵</strong>模式保证故障转移</li>
-<li>Redis MQ消息中间件开启<strong>持久化</strong>，保证数据不丢；<strong>ack机制</strong>和<strong>重试机制</strong>保证数据的可靠性</li>
-<li>分布式服务环境<strong>链路跟踪</strong>，监控整个服务的服务质量</li>
-<li>硬件资源<strong>监控</strong>、CPU、内存、负载、IO、堆内存、JVM GC、线程池以及各种中间件监控等等</li>
-</ol>
-<h4 id="高并发">高并发</h4>
-<ol>
-<li>利用MQ同步转异步，流量削峰，多线程异步消费</li>
-<li>读场景比较多的接口可以利用缓存Redis，包括热点key缓存预热，多级缓存，比如分布式缓存，本地缓存和CDN缓存。还可以做集群、哨兵、高可用保证Redis性能</li>
-<li>对于强一致的同步下单场景，可以将对MySQL的操作改为Redis，然后利用MQ做异步</li>
-<li>优化JVM，包括新生代和老年代的大小、GC算法的选择等，尽可能减少GC频率和耗时</li>
-<li>非核心业务逻辑、延迟任务逻辑、三方调用逻辑，可以做异步</li>
-<li>对于架构方面，可以做负载均衡集群部署，MySQL主从、分库分表或者归档、Redis集群、多级缓存、分布式垂直拆分部署、搜索场景引入ES等多个方面考虑</li>
-<li>对于程序方面，可以从For循环的计算逻辑优化、批处理机制减少IO、采用时间复杂度更小的数据结构和算法、乐观锁和分段锁和无锁编程减少锁冲突等方面考虑</li>
-</ol>
-<h2 id="四-总结">四、总结</h2>
-<p>以上，笔者从硬件层、代码层、中间件层、业务层等不同方向，简单的分析了影响系统性能各个因素，以及提供了简单的优化的思路和例子。因笔者工作经验能力有限，无法做到全面的分析，还望读者能够指正错误以及提供建议。</p>
-<h2 id="参考">参考</h2>
-<p>1、秒杀场景下MySQL的低效——丁奇<br>
-2、死磕ElasticSearch社区——ElasticSearch优化<br>
-3、MySQL性能压测——https://my.oschina.net/u/867417/blog/758690<br>
-4、高可用系统方案——https://blog.csdn.net/hustspy1990/article/details/78008324<br>
-5、Redis性能测试——https://redis.io/topics/benchmarks</p>
-<!--参考 -->
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[O(1)时间复杂度下，双向链表实现LRU]]></title>
-        <id>http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/</id>
-        <link href="http://localhost:4000/post/o1shi-jian-fu-za-du-xia-shuang-xiang-lian-biao-shi-xian-lru/">
-        </link>
-        <updated>2020-06-15T11:17:45.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="前言">前言</h3>
-<blockquote>
-<p>笔者先从linkedHashMap源码中借鉴插入顺序访问的代码，然后然后自己实现了一个LRU</p>
-</blockquote>
-<h3 id="linkedhashmap底层的数据结构">linkedHashMap底层的数据结构</h3>
-<p>linkedHashMap底层结构（顺序访问）：</p>
-<ul>
-<li>1、linkedHashMap维护了每个node的双向链表，初始化时候维护了空的entry header头，新加入的节点放到entry的头部header的next</li>
-<li>2、put还是get都会进行重排序，get entry1 还是put entry1都会先把Entry1从双向链表中删除，然后再把Entry1加入到双向链表的表尾。</li>
-<li>3、遍历访问的时候，会访问header的下一个next节点，这就形成了顺序访问</li>
-</ul>
-<figure data-type="image" tabindex="1"><img src="http://localhost:4000/post-images/1592968145044.png" alt="" loading="lazy"></figure>
-<h3 id="链表实现">链表实现</h3>
-<p>实现思路：</p>
-<ul>
-<li>1、数据是直接利用 HashMap 来存放的。</li>
-<li>2、内部使用了一个双向链表来存放数据，所以有一个头结点 header，以及尾结点 tailer。</li>
-<li>3、每次写入头结点，删除尾结点时都是依赖于 header tailer<br>
-<img src="http://localhost:4000/post-images/1592220507945.png" alt="" loading="lazy"></li>
-</ul>
-<pre><code>import com.google.common.collect.Maps;
-import java.util.Map;
-
-/**
- * 线程不安全，同步机制自行控制。
- */
-public class LRUCacheV2 {
-    /**
-     * 缓存map
-     */
-    private final Map&lt;String, Node&gt; cacheMap;
-
-    /**
-     * 头指针
-     */
-    private Node head;
-
-    /**
-     * 尾指针
-     */
-    private Node tail;
-
-    /**
-     * 容量
-     */
-    private final int cacheSize;
-
-    /**
-     * 当前容量
-     */
-    private int currentCacheSize;
-
-    LRUCacheV2(int capacity){
-        cacheMap = Maps.newHashMapWithExpectedSize(capacity);
-        cacheSize = capacity;
-        currentCacheSize = 0;
-    }
-
-    public Object get(String key){
-        Node node = cacheMap.get(key);
-        if(node != null){
-            // 移动到头指针
-            move2head(node);
-            return node.getData();
-        }
-        return null;
-    }
-
-    public void remove(String key){
-        Node node = cacheMap.get(key);
-        if(node != null){
-            Node pre = node.getPre();
-            Node next = node.getNext();
-            if(pre != null){
-                pre.setNext(next);
-            }
-            if(next != null){
-                next.setPre(pre);
-            }
-
-            // 如果删除刚好是头节点或者尾节点，也要移动指针
-            if(node.getKey().equals(head.getKey())){
-                head = pre;
-            }
-            if(node.getKey().equals(tail.getKey())){
-                tail = next;
-            }
-
-            cacheMap.remove(key);
-        }
-    }
-
-    public void put(String key, Object value){
-        Node node = cacheMap.get(key);
-        if(node != null){
-            // 存在节点的话，就覆盖，并且放到头
-            node.setData(value);
-            move2head(node);
-            cacheMap.put(key, node);
-        }else {
-            // 不存在节点，构造并且放到头
-            if(currentCacheSize == cacheSize){
-                // 删除尾node
-                String delKey = tail.getKey();
-                cacheMap.remove(delKey);
-
-                // 尾指针移动
-                Node next = tail.getNext();
-                if(next != null){
-                    next.setPre(null);
-                }
-                tail.setNext(null);
-                tail = next;
-
-            }else{
-                currentCacheSize++;
-            }
-            node = new Node();
-            node.setData(value);
-            node.setKey(key);
-            // 头指针移动
-            move2head(node);
-        }
-        cacheMap.put(key, node);
-    }
-
-    /**
-     * 节点移到头
-     */
-    private void move2head(Node node){
-        if(head == null){
-            // 初始化head 和 tail
-            head = node;
-            head.setNext(null);
-            head.setPre(null);
-            tail = node;
-        }else {
-            // 如果是相同的Key，啥都不用动，node就是最新的头
-            if(node.getKey().equals(head.getKey())){
-                return;
-            }
-
-            // 截取node
-            Node pre = node.getPre();
-            Node next = node.getNext();
-            if(pre != null){
-                pre.setNext(next);
-            }
-            if(next != null){
-                next.setPre(pre);
-            }
-
-            // 如果要截取的节点是尾节点，那么尾节点指针也要向前移动
-            if(node.getKey().equals(tail.getKey())){
-                tail = next;
-            }
-
-            // 放在头前面
-            head.setNext(node);
-            node.setPre(head);
-            // node下个指针指向null
-            node.setNext(null);
-            head = node;
-        }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder() ;
-        Node node = head;
-        while (node != null){
-            sb.append(node.getKey()).append(&quot;:&quot;)
-                    .append(node.getData())
-                    .append(&quot;--&gt;&quot;) ;
-            node = node.getPre();
-        }
-        return sb.toString();
-    }
-
-    public static void main(String[] args) {
-        LRUCacheV2 lruCacheV2 = new LRUCacheV2(4);
-        lruCacheV2.put(&quot;1&quot;,&quot;1&quot;);
-        lruCacheV2.put(&quot;2&quot;,&quot;2&quot;);
-        lruCacheV2.put(&quot;3&quot;,&quot;3&quot;);
-        lruCacheV2.put(&quot;4&quot;,&quot;4&quot;);
-        lruCacheV2.put(&quot;5&quot;,&quot;5&quot;);
-        //lruCacheV2.get(&quot;2&quot;);
-        //lruCacheV2.put(&quot;2&quot;,&quot;22&quot;);
-        lruCacheV2.remove(&quot;5&quot;);
-        System.out.println(lruCacheV2.toString());
-    }
-}
-</code></pre>
-<p>参考：<br>
-1、https://www.iteye.com/blog/gogole-692103<br>
-2、https://crossoverjie.top/2018/04/07/algorithm/LRU-cache/</p>
 ]]></content>
     </entry>
 </feed>
