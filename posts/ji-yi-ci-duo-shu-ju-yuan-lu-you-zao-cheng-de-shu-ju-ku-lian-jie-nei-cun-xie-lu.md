@@ -1,7 +1,7 @@
 ---
 title: '记一次多数据源路由造成的数据库连接泄露排查过程'
 date: 2021-02-02 11:32:16
-tags: []
+tags: [Java基础]
 published: true
 hideInList: false
 feature: /post-images/ji-yi-ci-duo-shu-ju-yuan-lu-you-zao-cheng-de-shu-ju-ku-lian-jie-nei-cun-xie-lu.jpg
@@ -120,6 +120,9 @@ isTop: false
 1、修改代码：
 1） dataSourceCachePool的key组成由host port 改成 host port account pwd 四个维度作为一个key。
 
+Q：为什么要这四个维度作为一个key ？
+A：因为避免一个rds有多个账户密码，导致dataSourceCachePool无限put相同host port，避免一直new datasource 和close datasource，浪费资源。
+
 2）关闭datasource对象，remove那段代码的逻辑修改成下面这个样子
 ```java
 //cache中已经缓存了租户的连接,但是修改了rds config信息
@@ -157,6 +160,9 @@ isTop: false
 
 Q：为什么要判断活跃的连接 ActiveCount > 0 ？
 A：因为close的时候要判断是否有正在使用的connection对象，如果强制关闭，那么会出现一个线程查询的时候，connetion突然不可用，导致错误。
+
+Q：为什么不用线程池，而是直接new Thread ？
+A：这个场景笔者也有考虑，但是这种场景很少，一般不会有，除非手动修改数据库配置。很少使用的场景，如果开个线程池一直放着，也耗系统资源。
 
 2、改配置，改成和官方默认的配置
 ![](https://zhangyaoo.github.io/post-images/1612426469625.png)

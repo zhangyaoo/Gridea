@@ -9,7 +9,7 @@
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
 <title>应用层网关设计与实现 | will</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1612429655719">
+<link rel="shortcut icon" href="/favicon.ico?v=1612508013752">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -39,7 +39,7 @@
 
 
   <meta name="description" content="应用层网关设计与实现" />
-  <meta name="keywords" content="" />
+  <meta name="keywords" content="网关,架构" />
 </head>
 
 <body>
@@ -190,7 +190,8 @@
       <div class="sidebar-body pisces" id="sidebar_body">
         
           
-            
+            <div class="post-side-meta" id="post_side_meta">
+              
 <div class="sidebar-wrapper box-shadow-wrapper bg-color">
   <div class="sidebar-item">
     <img class="site-author-image right-motion" src="/images/avatar.png"/>
@@ -233,6 +234,204 @@
 
 
 </div>
+            </div>
+            <div class="post-toc sidebar-body-active" id="post_toc" style="opacity: 1;">
+              <div class="toc-box right-motion">
+  <div class="toc-wrapper auto-number auto"
+    id="toc_wrapper">
+    <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E5%8E%9F%E7%90%86">原理</a></li>
+<li><a href="#%E8%AE%BE%E8%AE%A1">设计</a></li>
+<li><a href="#%E5%85%B3%E9%94%AE%E5%AE%9E%E7%8E%B0">关键实现</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+<li><a href="#%E5%8F%82%E8%80%83">参考</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+</div>
+
+<script>
+
+  let lastTop = 0, lList = [], hList = [], postBody, lastIndex = -1;
+  let active = 'active-show', activeClass = 'active-current';
+  let tocWrapper = document.querySelector('#toc_wrapper');
+  let tocContent = tocWrapper.children[0];
+  let autoNumber = tocWrapper && tocWrapper.classList.contains('auto-number');
+
+  function addTocNumber(elem, deep) {
+    if (!elem) {
+      return;
+    }
+    let prop = elem.__proto__;
+
+    if (prop === HTMLUListElement.prototype) {
+      for (let i = 0; i < elem.children.length; i++) {
+        addTocNumber(elem.children[i], deep + (i + 1) + '.');
+      }
+    } else if (prop === HTMLLIElement.prototype) {
+      // 保存li元素
+      if (elem.children[0] && elem.children[0].__proto__ === HTMLAnchorElement.prototype) {
+        lList.push(elem);
+      }
+      for (let i = 0; i < elem.children.length; i++) {
+        let cur = elem.children[i];
+        if (cur.__proto__ === HTMLAnchorElement.prototype) {
+          if (autoNumber) {
+            cur.text = deep + ' ' + cur.text;
+          }
+        } else if (cur.__proto__ === HTMLUListElement.prototype) {
+          addTocNumber(cur, deep);
+        }
+      }
+    }
+  }
+
+  function removeParentActiveClass() {
+    let parents = tocContent.querySelectorAll('.' + active)
+    parents.forEach(function (elem) {
+      elem.classList.remove(active);
+    });
+  }
+
+  function addActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.add(activeClass);
+    }
+  }
+
+  function removeActiveClass(index) {
+    if (index >= 0 && index < hList.length) {
+      lList[index].classList.remove(activeClass);
+    }
+  }
+
+  function addActiveLiElemment(elem, parent) {
+    if (!elem || elem === parent) {
+      return;
+    } else {
+      if (elem.__proto__ === HTMLLIElement.prototype) {
+        elem.classList.add(active);
+      }
+      addActiveLiElemment(elem.parentElement, parent);
+    }
+  }
+
+  function showToc() {
+    if (tocWrapper) {
+      postBody = document.querySelector('#post_body');
+      for (let i = 0; i < postBody.children.length; i++) {
+        if (postBody.children[i].__proto__ === HTMLHeadingElement.prototype) {
+          hList.push(postBody.children[i]);
+        }
+      }
+      if (tocWrapper.classList.contains('compress')) {
+        tocContent.classList.add('closed');
+      } else if (tocWrapper.classList.contains('no_compress')) {
+        tocContent.classList.add('expanded');
+      } else {
+        if (hList.length > 10) {
+          active = 'active-hidden'
+          tocContent.classList.add('closed');
+        } else {
+          tocContent.classList.add('expanded');
+        }
+      }
+    }
+  }
+
+  (function () {
+    // 处理不是从#一级标题开始目录
+    if (tocContent.children.length === 1 && tocContent.children[0].__proto__ === HTMLLIElement.prototype) {
+      let con = tocContent.children[0].children[0];
+      tocContent.innerHTML = con.innerHTML;
+    }
+    let markdownItTOC = document.querySelector('.markdownIt-TOC');
+    let innerHeight = window.innerHeight;
+    markdownItTOC.style = `max-height: ${innerHeight - 80 > 0 ? innerHeight - 80 : innerHeight}px`
+    addTocNumber(tocContent, '');
+  })();
+
+  document.addEventListener('scroll', function (e) {
+    if (lList.length <= 0) {
+      return;
+    }
+    let scrollTop = document.scrollingElement.scrollTop + 10;
+    let dir;
+
+    if (lastTop - scrollTop > 0) {
+      dir = 'up';
+    } else {
+      dir = 'down';
+    }
+
+    lastTop = scrollTop;
+    if (scrollTop <= 0) {
+      if (lastIndex >= 0 && lastIndex < hList.length) {
+        lList[lastIndex].classList.remove(activeClass);
+      }
+      return;
+    }
+
+    let current = 0, hasFind = false;
+    for (let i = 0; i < hList.length; i++) {
+      if (hList[i].offsetTop > scrollTop) {
+        current = i;
+        hasFind = true;
+        break;
+      }
+    }
+    if (!hasFind && scrollTop > lList[lList.length - 1].offsetTop) {
+      current = hList.length - 1;
+    } else {
+      current--;
+    }
+    if (dir === 'down') {
+      if (current > lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex)
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    } else {
+      if (current < lastIndex) {
+        addActiveClass(current);
+        removeActiveClass(lastIndex);
+        lastIndex = current;
+        removeParentActiveClass();
+        lList[current] && addActiveLiElemment(lList[current].parentElement, tocContent);
+      }
+    }
+  });
+
+
+  window.addEventListener('load', function () {
+    showToc();
+    document.querySelector('#sidebar').style = 'display: block;';
+    tocWrapper.classList.add('toc-active');
+    setTimeout(function () {
+      if ("createEvent" in document) {
+        let evt = document.createEvent("HTMLEvents");
+        evt.initEvent("scroll", false, true);
+        document.dispatchEvent(evt);
+      }
+      else {
+        document.fireEvent("scroll");
+      }
+    }, 500)
+  })
+
+</script>
+            </div>
           
         
       </div>
@@ -334,19 +533,43 @@
     </span>
     
     <span class="meta-item">
+      <i class="fa fa-folder-o"></i>
+      <span class="pc-show language" data-lan="category-in">分类于</span>
+      
+      
+      <a href="https://zhangyaoo.github.io/tag/SsTjyPN_I/">
+        <span>网关</span>
+      </a>、
+      
+      
+      
+      <a href="https://zhangyaoo.github.io/tag/8IlK1cWz9/">
+        <span>架构</span>
+      </a>
+      
+      
+    </span>
+    <span class="post-meta-divider">|</span>
+    
+    <span class="meta-item">
       <i class="fa fa-clock-o"></i>
       <span>1<span class="language" data-lan="minute">分钟</span></span>
     </span>
     <span class="meta-item">
       <span class="post-meta-divider">|</span>
       <i class="fa fa-file-word-o"></i>
-      <span>9<span class="pc-show language" data-lan="words">字数</span></span>
+      <span>14<span class="pc-show language" data-lan="words">字数</span></span>
     </span>
     
   </div>
 </header>
             <div class="post-body next-md-body" id="post_body">
-              <p>##还没完成，敬请期待<sup>_</sup></p>
+              <h3 id="前言">前言</h3>
+<h3 id="原理">原理</h3>
+<h3 id="设计">设计</h3>
+<h3 id="关键实现">关键实现</h3>
+<h3 id="总结">总结</h3>
+<h3 id="参考">参考</h3>
 
             </div>
             
@@ -367,6 +590,10 @@
     </li>
   </ul>
   <div class="tags">
+    
+      <a href="https://zhangyaoo.github.io/tag/SsTjyPN_I/"># 网关</a>
+    
+      <a href="https://zhangyaoo.github.io/tag/8IlK1cWz9/"># 架构</a>
     
   </div>
   <div class="nav">
@@ -928,6 +1155,8 @@
 &lt;h3 id=&#34;六-最终处理方式&#34;&gt;六、最终处理方式：&lt;/h3&gt;
 &lt;p&gt;1、修改代码：&lt;br&gt;
 1） dataSourceCachePool的key组成由host port 改成 host port account pwd 四个维度作为一个key。&lt;/p&gt;
+&lt;p&gt;Q：为什么要这四个维度作为一个key ？&lt;br&gt;
+A：因为避免一个rds有多个账户密码，导致dataSourceCachePool无限put相同host port，避免一直new datasource 和close datasource，浪费资源。&lt;/p&gt;
 &lt;p&gt;2）关闭datasource对象，remove那段代码的逻辑修改成下面这个样子&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;//cache中已经缓存了租户的连接,但是修改了rds config信息
         DataSource dataSource = dataSourceCachePool.remove(key).getDataSource();
@@ -963,6 +1192,8 @@
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Q：为什么要判断活跃的连接 ActiveCount &amp;gt; 0 ？&lt;br&gt;
 A：因为close的时候要判断是否有正在使用的connection对象，如果强制关闭，那么会出现一个线程查询的时候，connetion突然不可用，导致错误。&lt;/p&gt;
+&lt;p&gt;Q：为什么不用线程池，而是直接new Thread ？&lt;br&gt;
+A：这个场景笔者也有考虑，但是这种场景很少，一般不会有，除非手动修改数据库配置。很少使用的场景，如果开个线程池一直放着，也耗系统资源。&lt;/p&gt;
 &lt;p&gt;2、改配置，改成和官方默认的配置&lt;br&gt;
 &lt;img src=&#34;https://zhangyaoo.github.io/post-images/1612426469625.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
 &lt;p&gt;最后，重新上线后，观测对象内存数据，正常。&lt;/p&gt;
@@ -1023,7 +1254,12 @@ A：因为close的时候要判断是否有正在使用的connection对象，如�
       
       <div class="item">
         <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/ying-yong-ceng-wang-guan-she-ji-yu-shi-xian/"" data-c="
-          &lt;p&gt;##还没完成，敬请期待&lt;sup&gt;_&lt;/sup&gt;&lt;/p&gt;
+          &lt;h3 id=&#34;前言&#34;&gt;前言&lt;/h3&gt;
+&lt;h3 id=&#34;原理&#34;&gt;原理&lt;/h3&gt;
+&lt;h3 id=&#34;设计&#34;&gt;设计&lt;/h3&gt;
+&lt;h3 id=&#34;关键实现&#34;&gt;关键实现&lt;/h3&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
 ">应用层网关设计与实现</a>
       </div>
       

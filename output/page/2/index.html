@@ -9,7 +9,7 @@
 <meta name="description" content="生死看淡，不服就干">
 <meta name="theme-color" content="#000">
 <title>will</title>
-<link rel="shortcut icon" href="/favicon.ico?v=1612429655719">
+<link rel="shortcut icon" href="/favicon.ico?v=1612508013752">
 <link rel="stylesheet" href="/media/css/pisces.css">
 <link rel="stylesheet" href="/media/fonts/font-awesome.css">
 <link
@@ -775,6 +775,8 @@
 &lt;h3 id=&#34;六-最终处理方式&#34;&gt;六、最终处理方式：&lt;/h3&gt;
 &lt;p&gt;1、修改代码：&lt;br&gt;
 1） dataSourceCachePool的key组成由host port 改成 host port account pwd 四个维度作为一个key。&lt;/p&gt;
+&lt;p&gt;Q：为什么要这四个维度作为一个key ？&lt;br&gt;
+A：因为避免一个rds有多个账户密码，导致dataSourceCachePool无限put相同host port，避免一直new datasource 和close datasource，浪费资源。&lt;/p&gt;
 &lt;p&gt;2）关闭datasource对象，remove那段代码的逻辑修改成下面这个样子&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-java&#34;&gt;//cache中已经缓存了租户的连接,但是修改了rds config信息
         DataSource dataSource = dataSourceCachePool.remove(key).getDataSource();
@@ -810,6 +812,8 @@
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Q：为什么要判断活跃的连接 ActiveCount &amp;gt; 0 ？&lt;br&gt;
 A：因为close的时候要判断是否有正在使用的connection对象，如果强制关闭，那么会出现一个线程查询的时候，connetion突然不可用，导致错误。&lt;/p&gt;
+&lt;p&gt;Q：为什么不用线程池，而是直接new Thread ？&lt;br&gt;
+A：这个场景笔者也有考虑，但是这种场景很少，一般不会有，除非手动修改数据库配置。很少使用的场景，如果开个线程池一直放着，也耗系统资源。&lt;/p&gt;
 &lt;p&gt;2、改配置，改成和官方默认的配置&lt;br&gt;
 &lt;img src=&#34;https://zhangyaoo.github.io/post-images/1612426469625.png&#34; alt=&#34;&#34; loading=&#34;lazy&#34;&gt;&lt;/p&gt;
 &lt;p&gt;最后，重新上线后，观测对象内存数据，正常。&lt;/p&gt;
@@ -870,7 +874,12 @@ A：因为close的时候要判断是否有正在使用的connection对象，如�
       
       <div class="item">
         <a class="result-title" style="opacity: 0;" href="https://zhangyaoo.github.io/post/ying-yong-ceng-wang-guan-she-ji-yu-shi-xian/"" data-c="
-          &lt;p&gt;##还没完成，敬请期待&lt;sup&gt;_&lt;/sup&gt;&lt;/p&gt;
+          &lt;h3 id=&#34;前言&#34;&gt;前言&lt;/h3&gt;
+&lt;h3 id=&#34;原理&#34;&gt;原理&lt;/h3&gt;
+&lt;h3 id=&#34;设计&#34;&gt;设计&lt;/h3&gt;
+&lt;h3 id=&#34;关键实现&#34;&gt;关键实现&lt;/h3&gt;
+&lt;h3 id=&#34;总结&#34;&gt;总结&lt;/h3&gt;
+&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
 ">应用层网关设计与实现</a>
       </div>
       
